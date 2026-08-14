@@ -2,8 +2,8 @@
 
 > **이 폴더는 에이전트가 읽습니다.** 스택과 무관하게 모든 코드에 적용되는 규칙입니다.
 
-스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/),
-프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/).
+스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/).
+
 어떤 규칙이 적용될지는 **고치는 파일의 위치**가 정한다.
 
 | 스킬 | 무엇을 다루나 | 언제 |
@@ -17,12 +17,11 @@
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 
 - **[SKILL.md](oop-responsibility-design/SKILL.md)** (151줄) — 규칙 요약. 코드 작성·리뷰 판단에는 이것만으로 충분하다.
-- **[reference.md](oop-responsibility-design/reference.md)** (787줄) — 영화 예매 도메인 코틀린 예제로
-  절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 설계 근거를 설명하거나 개념을 배울 때 읽는다.
+
+- **[reference.md](oop-responsibility-design/reference.md)** (787줄) — 영화 예매 도메인 코틀린 예제로 절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 설계 근거를 설명하거나 개념을 배울 때 읽는다.
 
 ## 라이선스
 
-[LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail*` 스킬 4종에만** 적용된다 —
-각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
+[LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail*` 스킬 4종에만** 적용된다 — 각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
 
 `oop-responsibility-design` 은 이 저장소의 자체 문서이며 LICENSE 적용 대상이 아니다.

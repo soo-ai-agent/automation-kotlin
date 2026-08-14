@@ -16,8 +16,7 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 ## 도메인
 
-> 데이터 덩어리마다 소제목 + 표. 모르는 칸은 비워 두면 에이전트가 정한다.
-> 소유자가 있는 데이터면 소유자 필드를 반드시 적는다.
+> 데이터 덩어리마다 소제목 + 표. 모르는 칸은 비워 두면 에이전트가 정한다. 소유자가 있는 데이터면 소유자 필드를 반드시 적는다.
 
 ### (도메인 이름)
 
@@ -34,11 +33,12 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 ## 완료 기준
 
-> 확인 가능한 문장으로 — E2E 가 이 기준으로 테스트를 만든다.
-> 실패 케이스도 함께 적는다. 예) 제목이 비면 400 을 준다.
+> 확인 가능한 문장으로 — E2E 가 이 기준으로 테스트를 만든다. 실패 케이스도 함께 적는다. 예) 제목이 비면 400 을 준다.
 
 - `cd backend && ./gradlew ktlintCheck unitTest` 통과
+
 - `cd frontend && npm run build` 통과
+
 - (여기에 적는다)
 
 ---

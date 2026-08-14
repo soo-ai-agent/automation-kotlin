@@ -1,8 +1,6 @@
 # CI 안내
 
-> **이 문서는 사람이 읽습니다.** 워크플로를 수정하려는 에이전트는
->
-> [common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽습니다.
+> **이 문서는 사람이 읽습니다.** 워크플로를 수정하려는 에이전트는 [common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽습니다.
 
 ## 사람이 고치는 파일 (설정)
 
@@ -39,8 +37,7 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 
 ## GitLab 판과 다른 점
 
-이 자동화의 원본은 GitLab CI 로 만들어졌고, 여기서는 GitHub Actions 로 옮겼다.
-플랫폼 차이 때문에 구조가 달라진 곳은 셋이다.
+이 자동화의 원본은 GitLab CI 로 만들어졌고, 여기서는 GitHub Actions 로 옮겼다. 플랫폼 차이 때문에 구조가 달라진 곳은 셋이다.
 
 | | GitLab | 여기 |
 |---|---|---|
@@ -48,9 +45,6 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 | 수습(`?`) | 별도 잡 + 아티팩트로 상태 전달 | **같은 잡 안에서** 이어 실행 — 잡을 두 벌씩 선언할 필요가 없고, 같은 브랜치를 이어받는다는 의미도 더 정확하다 |
 | 노드 간 호출 | 트리거 토큰 | `AGENT_PAT`. **선택이 아니다** — 기본 `GITHUB_TOKEN` 으로 만든 PR·커밋은 다른 워크플로를 깨우지 못한다 |
 
-권한 경계는 원본 그대로다: **Claude 는 파일만 쓰고, API 호출(이슈·PR·라벨)은 셸이 한다.**
-그래서 `GH_TOKEN` 은 잡 전체가 아니라 `gh` 를 쓰는 step 에만 걸려 있다.
+권한 경계는 원본 그대로다: **Claude 는 파일만 쓰고, API 호출(이슈·PR·라벨)은 셸이 한다.** 그래서 `GH_TOKEN` 은 잡 전체가 아니라 `gh` 를 쓰는 step 에만 걸려 있다.
 
-이 워크플로들을 **수정**하려면 먼저
-[common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽는다 —
-요구사항·구현 위치·불변 조건이 정리되어 있다.
+이 워크플로들을 **수정**하려면 먼저 [common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽는다 — 요구사항·구현 위치·불변 조건이 정리되어 있다.

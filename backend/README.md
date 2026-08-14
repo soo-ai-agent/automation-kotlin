@@ -6,8 +6,7 @@ Kotlin + Spring Boot 멀티모듈 앱이다. **모든 명령은 이 폴더 안�
 
 ## 1. 뼈대 가져오기
 
-[team-dodn/spring-boot-kotlin-template](https://github.com/team-dodn/spring-boot-kotlin-template)
-에서 가져온다.
+[team-dodn/spring-boot-kotlin-template](https://github.com/team-dodn/spring-boot-kotlin-template) 에서 가져온다.
 
 ```bash
 cd backend
@@ -18,11 +17,9 @@ cp -r /tmp/tpl/gradle /tmp/tpl/gradlew /tmp/tpl/gradlew.bat /tmp/tpl/.editorconf
 rm -rf /tmp/tpl
 ```
 
-`settings.gradle.kts` 의 `rootProject.name` 과 패키지 루트(`io.dodn.springboot`)를
-프로젝트 이름에 맞게 바꾼다. 패키지 경로를 바꿨다면 스킬 문서의 예시 경로도 그에 맞춰 읽는다.
+`settings.gradle.kts` 의 `rootProject.name` 과 패키지 루트(`io.dodn.springboot`)를 프로젝트 이름에 맞게 바꾼다. 패키지 경로를 바꿨다면 스킬 문서의 예시 경로도 그에 맞춰 읽는다.
 
-템플릿 루트의 `CLAUDE.md`·`AGENTS.md`·`README.md` 는 가져오지 않는다 — 저장소 루트의
-것과 충돌한다.
+템플릿 루트의 `CLAUDE.md`·`AGENTS.md`·`README.md` 는 가져오지 않는다 — 저장소 루트의 것과 충돌한다.
 
 ## 2. 확인
 
@@ -42,8 +39,7 @@ rm -rf /tmp/tpl
 
 ## 3. 커밋해서 올리기
 
-**에이전트는 push 된 코드만 본다.** 로컬에서 만든 뼈대는 올리기 전까지 에이전트에게
-존재하지 않는다 — 첫 구축을 지시하기 전에 반드시 올린다.
+**에이전트는 push 된 코드만 본다.** 로컬에서 만든 뼈대는 올리기 전까지 에이전트에게 존재하지 않는다 — 첫 구축을 지시하기 전에 반드시 올린다.
 
 ```bash
 git add -A
@@ -53,8 +49,7 @@ git push
 
 커밋 메시지는 `<type>:<제목>` 형식(콜론 뒤 공백 없음)을 쓴다 — 에이전트도 같은 형식을 쓴다.
 
-`api` 노드는 시작할 때 `backend/settings.gradle.kts` 가 있는지 확인하고, 없으면 구조를
-지어내지 않고 보고 후 중단한다.
+`api` 노드는 시작할 때 `backend/settings.gradle.kts` 가 있는지 확인하고, 없으면 구조를 지어내지 않고 보고 후 중단한다.
 
 ## 4. 실행
 
@@ -66,8 +61,7 @@ git push
 
 ## 5. 새 도메인을 추가할 때
 
-파일을 어디에 두는지는 `.claude/skills/kotlin-module-layout/SKILL.md` 의 배치표를 본다.
-만드는 순서는 위에서 아래로:
+파일을 어디에 두는지는 `.claude/skills/kotlin-module-layout/SKILL.md` 의 배치표를 본다. 만드는 순서는 위에서 아래로:
 
     core-enum → 엔티티 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → DTO → 컨트롤러
 
@@ -75,12 +69,10 @@ git push
 
 ## 6. 응답 형식
 
-응답은 항상 `ApiResponse<T>` 로 감싼다. 새 엔드포인트를 만들면 저장소 루트
-[CONTRACT.md](../CONTRACT.md) 에 계약을 기록한다 — 프론트가 그 문서를 보고 화면을 만든다.
+응답은 항상 `ApiResponse<T>` 로 감싼다. 새 엔드포인트를 만들면 저장소 루트 [CONTRACT.md](../CONTRACT.md) 에 계약을 기록한다 — 프론트가 그 문서를 보고 화면을 만든다.
 
 ## 배포 전에
 
-- 이미지는 [Dockerfile](Dockerfile) 로 빌드한다. `bootJar` 산출물을 담기만 하므로
-  `./gradlew :core:core-api:bootJar` 를 먼저 실행해야 한다 (CI 가 알아서 한다).
+- 이미지는 [Dockerfile](Dockerfile) 로 빌드한다. `bootJar` 산출물을 담기만 하므로 `./gradlew :core:core-api:bootJar` 를 먼저 실행해야 한다 (CI 가 알아서 한다).
 
 - DB 접속 정보처럼 환경마다 달라지는 값은 배포 환경변수로 준다.

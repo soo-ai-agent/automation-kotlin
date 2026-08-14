@@ -37,13 +37,17 @@ class TodoEntity(
 ```
 
 - 바뀌지 않는 값은 `val`. 바뀌는 값만 `var` + **`private set`**.
+
 - **공개 세터를 만들지 않는다.** 밖에서 `entity.done = true` 가 가능하면 위반이다.
+
 - 상태 변경 규칙과 불변식은 **엔티티 메서드에 캡슐화**한다. 검증 없이 대입만 하는 메서드는 세터와 같으니 만들지 않는다.
+
 - 식별자·생성시각·수정시각은 `BaseEntity` 가 갖는다. 다시 선언하지 않는다.
 
 ## 애그리게이트
 
 - 경계를 넘는 상태 변경은 **루트 엔티티를 통해** 수행한다. 자식 엔티티를 밖에서 직접 바꾸지 않는다.
+
 - 자식 컬렉션은 `private` 으로 두고 읽기 전용 뷰만 노출한다.
 
 ```kotlin
@@ -60,9 +64,13 @@ fun addItem(product: Long, quantity: Int) {
 ## 매핑
 
 - 연관관계는 전부 `FetchType.LAZY`. `@ManyToOne` 기본값이 EAGER 이므로 명시적으로 덮는다.
+
 - `@Column` 에 `nullable`, `length` 를 명시한다. DB 제약을 애플리케이션 검증에 미루지 않는다.
+
 - enum 은 `@Enumerated(EnumType.STRING)`. ORDINAL 은 값 추가 시 데이터가 깨진다.
+
 - 조회 조건이 있는 컬럼에는 인덱스를 `@Table(indexes = [...])` 로 선언한다.
+
 - 동시 수정이 걸리는 엔티티에는 `@Version` 으로 낙관적 락을 건다.
 
 ## 적발 신호
@@ -81,6 +89,9 @@ fun addItem(product: Long, quantity: Int) {
 ## 체크리스트
 
 - [ ] 모든 변경 가능 프로퍼티가 `private set` 인가
+
 - [ ] 상태 변경이 규칙을 가진 행위 메서드로만 일어나는가
+
 - [ ] 컬렉션이 읽기 전용으로 노출되는가
+
 - [ ] 연관관계가 LAZY 이고 enum 이 STRING 인가

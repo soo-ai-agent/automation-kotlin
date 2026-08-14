@@ -19,15 +19,21 @@ interface TodoRepository : JpaRepository<TodoEntity, Long> {
 ```
 
 - 이름으로 의도가 드러나게: `findBy...`, `existsBy...`, `save`, `deleteBy...`, `countBy...`.
+
 - 반환 타입을 명시한다. 없을 수 있으면 `?`, 목록이면 `List<T>`.
+
 - SQL·JPQL 은 이 모듈 밖으로 새지 않는다. 서비스·컨트롤러에 쿼리 문자열이 있으면 위반이다.
 
 ## 규칙
 
 - **상한 없는 전체 조회를 만들지 않는다.** 목록은 조건이나 `Pageable` 을 받는다. 계약상 전체 반환이 맞다면 그 이유를 주석으로 남긴다.
+
 - 연관관계를 함께 쓸 조회는 `@EntityGraph` 나 `join fetch` 로 한 번에 가져온다 (N+1 방지).
+
 - 조건이 세 개를 넘거나 조합이 유동적이면 메서드 이름을 늘리지 말고 `Specification` 을 별도 파일(`XxxSpecs.kt`)로 분리한다.
+
 - 벌크 갱신은 `@Modifying(clearAutomatically = true)` 와 함께 쓰고, 영속성 컨텍스트가 어긋날 수 있음을 인지한다.
+
 - 소유자 스코프가 있는 데이터는 **조회 단계에서 소유자 조건을 건다**(`findByIdAndMemberId`). 조회 후 애플리케이션에서 비교하지 않는다.
 
 ## 적발 신호
@@ -45,6 +51,9 @@ interface TodoRepository : JpaRepository<TodoEntity, Long> {
 ## 체크리스트
 
 - [ ] 메서드 이름이 조회 조건을 그대로 드러내는가
+
 - [ ] 목록 조회에 조건이나 페이징이 있는가
+
 - [ ] 연관관계 조회가 N+1 을 만들지 않는가
+
 - [ ] 소유자 조건이 쿼리에 포함됐는가

@@ -2,9 +2,7 @@
 
 > **이 문서는 사람이 읽습니다.** 에이전트가 읽는 규칙은 [CLAUDE.md](CLAUDE.md)·[AGENTS.md](AGENTS.md) 입니다.
 
-이슈를 쓰면 에이전트가 코드를 만들고, 리뷰까지 마친 PR 을 연다. 사람은 두 가지만 한다 —
-무엇을 만들지 쓰기, **직접 올린 이슈**의 PR 머지하기. 에이전트가 쪼갠 하위 이슈의 PR 은
-리뷰를 통과하면 자동으로 머지된다.
+이슈를 쓰면 에이전트가 코드를 만들고, 리뷰까지 마친 PR 을 연다. 사람은 두 가지만 한다 — 무엇을 만들지 쓰기, **직접 올린 이슈**의 PR 머지하기. 에이전트가 쪼갠 하위 이슈의 PR 은 리뷰를 통과하면 자동으로 머지된다.
 
 ## 시작하기 (처음 한 번, 15분)
 
@@ -44,13 +42,11 @@ cd frontend && cp .env.example .env && npm install && npm run dev
 gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 ```
 
-백엔드 API → 프론트 화면 → E2E 테스트가 차례로 만들어지고 PR 이 열린다. 리뷰 통과를
-확인하고 머지하면 끝이다. 상세는 [docs/agent-guide.md](docs/agent-guide.md).
+백엔드 API → 프론트 화면 → E2E 테스트가 차례로 만들어지고 PR 이 열린다. 리뷰 통과를 확인하고 머지하면 끝이다. 상세는 [docs/agent-guide.md](docs/agent-guide.md).
 
 ## 그다음부터
 
-이슈를 쓰고 `claude` 라벨을 붙인다. 그게 전부다. 큰 작업은 `claude-split` 라벨을 붙이면
-하위 이슈로 쪼개서 진행한다. 이슈 잘 쓰는 법은 [docs/issue-guide.md](docs/issue-guide.md).
+이슈를 쓰고 `claude` 라벨을 붙인다. 그게 전부다. 큰 작업은 `claude-split` 라벨을 붙이면 하위 이슈로 쪼개서 진행한다. 이슈 잘 쓰는 법은 [docs/issue-guide.md](docs/issue-guide.md).
 
     이슈 + claude 라벨
       → 에이전트가 코딩 → PR → 에이전트가 리뷰
