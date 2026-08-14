@@ -1,0 +1,324 @@
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 고칠 곳: 스위치는 .github/agent/settings.env,
+#    노드 지시문은 .github/agent/nodes/*.md. 이 파일은 기능 자체를 개조할 때만 열고,
+#    수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#
+# 노드 하나 — 그래프의 칸 하나가 이 워크플로 한 번이다. claude-agent.yml 이 단계마다 호출한다.
+#
+# 잡 흐름 (step 순서 그대로):
+#   ① 준비        checkout → 런타임 설치 → 지시문·도구 꺼내기 → 작업 브랜치
+#   ② Claude 실행  프롬프트 조립 → claude CLI → (실패하고 수습 노드가 있으면) 수습 실행
+#   ③ 후처리       명세 → 이슈 본문 · 분할 파일 → 하위 이슈 · 잔여 변경 커밋
+#   ④ 공유        push + 마지막 노드면 PR → 이슈/PR 에 회신
+#
+# 권한 경계 — Claude 에게 GitHub API 권한을 주지 않는다. Claude 는 파일만 쓰고,
+# API 호출(이슈·PR·라벨)은 셸이 한다. 그래서 GH_TOKEN 은 잡 전체가 아니라
+# gh 를 쓰는 step 에만 건다. Claude 실행 step 에는 토큰이 없다.
+name: claude-node
+
+on:
+  workflow_call:
+    inputs:
+      node:
+        description: "실행할 노드 이름 (.github/agent/nodes/<이름>.md)"
+        required: true
+        type: string
+      label:
+        description: "진행 화면에 보일 이름 (같은 노드가 두 번 나오면 code-2 처럼)"
+        type: string
+        default: ""
+      rescue:
+        description: "이 노드가 실패하면 이어받을 수습 노드. 없으면 빈 값"
+        type: string
+        default: ""
+      make_pr:
+        description: "true 면 이 노드가 PR 을 연다 (마지막 단계의 마지막 노드)"
+        type: string
+        default: "false"
+      prompt:
+        description: "작업 지시. 비우고 issue 를 주면 그 이슈의 제목+본문을 지시로 쓴다"
+        type: string
+        default: ""
+      branch:
+        required: true
+        type: string
+      task_code:
+        type: string
+        default: ""
+      issue:
+        description: "연결된 이슈 또는 PR 번호"
+        type: string
+        default: ""
+      context_type:
+        description: "issue | pr | (빈 값)"
+        type: string
+        default: ""
+      runner:
+        type: string
+        default: "ubuntu-latest"
+      java_version:
+        type: string
+        default: "21"
+      node_version:
+        type: string
+        default: "22"
+
+jobs:
+  node:
+    name: ${{ inputs.label || inputs.node }}
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      # 사용자 입력은 셸에 직접 끼워 넣지 않고 환경변수로만 받는다 (스크립트 인젝션 방지)
+      NODE_NAME: ${{ inputs.node }}
+      RESCUE: ${{ inputs.rescue }}
+      MAKE_PR: ${{ inputs.make_pr }}
+      IN_PROMPT: ${{ inputs.prompt }}
+      BRANCH: ${{ inputs.branch }}
+      TASK_CODE: ${{ inputs.task_code }}
+      ISSUE: ${{ inputs.issue }}
+      CONTEXT_TYPE: ${{ inputs.context_type }}
+      DEF: ${{ github.event.repository.default_branch }}
+    steps:
+      # ── ① 준비 ──────────────────────────────────────────
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 에이전트에게 전체 이력 컨텍스트 제공
+          token: ${{ secrets.AGENT_PAT || github.token }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java_version }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: 지시문과 도구 꺼내기
+        run: |
+          set -e
+          # 역할 지시문과 로그 정리기는 항상 기본 브랜치 것을 쓴다 —
+          # 작업 브랜치에 없거나 에이전트가 고쳐도 이 잡이 깨지지 않게.
+          git fetch origin "$DEF" --depth=1
+          git show "origin/$DEF:.github/agent/nodes/$NODE_NAME.md" > /tmp/role.md 2>/dev/null || : > /tmp/role.md
+          if [ -n "$RESCUE" ]; then
+            git show "origin/$DEF:.github/agent/nodes/$RESCUE.md" > /tmp/rescue-role.md 2>/dev/null || : > /tmp/rescue-role.md
+          fi
+          git show "origin/$DEF:.github/agent/stream.js" > /tmp/stream.js
+          npm install -g @anthropic-ai/claude-code
+
+      - name: 작업 브랜치 준비
+        run: |
+          set -e
+          git config user.name "Claude"
+          git config user.email "claude@anthropic.com"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$BRANCH" && git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH" "origin/$DEF"
+          fi
+          echo "BEFORE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: 작업 지시 확정
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+        run: |
+          set -e
+          # 지시는 셋 중 하나에서 온다: 입력 문자열 · @경로 명세 파일 · 이슈 본문
+          if [ -n "$IN_PROMPT" ]; then
+            case "$IN_PROMPT" in
+              @*) SPEC="${IN_PROMPT#@}"
+                  if [ -f "$SPEC" ]; then
+                    cp "$SPEC" /tmp/body.md; echo "작업 명세: $SPEC"
+                  else
+                    printf '%s' "$IN_PROMPT" > /tmp/body.md
+                    echo "경고: 명세 파일 없음($SPEC) — 문자열 그대로 사용"
+                  fi ;;
+              *)  printf '%s' "$IN_PROMPT" > /tmp/body.md ;;
+            esac
+          elif [ -n "$ISSUE" ] && [ "$CONTEXT_TYPE" = "issue" ]; then
+            # 이슈 본문은 길 수 있어 워크플로 입력으로 넘기지 않고 여기서 직접 읽는다
+            gh issue view "$ISSUE" --json title,body \
+              --jq '.title + "\n\n" + (.body // "")' > /tmp/body.md
+            echo "작업 지시: 이슈 #$ISSUE"
+          else
+            echo "작업 지시가 없어요 (prompt 도 issue 도 비었음)"; exit 1
+          fi
+
+      # ── ② Claude 실행 ───────────────────────────────────
+      - name: Claude 실행
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          ALLOWED="Bash(git add:*),Bash(git commit:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(./gradlew:*),Bash(npm:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*)"
+
+          build_prompt() { # $1=역할 파일, $2=출력 파일
+            : > "$2"
+            [ -s "$1" ] && printf '%s\n\n' "$(cat "$1")" >> "$2"
+            printf '## 작업\n\n%s\n\n' "$(cat /tmp/body.md)" >> "$2"
+            if [ "$CONTEXT_TYPE" = "issue" ] && [ "$NODE_NAME" != "split" ]; then
+              # 제목만 있는 이슈 보완 — 명세의 원본은 저장소가 아니라 이슈다
+              printf '위 작업에 할 일 목록이나 완료 기준이 없거나 빈약하면, 구현 전에 네가 직접 정의해라:\n' >> "$2"
+              printf '배경·할 일·완료 기준(체크박스)을 담은 .claude-spec.md 를 저장소 루트에 만들고(커밋 금지),\n' >> "$2"
+              printf '그 완료 기준을 만족시키는 것까지가 이번 작업이다. 이미 충분히 구체적이면 이 파일은 만들지 마라.\n\n' >> "$2"
+            fi
+            printf '작업이 끝나면 변경을 논리 단위로 나눠 직접 git add / git commit 해줘.\n' >> "$2"
+            printf '리팩터링과 기능 변경은 같은 커밋에 섞지 말고, 메시지는 <type>:<제목> 형식으로\n' >> "$2"
+            printf '(type 소문자, 콜론 뒤 공백 없음: feat/fix/refactor/test/docs/chore 등).\n' >> "$2"
+            printf '커밋 메시지와 최종 결과 보고는 한국어로 쓴다. 코드·식별자·경로는 원문 그대로 둔다.\n' >> "$2"
+          }
+
+          run_claude() { # $1=프롬프트 파일 → 종료코드를 STATUS 에
+            STATUS=0
+            claude -p "$(cat "$1")" \
+              --permission-mode acceptEdits \
+              --allowedTools "$ALLOWED" \
+              --output-format stream-json --verbose \
+              | tee /tmp/claude-stream.jsonl \
+              | node /tmp/stream.js || STATUS=$?
+            node /tmp/stream.js result /tmp/claude-stream.jsonl > /tmp/claude-out.txt
+          }
+
+          build_prompt /tmp/role.md /tmp/prompt.txt
+          echo "노드: $NODE_NAME${RESCUE:+ (수습: $RESCUE)}"
+          run_claude /tmp/prompt.txt
+
+          # 수습 — 실패했고 수습 노드가 지정돼 있으면, 같은 브랜치를 이어받아 완수시킨다
+          if [ "$STATUS" != "0" ] && [ -n "$RESCUE" ]; then
+            echo "::warning::$NODE_NAME 실패(status $STATUS) — $RESCUE 노드로 수습 시작"
+            cp /tmp/claude-out.txt /tmp/prev-out.txt
+            build_prompt /tmp/rescue-role.md /tmp/rescue-prompt.txt
+            {
+              printf '\n## 상황\n\n같은 브랜치의 직전 %s 노드가 실패한 채 끝났어요.\n' "$NODE_NAME"
+              printf 'git log 와 git diff 로 상태를 파악하고, 어중간하게 남은 변경을 정리한 뒤\n'
+              printf '위 작업을 이어받아 완수해줘.\n\n### 실패한 노드의 마지막 보고\n\n%s\n' \
+                "$(tail -c 2000 /tmp/prev-out.txt)"
+            } >> /tmp/rescue-prompt.txt
+            run_claude /tmp/rescue-prompt.txt
+            echo "NODE_LABEL=$NODE_NAME→$RESCUE" >> "$GITHUB_ENV"
+          else
+            echo "NODE_LABEL=$NODE_NAME" >> "$GITHUB_ENV"
+          fi
+          echo "CLAUDE_STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      # ── ③ 후처리 ────────────────────────────────────────
+      - name: 명세를 이슈 본문에 반영
+        if: env.CONTEXT_TYPE == 'issue' && env.ISSUE != ''
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+        run: |
+          set -e
+          [ -f .claude-spec.md ] || exit 0
+          {
+            gh issue view "$ISSUE" --json body --jq '.body // ""'
+            printf '\n\n---\n\n'
+            cat .claude-spec.md
+            printf '\n\n_(에이전트가 작성한 명세예요 — 의도와 다르면 본문을 고치고 claude-sent 라벨을 떼세요)_\n'
+          } > /tmp/issue-body.md
+          gh issue edit "$ISSUE" --body-file /tmp/issue-body.md && echo "이슈 본문에 명세 반영" \
+            || echo "명세 반영 실패 — 작업은 계속"
+          rm -f .claude-spec.md   # 명세의 원본은 이슈다. 저장소 커밋에 섞지 않는다
+
+      - name: 분할 파일을 하위 이슈로
+        if: env.NODE_NAME == 'split'
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+        run: |
+          set -e
+          [ -d .claude-split ] || exit 0
+          : > /tmp/checklist.md
+          CREATED=""
+          for f in .claude-split/*.md; do
+            [ -f "$f" ] || continue
+            TITLE=$(head -n 1 "$f" | sed 's/^#* *//')
+            { tail -n +2 "$f"; [ -n "$ISSUE" ] && printf '\n\n상위 이슈: #%s\n' "$ISSUE"; } > /tmp/sub-body.md
+            # 하위 이슈 라벨은 claude,claude-made 둘 다여야 한다 —
+            # claude 가 빠지면 착수가 안 되고, claude-made 가 빠지면 자동 머지가 안 된다
+            URL=$(gh issue create --title "$TITLE" --body-file /tmp/sub-body.md \
+                    --label claude --label claude-made) || continue
+            N="${URL##*/}"
+            CREATED="${CREATED} #${N}"
+            printf -- '- [ ] #%s %s\n' "$N" "$TITLE" >> /tmp/checklist.md
+            echo "하위 이슈 생성: #${N} ${TITLE}"
+          done
+          rm -rf .claude-split
+          # 분할 노드는 커밋을 남기지 않는다 — 실수로 커밋했어도 되돌린다
+          git reset --hard "$BEFORE_SHA" >/dev/null
+          [ -n "$CREATED" ] && [ -n "$ISSUE" ] || exit 0
+          {
+            gh issue view "$ISSUE" --json body --jq '.body // ""'
+            printf '\n\n## 하위 이슈\n\n'
+            cat /tmp/checklist.md
+            printf '\n_(하위 이슈가 닫히면 디스패처가 체크하고, 전부 끝나면 작업별 결과 보고를 달아드려요 — 확인 후 이 이슈는 직접 닫아 주세요)_\n'
+          } > /tmp/parent-body.md
+          gh issue edit "$ISSUE" --body-file /tmp/parent-body.md || echo "체크리스트 반영 실패 — 계속"
+          printf '🔀 이슈를 쪼갰어요. 하위 이슈:%s\n\n하위 이슈에는 claude 라벨이 붙어 있어 디스패처가 차례로 착수해요.\n' \
+            "$CREATED" > /tmp/split-note.md
+          gh issue comment "$ISSUE" --body-file /tmp/split-note.md || true
+
+      - name: 남은 변경 커밋
+        run: |
+          set -e
+          [ -z "$(git status --porcelain)" ] && exit 0
+          git add -A
+          git commit -m "${TASK_CODE:+[$TASK_CODE] }chore:에이전트 작업 잔여 변경"
+
+      # ── ④ 공유: push · PR · 회신 ────────────────────────
+      - name: push
+        run: |
+          set -e
+          if [ "$(git rev-parse HEAD)" = "$BEFORE_SHA" ]; then
+            echo "변경 없음 — 리뷰/분석만 수행"; echo "PUSHED=false" >> "$GITHUB_ENV"; exit 0
+          fi
+          # 같은 단계의 병렬 노드가 먼저 push 했으면 rebase 후 재시도
+          i=0
+          until git push -u origin "$BRANCH"; do
+            i=$((i + 1))
+            [ "$i" -ge 3 ] && { echo "push 실패"; exit 1; }
+            git pull --rebase origin "$BRANCH"
+          done
+          echo "PUSHED=true" >> "$GITHUB_ENV"
+
+      - name: PR 생성 (마지막 노드만)
+        if: env.PUSHED == 'true' && inputs.make_pr == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+        run: |
+          set -e
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            echo "이미 열린 PR 있음 — 생성 생략"; exit 0
+          fi
+          TITLE=$(head -n 1 /tmp/body.md | sed 's/^#* *//' | cut -c1-120)
+          [ -n "$TITLE" ] || TITLE="Claude 자동 변경"
+          [ -n "$TASK_CODE" ] && TITLE="[$TASK_CODE] $TITLE"
+          {
+            [ "$CONTEXT_TYPE" = "issue" ] && [ -n "$ISSUE" ] && printf 'Closes #%s\n\n' "$ISSUE"
+            cat /tmp/claude-out.txt
+          } > /tmp/pr-body.md
+          gh pr create --base "$DEF" --head "$BRANCH" --title "$TITLE" --body-file /tmp/pr-body.md
+          echo "PR 생성됨 ($BRANCH → $DEF): $TITLE"
+
+      - name: 이슈·PR 에 회신
+        if: always() && env.ISSUE != ''
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+        run: |
+          { printf '🤖 Claude 실행 결과%s (노드: %s)\n\n' \
+              "${TASK_CODE:+ [$TASK_CODE]}" "${NODE_LABEL:-$NODE_NAME}"
+            tail -c 3000 /tmp/claude-out.txt 2>/dev/null || echo "(결과 없음)"
+          } > /tmp/note.md
+          # PR 번호는 gh issue 로 조회되지 않는다 — 리뷰 fix 루프는 gh pr 로 회신한다
+          if [ "$CONTEXT_TYPE" = "pr" ]; then
+            gh pr comment "$ISSUE" --body-file /tmp/note.md || true
+          else
+            gh issue comment "$ISSUE" --body-file /tmp/note.md || true
+          fi
+
+      - name: 실행 상태 반영
+        if: always()
+        run: exit ${CLAUDE_STATUS:-0}

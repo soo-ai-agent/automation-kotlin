@@ -1,0 +1,179 @@
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 고칠 곳: 스위치는 .github/agent/settings.env,
+#    노드 지시문은 .github/agent/nodes/*.md. 이 파일은 기능 자체를 개조할 때만 열고,
+#    수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#
+# Claude 일꾼 — 지시를 받아 그래프를 펼치고, 노드들이 같은 브랜치에서 코딩한 뒤 PR 을 연다.
+#
+# 호출 계약 (디스패처·리뷰어·사람이 workflow_dispatch 로 전달):
+#   prompt        작업 지시. @TASK.md 처럼 @경로를 주면 그 파일이 명세가 된다.
+#                 비우고 issue 를 주면 그 이슈의 제목+본문이 지시가 된다.
+#   graph         (선택) 이번 작업만 다른 노드 구성으로 — 예: api+web>e2e
+#   node          (선택) 그래프 없이 이 노드 하나만 — 리뷰어의 fix 재작업이 쓴다
+#   branch        (선택) 이어서 작업할 브랜치. 비우면 새로 만든다
+#   task_code     (선택) PR 제목 앞에 붙일 코드
+#   issue         (선택) 연결할 이슈/PR 번호 — 결과를 여기에 회신한다
+#   context_type  (선택) issue | pr
+#
+# 그래프 실행 구조 — GitHub Actions 는 잡을 실행 중에 만들어 낼 수 없다.
+# 그래서 단계 잡(s1..s4)을 미리 선언해 두고, graph 잡이 단계별 매트릭스를 계산해 넘긴다.
+# 빈 단계는 매트릭스가 [] 라서 통째로 건너뛴다. 앞 단계가 실패하면 뒤 단계는 자동으로 안 돈다.
+name: claude-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "작업 지시. @TASK.md 처럼 @경로를 주면 그 파일이 명세가 된다"
+      graph:
+        description: "이번 작업만 쓸 노드 구성 (예: plan>code?fix>test). 비우면 설정 기본값"
+      node:
+        description: "이 노드 하나만 실행 (그래프 무시)"
+      branch:
+        description: "이어서 작업할 브랜치. 비우면 새로 만든다"
+      task_code:
+        description: "PR 제목 앞에 붙일 코드"
+      issue:
+        description: "연결할 이슈/PR 번호"
+      context_type:
+        description: "issue | pr"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  graph:
+    name: 그래프 펼치기
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      s1: ${{ steps.expand.outputs.s1 }}
+      s2: ${{ steps.expand.outputs.s2 }}
+      s3: ${{ steps.expand.outputs.s3 }}
+      s4: ${{ steps.expand.outputs.s4 }}
+      branch: ${{ steps.expand.outputs.branch }}
+      runner: ${{ steps.expand.outputs.runner }}
+      java_version: ${{ steps.expand.outputs.java_version }}
+      node_version: ${{ steps.expand.outputs.node_version }}
+    env:
+      IN_GRAPH: ${{ inputs.graph }}
+      IN_NODE: ${{ inputs.node }}
+      IN_BRANCH: ${{ inputs.branch }}
+      ISSUE: ${{ inputs.issue }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }} # 설정과 그래프 도구는 항상 기본 브랜치 것
+
+      - name: 설정 읽고 그래프 펼치기
+        id: expand
+        run: |
+          set -e
+          . .github/agent/settings.env
+          {
+            echo "runner=$CLAUDE_RUNNER"
+            echo "java_version=$CLAUDE_JAVA_VERSION"
+            echo "node_version=$CLAUDE_NODE_VERSION"
+          } >> "$GITHUB_OUTPUT"
+
+          # 작업 브랜치: 지정 > 이슈별 고정 > 실행별 생성
+          if [ -n "$IN_BRANCH" ]; then BRANCH="$IN_BRANCH"
+          elif [ -n "$ISSUE" ]; then BRANCH="claude/issue-$ISSUE"
+          else BRANCH="claude/work-${{ github.run_id }}"; fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+          CLAUDE_GRAPH="${IN_GRAPH:-$CLAUDE_GRAPH}" CLAUDE_NODE="$IN_NODE" \
+            node .github/agent/graph.js
+
+  s1:
+    needs: graph
+    if: needs.graph.outputs.s1 != '[]'
+    strategy:
+      fail-fast: false # 병렬 노드는 서로 끝까지 가게 둔다
+      matrix:
+        include: ${{ fromJSON(needs.graph.outputs.s1) }}
+    uses: ./.github/workflows/claude-node.yml
+    secrets: inherit
+    with:
+      node: ${{ matrix.node }}
+      label: ${{ matrix.label }}
+      rescue: ${{ matrix.rescue }}
+      make_pr: ${{ matrix.make_pr }}
+      prompt: ${{ inputs.prompt }}
+      branch: ${{ needs.graph.outputs.branch }}
+      task_code: ${{ inputs.task_code }}
+      issue: ${{ inputs.issue }}
+      context_type: ${{ inputs.context_type }}
+      runner: ${{ needs.graph.outputs.runner }}
+      java_version: ${{ needs.graph.outputs.java_version }}
+      node_version: ${{ needs.graph.outputs.node_version }}
+
+  s2:
+    needs: [graph, s1]
+    if: needs.graph.outputs.s2 != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.graph.outputs.s2) }}
+    uses: ./.github/workflows/claude-node.yml
+    secrets: inherit
+    with:
+      node: ${{ matrix.node }}
+      label: ${{ matrix.label }}
+      rescue: ${{ matrix.rescue }}
+      make_pr: ${{ matrix.make_pr }}
+      prompt: ${{ inputs.prompt }}
+      branch: ${{ needs.graph.outputs.branch }}
+      task_code: ${{ inputs.task_code }}
+      issue: ${{ inputs.issue }}
+      context_type: ${{ inputs.context_type }}
+      runner: ${{ needs.graph.outputs.runner }}
+      java_version: ${{ needs.graph.outputs.java_version }}
+      node_version: ${{ needs.graph.outputs.node_version }}
+
+  s3:
+    needs: [graph, s2]
+    if: needs.graph.outputs.s3 != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.graph.outputs.s3) }}
+    uses: ./.github/workflows/claude-node.yml
+    secrets: inherit
+    with:
+      node: ${{ matrix.node }}
+      label: ${{ matrix.label }}
+      rescue: ${{ matrix.rescue }}
+      make_pr: ${{ matrix.make_pr }}
+      prompt: ${{ inputs.prompt }}
+      branch: ${{ needs.graph.outputs.branch }}
+      task_code: ${{ inputs.task_code }}
+      issue: ${{ inputs.issue }}
+      context_type: ${{ inputs.context_type }}
+      runner: ${{ needs.graph.outputs.runner }}
+      java_version: ${{ needs.graph.outputs.java_version }}
+      node_version: ${{ needs.graph.outputs.node_version }}
+
+  s4:
+    needs: [graph, s3]
+    if: needs.graph.outputs.s4 != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.graph.outputs.s4) }}
+    uses: ./.github/workflows/claude-node.yml
+    secrets: inherit
+    with:
+      node: ${{ matrix.node }}
+      label: ${{ matrix.label }}
+      rescue: ${{ matrix.rescue }}
+      make_pr: ${{ matrix.make_pr }}
+      prompt: ${{ inputs.prompt }}
+      branch: ${{ needs.graph.outputs.branch }}
+      task_code: ${{ inputs.task_code }}
+      issue: ${{ inputs.issue }}
+      context_type: ${{ inputs.context_type }}
+      runner: ${{ needs.graph.outputs.runner }}
+      java_version: ${{ needs.graph.outputs.java_version }}
+      node_version: ${{ needs.graph.outputs.node_version }}

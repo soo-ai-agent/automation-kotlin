@@ -1,0 +1,87 @@
+# 🔒 이 파일은 고칠 필요 없어요 — 설정은 파일이 아니라 GitHub 변수·시크릿으로 해요.
+#
+# 배포 — main 에 머지되면 이미지를 빌드해 GHCR 에 올리고, 서버에서 compose 로 교체한다.
+#
+# Settings → Secrets and variables → Actions:
+#   [Variables] DEPLOY_ENABLED   "true" 로 등록해야 배포 잡이 켜져요 (레지스트리·서버 준비 후)
+#   [Secrets]   DEPLOY_HOST      서버 주소 (없으면 이미지 푸시까지만 하고 끝)
+#               DEPLOY_USER      SSH 사용자
+#               DEPLOY_SSH_KEY   SSH 개인키
+#               DEPLOY_PATH      서버의 docker-compose.yml 위치
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 이미지 이름과 태그
+        run: |
+          # GHCR 은 소문자 경로만 받는다
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          echo "TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-java@v4
+        if: hashFiles('backend/settings.gradle.kts') != ''
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: 백엔드 빌드·푸시
+        run: |
+          set -e
+          if [ ! -f backend/settings.gradle.kts ]; then
+            echo "backend 뼈대 없음 — 건너뜀 (backend/README.md 참고)"; exit 0
+          fi
+          cd backend
+          ./gradlew :core:core-api:bootJar -x test
+          docker build -t "$IMAGE/backend:latest" -t "$IMAGE/backend:$TAG" .
+          docker push "$IMAGE/backend:latest"
+          docker push "$IMAGE/backend:$TAG"
+
+      - name: 프론트엔드 빌드·푸시
+        run: |
+          set -e
+          docker build -t "$IMAGE/frontend:latest" -t "$IMAGE/frontend:$TAG" frontend
+          docker push "$IMAGE/frontend:latest"
+          docker push "$IMAGE/frontend:$TAG"
+
+  deploy:
+    needs: build
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 서버에서 교체
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -e
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "DEPLOY_HOST 미설정 — 이미지 푸시까지만 수행"; exit 0
+          fi
+          install -m 600 /dev/null /tmp/deploy_key
+          printf '%s\n' "$DEPLOY_SSH_KEY" > /tmp/deploy_key
+          ssh -i /tmp/deploy_key -o StrictHostKeyChecking=accept-new \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd $DEPLOY_PATH && docker compose pull && docker compose up -d"

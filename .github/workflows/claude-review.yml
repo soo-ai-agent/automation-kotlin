@@ -1,0 +1,163 @@
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 고칠 곳: 통과 기준·재수정 횟수는
+#    .github/agent/settings.env, 리뷰 규칙은 common/docs/code-review/rules.md.
+#    이 파일은 기능 자체를 개조할 때만 열고, 수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#
+# Claude 리뷰어 — PR diff 를 판정하고 코멘트를 남겨요. 코드는 고치지 않아요(재작업 루프 방지).
+#
+# 잡 흐름 (step 순서 그대로):
+#   설정 로드 → diff 추출 → 리뷰 규칙 모으기 → Claude 판정 → PR 에 코멘트
+#   → PASS 면 에이전트가 쪼갠 하위 이슈(claude-made)의 PR 만 자동 머지,
+#     사람이 올린 이슈의 PR 은 사람이 머지 / 지적이면 fix 노드 재호출,
+#     리뷰 코멘트가 CLAUDE_MAX_ROUNDS 개면 멈추고 사람을 불러요
+name: claude-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+      HAS_PAT: ${{ secrets.AGENT_PAT != '' }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+      MARKER: "🔍 Claude 코드 리뷰" # 코멘트 제목 겸 라운드 카운터 — 같은 문자열이어야 해요
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 타겟 브랜치와 비교하려면 이력이 필요해요
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 설정 로드와 도구 준비
+        run: |
+          set -e
+          git fetch origin "$BASE_REF"
+          # 설정·도구는 항상 기본 브랜치 것 — PR 브랜치가 리뷰 기준을 바꾸지 못하게
+          git show "origin/$BASE_REF:.github/agent/settings.env" > /tmp/settings.env
+          git show "origin/$BASE_REF:.github/agent/stream.js" > /tmp/stream.js
+          . /tmp/settings.env
+          {
+            echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
+            echo "RULES_DIR=$CLAUDE_REVIEW_RULES_DIR"
+            echo "DIFF_LIMIT=$CLAUDE_DIFF_LIMIT_BYTES"
+            echo 'REVIEW_BAR<<BAREOF'
+            printf '%s\n' "$CLAUDE_REVIEW_BAR"
+            echo 'BAREOF'
+          } >> "$GITHUB_ENV"
+          npm install -g @anthropic-ai/claude-code
+
+      - name: diff 추출
+        run: |
+          set -e
+          git diff "origin/$BASE_REF...HEAD" | head -c "$DIFF_LIMIT" > /tmp/diff.patch
+          if [ ! -s /tmp/diff.patch ]; then
+            echo "diff 없음 — 리뷰 생략"; echo "SKIP=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: 라운드 확인
+        if: env.SKIP != 'true'
+        run: |
+          # 라운드 수를 따로 저장하지 않고 자기 코멘트 개수로 센다 — PR 당 정확하고 저장소도 안 건드린다
+          ROUNDS=$(gh pr view "$PR" --json comments \
+            --jq "[.comments[] | select(.body | contains(\"$MARKER\"))] | length")
+          echo "리뷰 라운드: $ROUNDS / $MAX_ROUNDS"
+          echo "ROUNDS=$ROUNDS" >> "$GITHUB_ENV"
+
+      - name: 리뷰
+        if: env.SKIP != 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          # 규칙과 diff 는 stdin 으로 — 프롬프트 문자열에 넣으면 md 의 백틱이 셸에서 실행된다
+          {
+            printf '## 리뷰 규칙\n\n'
+            find "$RULES_DIR" -name '*.md' -type f -print0 2>/dev/null | sort -z | xargs -0 -r cat \
+              || echo "(리뷰 규칙 문서 없음 — 통과 기준만 적용)"
+            printf '\n\n## 통과 기준\n\n%s\n\n## DIFF\n\n' "$REVIEW_BAR"
+            cat /tmp/diff.patch
+          } > /tmp/review-input.txt
+
+          claude -p "stdin 의 '리뷰 규칙'·'통과 기준' 절과, diff 파일 경로에 해당하는 영역 스킬을 기준으로 'DIFF' 절을 리뷰해줘.
+          backend/ 경로면 backend/.claude/skills/kotlin-* 중 해당 레이어의, frontend/ 경로면
+          frontend/.claude/skills/frontend-react 의 '적발 신호' 표와 체크리스트를 열어 대조하고,
+          지적에는 해당 스킬 항목을 근거로 명시해.
+
+          출력 형식(엄수):
+          첫 줄: 'VERDICT: PASS' 또는 'VERDICT: CHANGES_REQUESTED' 만.
+          그 아래는 마크다운으로, 정확히 이 구조를 따라:
+
+          ### 🚫 차단 (머지 불가)
+          - **\`파일:라인\`** — 문제 한 줄 요약
+            - 원인: 왜 문제인지 한두 문장
+            - 수정: 구체적 방법
+            - 근거: 스킬 이름과 적발 신호 항목
+          (차단 지적이 없으면 이 절 자체를 생략)
+
+          ### 📝 참고 (비차단)
+          - \`파일:라인\` — 한 줄 요약 (근거: 스킬 항목). 항목당 정확히 한 줄, 줄글 금지.
+          (참고가 없으면 이 절 자체를 생략)
+
+          절과 절, 항목과 항목 사이에 빈 줄. 칭찬·총평·인사말 금지.
+          리뷰는 한국어로 쓴다. 코드·식별자·경로는 원문 그대로 둔다." \
+            --output-format text < /tmp/review-input.txt | tee /tmp/review.md
+
+      - name: 코멘트 게시
+        if: env.SKIP != 'true'
+        run: |
+          if head -n 1 /tmp/review.md | grep -q "PASS"; then BADGE="✅ 통과"; else BADGE="❌ 수정 필요"; fi
+          printf '## %s — %s\n\n%s\n' "$MARKER" "$BADGE" "$(tail -n +2 /tmp/review.md)" > /tmp/note.md
+          gh pr comment "$PR" --body-file /tmp/note.md
+
+      - name: 통과 — 자동 머지 판단
+        if: env.SKIP != 'true'
+        run: |
+          head -n 1 /tmp/review.md | grep -q "PASS" || exit 0
+          # 2중 게이트 — ① 브랜치명이 claude/issue-N 인가 ② 그 이슈에 claude-made 라벨이 있는가.
+          # 판별 불가면 머지하지 않는 쪽으로 떨어진다 (안전 측 실패).
+          case "$HEAD_REF" in
+            claude/issue-*) N="${HEAD_REF#claude/issue-}" ;;
+            *) echo "이슈 기반 PR 아님 — 머지는 사람 몫"; exit 0 ;;
+          esac
+          case "$N" in ''|*[!0-9]*) echo "이슈 번호 판별 불가 — 머지는 사람 몫"; exit 0 ;; esac
+          if ! gh issue view "$N" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx "claude-made"; then
+            echo "사람이 올린 이슈(#$N) — 머지는 사람 몫"; exit 0
+          fi
+          if gh pr merge "$PR" --squash --delete-branch; then
+            echo "자동 머지 완료"
+          else
+            gh pr comment "$PR" --body "⚠️ 리뷰는 통과했지만 자동 머지에 실패했어요 (충돌 또는 권한 — AGENT_PAT 의 Contents: Read and write 를 확인하세요). 사람이 머지해 주세요."
+            echo "자동 머지 실패 — 사람에게 넘김"
+          fi
+
+      - name: 지적 — fix 노드 재호출
+        if: env.SKIP != 'true'
+        run: |
+          head -n 1 /tmp/review.md | grep -q "PASS" && { echo "통과 — 재작업 없음"; exit 0; }
+          if [ "$ROUNDS" -ge "$MAX_ROUNDS" ]; then
+            gh pr comment "$PR" --body "⚠️ 리뷰 ${ROUNDS}회 후에도 지적이 남아 자동 재작업을 멈춰요. 사람이 확인해 주세요."
+            exit 0
+          fi
+          if [ "$HAS_PAT" != "true" ]; then
+            echo "AGENT_PAT 없음 — 재작업 루프 꺼짐 (GITHUB_TOKEN 은 다른 워크플로를 깨우지 못한다)"; exit 0
+          fi
+          gh workflow run claude-agent.yml \
+            -f prompt="$(cat /tmp/review.md)" \
+            -f node="fix" \
+            -f branch="$HEAD_REF" \
+            -f issue="$PR" \
+            -f context_type="pr"
+          echo "재작업 트리거됨 (라운드 $ROUNDS)"

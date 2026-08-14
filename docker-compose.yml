@@ -1,0 +1,18 @@
+# 서버에서 실행: docker compose pull && docker compose up -d
+# 이미지 태그의 <registry> 는 ghcr.io/<owner>/<repo> 로 바꾼다 (docs/deploy.md).
+services:
+  backend:
+    image: <registry>/backend:latest
+    restart: unless-stopped
+    # environment:
+    #   SPRING_DATASOURCE_URL: ...
+    #   SPRING_DATASOURCE_USERNAME: ...
+    #   SPRING_DATASOURCE_PASSWORD: ...
+
+  frontend:
+    image: <registry>/frontend:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
