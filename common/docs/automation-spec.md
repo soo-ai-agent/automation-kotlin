@@ -196,7 +196,7 @@
 
 ### 수정 시 불변 조건
 
-- 리뷰어 프롬프트(`claude-review.yml`)와 `settings.env` 의 `CLAUDE_REVIEW_BAR` 에 있는 스킬 경로는 **문자열 하드코딩**이다 — 스킬을 옮기면 두 곳을 같이 고칠 것 (`backend/.claude/skills/kotlin-*`, `frontend/.claude/skills/frontend-react`).
+- 리뷰어 프롬프트(`claude-review.yml`)와 `settings.env` 의 `CLAUDE_REVIEW_BAR` 에 있는 스킬 경로는 **문자열 하드코딩**이다 — 스킬을 옮기면 두 곳을 같이 고칠 것 (`.claude/skills/oop-responsibility-design`, `backend/.claude/skills/kotlin-*`, `frontend/.claude/skills/frontend-react`).
 
 - `CLAUDE.md`·`AGENTS.md` 는 루트에서 옮길 수 없다 (Claude Code·Codex 가 루트에서 읽는다).
 

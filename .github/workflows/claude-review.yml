@@ -91,10 +91,11 @@ jobs:
             cat /tmp/diff.patch
           } > /tmp/review-input.txt
 
-          claude -p "stdin 의 '리뷰 규칙'·'통과 기준' 절과, diff 파일 경로에 해당하는 영역 스킬을 기준으로 'DIFF' 절을 리뷰해줘.
-          backend/ 경로면 backend/.claude/skills/kotlin-* 중 해당 레이어의, frontend/ 경로면
-          frontend/.claude/skills/frontend-react 의 '적발 신호' 표와 체크리스트를 열어 대조하고,
-          지적에는 해당 스킬 항목을 근거로 명시해.
+          claude -p "stdin 의 '리뷰 규칙'·'통과 기준' 절과 저장소의 스킬을 기준으로 'DIFF' 절을 리뷰해줘.
+          열어 볼 스킬은 둘이다 — 모든 diff 에 공통으로 적용되는 .claude/skills/oop-responsibility-design,
+          그리고 diff 파일 경로에 해당하는 영역 스킬 (backend/ 는 backend/.claude/skills/kotlin-* 중 해당 레이어,
+          frontend/ 는 frontend/.claude/skills/frontend-react).
+          각 스킬의 '적발 신호' 표와 체크리스트를 열어 대조하고, 지적에는 해당 스킬 항목을 근거로 명시해.
 
           출력 형식(엄수):
           첫 줄: 'VERDICT: PASS' 또는 'VERDICT: CHANGES_REQUESTED' 만.
