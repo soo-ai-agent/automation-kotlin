@@ -4,7 +4,7 @@
 
 **지금 이 폴더는 거의 비어 있다.** 에이전트가 따를 코딩 규칙(`.claude/skills/`)과 배포용 `Dockerfile` 만 있고, 실제 Spring 모듈은 없다.
 
-아래 1~3 을 따라 뼈대를 채우고 커밋해야 `api` 노드가 백엔드를 만들 수 있다. 한 번만 하면 된다.
+아래 1~4 를 따라 뼈대를 채우고 커밋해야 `api` 노드가 백엔드를 만들 수 있다. 한 번만 하면 된다.
 
 **모든 명령은 이 폴더 안에서 실행한다.** JDK 25 가 필요하다 — 템플릿의 `gradle.properties` 가 `javaVersion=25` 로 툴체인을 요구한다.
 
@@ -25,7 +25,21 @@ rm -rf /tmp/tpl
 
 템플릿 루트의 `CLAUDE.md`·`AGENTS.md`·`README.md` 는 가져오지 않는다 — 저장소 루트의 것과 충돌한다.
 
-## 2. 확인
+## 2. 검증 의존성 추가
+
+**이 한 줄을 반드시 넣는다.** 템플릿에는 Bean Validation 이 빠져 있는데, 이 저장소의 리뷰 규칙은 신뢰 경계 입력에 `@Valid` 와 `@field:` 검증을 **MUST** 로 요구한다.
+
+넣지 않으면 에이전트가 `@field:NotBlank` 를 쓰는 순간 `Unresolved reference 'validation'` 으로 컴파일이 깨진다.
+
+`core/core-api/build.gradle.kts` 의 `dependencies` 에 추가한다.
+
+```kotlin
+implementation("org.springframework.boot:spring-boot-starter-validation")
+```
+
+인증을 쓸 계획이면 `spring-boot-starter-security` 도 함께 넣는다 — 컨트롤러 규칙의 `@AuthenticationPrincipal` 이 그것을 전제한다. 인증이 없는 프로젝트면 넣지 않아도 된다.
+
+## 3. 확인
 
 ```bash
 ./gradlew ktlintCheck unitTest
@@ -41,7 +55,7 @@ rm -rf /tmp/tpl
 | `restDocsTest` | API 문서 생성 (에이전트는 안 돌린다) |
 | `:core:core-api:bootJar` | 배포 이미지 빌드 |
 
-## 3. 커밋해서 올리기
+## 4. 커밋해서 올리기
 
 **에이전트는 push 된 코드만 본다.** 로컬에서 만든 뼈대는 올리기 전까지 에이전트에게 존재하지 않는다 — 첫 구축을 지시하기 전에 반드시 올린다.
 
@@ -55,7 +69,7 @@ git push
 
 `api` 노드는 시작할 때 `backend/settings.gradle.kts` 가 있는지 확인하고, 없으면 구조를 지어내지 않고 보고 후 중단한다.
 
-## 4. 실행
+## 5. 실행
 
 ```bash
 ./gradlew :core:core-api:bootRun
@@ -63,7 +77,7 @@ git push
 
 기본 포트는 8080 이다. 프론트엔드는 `frontend/.env` 로 이 주소를 가리킨다 — 서로 읽지 않는다.
 
-## 5. 새 도메인을 추가할 때
+## 6. 새 도메인을 추가할 때
 
 파일을 어디에 두는지는 `.claude/skills/kotlin-module-layout/SKILL.md` 의 배치표를 본다. 만드는 순서는 위에서 아래로:
 
@@ -71,7 +85,7 @@ git push
 
 템플릿의 `Example*` 파일들이 각 레이어의 표준 형태다. 첫 도메인을 만든 뒤 지워도 된다.
 
-## 6. 응답 형식
+## 7. 응답 형식
 
 응답은 항상 `ApiResponse<T>` 로 감싼다. 새 엔드포인트를 만들면 저장소 루트 [CONTRACT.md](../CONTRACT.md) 에 계약을 기록한다 — 프론트가 그 문서를 보고 화면을 만든다.
 

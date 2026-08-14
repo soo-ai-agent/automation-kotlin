@@ -26,8 +26,8 @@ core/core-api/.../core/domain/todo/Todo.kt                      도메인 모델
 core/core-api/.../core/domain/todo/implement/TodoFinder.kt      구현 레이어
 core/core-api/.../core/domain/todo/implement/TodoAppender.kt
 core/core-api/.../core/domain/todo/TodoService.kt               도메인 서비스
-core/core-api/.../core/api/controller/v1/request/TodoCreateRequest.kt
-core/core-api/.../core/api/controller/v1/response/TodoResponse.kt
+core/core-api/.../core/api/controller/v1/request/TodoCreateRequestDto.kt
+core/core-api/.../core/api/controller/v1/response/TodoResponseDto.kt
 core/core-api/.../core/api/controller/v1/TodoController.kt      컨트롤러
 ```
 

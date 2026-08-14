@@ -24,18 +24,18 @@ class TodoController(
     private val todoService: TodoService,
 ) {
     @GetMapping
-    fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponse>> {
+    fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponseDto>> {
         val results: List<TodoResult> = todoService.list(member.id)
-        return ApiResponse.success(results.map(TodoResponse::from))
+        return ApiResponse.success(results.map(TodoResponseDto::from))
     }
 
     @PostMapping
     fun create(
         @AuthenticationPrincipal member: MemberPrincipal,
-        @Valid @RequestBody request: TodoCreateRequest,
-    ): ApiResponse<TodoResponse> {
+        @Valid @RequestBody request: TodoCreateRequestDto,
+    ): ApiResponse<TodoResponseDto> {
         val result: TodoResult = todoService.create(member.id, request.toCommand())
-        return ApiResponse.success(TodoResponse.from(result))
+        return ApiResponse.success(TodoResponseDto.from(result))
     }
 }
 ```
