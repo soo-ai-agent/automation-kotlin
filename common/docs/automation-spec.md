@@ -14,6 +14,8 @@
 | 진입점(그래프) | `.github/workflows/claude-agent.yml` | `workflow_dispatch` |
 | 노드 본체 | `.github/workflows/claude-node.yml` | `workflow_call` (진입점이 호출) |
 | 그래프 펼치기 | `.github/agent/graph.js` | 진입점의 `graph` 잡이 실행 |
+| 디스패처 로직 | `.github/agent/dispatch.py` | `claude-dispatch.yml` 이 `start`·`cleanup` 두 번 실행 |
+| 노드의 Claude 실행 | `.github/agent/run-claude.sh` | 노드가 기본 브랜치에서 꺼내 씀 |
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
 | 설정 | `.github/agent/settings.env` | — |
@@ -22,7 +24,7 @@
 
 라벨 규약: `claude`(착수 동의) · `claude-split`(분할 요청) · `claude-sent`(착수됨 마커) · `claude-made`(에이전트가 만든 하위 이슈 — **자동 머지 대상 판별 키**).
 
-**설정과 도구는 항상 기본 브랜치에서 읽는다.** `settings.env`·`nodes/*.md`·`stream.js`· `graph.js` 모두 `git show origin/$DEF:...` 로 꺼낸다.
+**설정과 도구는 항상 기본 브랜치에서 읽는다.** `settings.env`·`nodes/*.md`·`stream.js`·`run-claude.sh` 모두 `git show origin/$DEF:...` 로 꺼낸다 (`graph.js`·`dispatch.py` 는 기본 브랜치를 checkout 해서 쓴다).
 
 작업 브랜치에 파일이 없거나 에이전트가 그 파일을 고쳐도 잡이 깨지지 않아야 하고, PR 브랜치가 자기 리뷰 기준을 바꾸지 못해야 하기 때문이다.
 
