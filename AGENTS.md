@@ -19,6 +19,11 @@
 | 조회·저장 상세 구현 | `backend/.claude/skills/kotlin-implement` |
 | 테이블·상태 변경 | `backend/.claude/skills/kotlin-entity` + `kotlin-migration` |
 | 실패·예외 설계 | `backend/.claude/skills/kotlin-error` |
+| 로그인·권한·소유자 스코프 | `backend/.claude/skills/kotlin-auth` |
+| 외부 API 연동 | `backend/.claude/skills/kotlin-client` |
+| 설정값·비밀값 | `backend/.claude/skills/kotlin-config` |
+| 로그 남기기 | `backend/.claude/skills/kotlin-logging` |
+| API 문서(REST Docs) | `backend/.claude/skills/kotlin-api-docs` |
 | 쿼리 | `backend/.claude/skills/kotlin-repository` |
 | 테스트 (모든 기능 작업에 동반) | `backend/.claude/skills/kotlin-test` |
 | 프론트엔드 | `frontend/.claude/skills/frontend-react/SKILL.md` + `chapters.md` 해당 장, `frontend/README.md` |

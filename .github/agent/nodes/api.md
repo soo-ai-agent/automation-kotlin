@@ -10,6 +10,8 @@
 
 - 새 동작마다 유닛 테스트를 같은 변경에 포함한다. `cd backend && ./gradlew ktlintCheck unitTest` 가 통과해야 끝난 것이다.
 
+- 외부(프론트 아닌 곳)가 쓰는 API 면 `kotlin-api-docs` 대로 REST Docs 문서 테스트도 함께 만든다. 내부에서만 쓰면 `CONTRACT.md` 로 충분하다.
+
 - 마지막에 저장소 루트 `CONTRACT.md` 에 이번에 만든 엔드포인트를 적는다: 메서드·경로·요청 필드·응답 필드와 타입·nullable·상태코드. 응답은 `ApiResponse<T>` 로 감싸지므로 `data` 안쪽의 모양을 적는다.
 
   다음 노드가 이 문서를 보고 프론트를 만든다.
