@@ -86,11 +86,28 @@ jobs:
           CLAUDE_GRAPH="${IN_GRAPH:-$CLAUDE_GRAPH}" CLAUDE_NODE="$IN_NODE" \
             node .github/agent/graph.js
 
+  # ── 단계 잡 s1..s4 ────────────────────────────────────────
+  #
+  # 아래 네 잡은 **세 줄만 다르고 나머지 18줄은 완전히 같다.** 다른 세 줄은 이것뿐이다:
+  #
+  #   needs:  앞 단계를 기다린다 (s1 은 graph 만, s2 는 s1, s3 은 s2, s4 는 s3)
+  #   if:     자기 단계의 매트릭스가 비어 있으면 통째로 건너뛴다
+  #   include: 자기 단계의 매트릭스를 읽는다
+  #
+  # 이렇게 베껴 쓴 이유는 GitHub Actions 가 잡을 실행 중에 만들어 낼 수 없고,
+  # 워크플로 YAML 에서는 앵커(&·*)도 못 쓰기 때문이다. 단계마다 미리 선언하는 수밖에 없다.
+  # 그래서 순차 단계가 최대 4개로 제한된다 (graph.js 의 MAX_STAGES).
+  #
+  # **`with:` 를 고칠 때는 네 잡을 모두 같이 고쳐야 한다.** 하나만 고치면 그 단계만 다르게 돈다.
+  # 단계를 늘리려면 같은 모양의 잡을 하나 더 붙이고 graph.js 의 MAX_STAGES 를 함께 올린다.
+  #
+  # fail-fast: false 는 병렬 노드가 서로를 중도 취소하지 않게 한다 — 넷 다 필요하다.
+
   s1:
     needs: graph
     if: needs.graph.outputs.s1 != '[]'
     strategy:
-      fail-fast: false # 병렬 노드는 서로 끝까지 가게 둔다
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.graph.outputs.s1) }}
     uses: ./.github/workflows/claude-node.yml
