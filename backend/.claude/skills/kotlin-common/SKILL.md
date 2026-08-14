@@ -36,7 +36,7 @@ fun findActive(memberId: Long) = repository.findById(memberId).get()!!
 
 - 도메인 모델·DTO·Result 는 `data class` + **`val` 만** 쓴다. `var` 금지.
 
-- 엔티티의 변경 가능한 상태는 `var` 이되 **`private set`** 이며, 변경은 엔티티 행위 메서드로만 한다 (kotlin-entity 참고).
+- 엔티티의 변경 가능한 상태는 `var` 이되 **`protected set`** 이며, 변경은 엔티티 행위 메서드로만 한다 (kotlin-entity 참고).
 
 - 컬렉션은 `List`/`Set`(읽기 전용)으로 노출한다. `MutableList` 를 반환하거나 프로퍼티로 공개하지 않는다.
 

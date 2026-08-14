@@ -14,7 +14,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 계층별 규칙이다. 스택과
 | [kotlin-dto](kotlin-dto/SKILL.md) | 요청·응답 형태 변경 | 검증 애너테이션, 도메인 모델과의 변환 |
 | [kotlin-domain-service](kotlin-domain-service/SKILL.md) | 업무 흐름·트랜잭션 | 유스케이스 조립, `@Transactional` 경계 |
 | [kotlin-implement](kotlin-implement/SKILL.md) | 조회·저장 상세 구현 | `Finder`·`Appender` 재사용 단위, 엔티티↔도메인 변환 |
-| [kotlin-entity](kotlin-entity/SKILL.md) | 테이블·상태 변경 | `@Entity`, `private set` + 행위 메서드, 애그리게이트 |
+| [kotlin-entity](kotlin-entity/SKILL.md) | 테이블·상태 변경 | `@Entity`, `protected set` + 행위 메서드, 애그리게이트 |
 | [kotlin-repository](kotlin-repository/SKILL.md) | 쿼리 추가, 느린 쿼리 | 쿼리 메서드 이름, 페이징, fetch join 과 N+1 |
 | [kotlin-test](kotlin-test/SKILL.md) | **기능 작업마다 함께** | 한 메서드 = 한 기능, MockK 범위, 계층별 테스트 대상 |
 

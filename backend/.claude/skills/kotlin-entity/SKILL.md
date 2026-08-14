@@ -1,6 +1,6 @@
 ---
 name: kotlin-entity
-description: JPA 엔티티 작성과 리뷰 규칙. storage db-core 의 @Entity 클래스, BaseEntity 상속, private set 과 행위 메서드, 애그리게이트 경계, 연관관계 페치 전략을 다룰 때 사용한다. "테이블 추가", "엔티티 상태 변경", "컬럼 추가" 요청에도 사용할 것.
+description: JPA 엔티티 작성과 리뷰 규칙. storage db-core 의 @Entity 클래스, BaseEntity 상속, protected set 과 행위 메서드, 애그리게이트 경계, 연관관계 페치 전략을 다룰 때 사용한다. "테이블 추가", "엔티티 상태 변경", "컬럼 추가" 요청에도 사용할 것.
 ---
 
 # Entity
@@ -16,14 +16,18 @@ class TodoEntity(
     @Column(name = "member_id", nullable = false)
     val memberId: Long,
 
+    // 바뀌는 값은 생성자에서 프로퍼티로 선언하지 않는다. 아래 본문에서 선언해야 setter 를 좁힐 수 있다
+    title: String,
+    done: Boolean = false,
+) : BaseEntity() {
+
     @Column(name = "title", nullable = false, length = 200)
-    var title: String,
-        private set,
+    var title: String = title
+        protected set
 
     @Column(name = "done", nullable = false)
-    var done: Boolean = false,
-        private set,
-) : BaseEntity() {
+    var done: Boolean = done
+        protected set
 
     fun rename(newTitle: String) {
         require(newTitle.isNotBlank()) { "제목은 비어 있을 수 없습니다" }
@@ -36,7 +40,15 @@ class TodoEntity(
 }
 ```
 
-- 바뀌지 않는 값은 `val`. 바뀌는 값만 `var` + **`private set`**.
+- 바뀌지 않는 값은 `val`. 바뀌는 값만 `var` + **`protected set`**.
+
+- **setter 를 좁히려면 프로퍼티를 클래스 본문에 선언해야 한다.** 생성자 파라미터에는 접근자를 붙일 수 없다 (`private set,` 은 문법 오류다). 생성자로는 값만 받고, 본문에서 `var x: T = x` 로 받아 선언한다.
+
+- **`private set` 이 아니라 `protected set` 이다.** `storage/db-core/build.gradle.kts` 의 `allOpen` 이 `@Entity`·`@MappedSuperclass`·`@Embeddable` 을 `open` 으로 만드는데, 코틀린은 `open` 프로퍼티에 `private set` 을 금지한다 (`Private setters for open properties are prohibited`).
+
+  엔티티가 `open` 이어야 Hibernate 가 지연 로딩 프록시를 만들 수 있으므로 `allOpen` 은 끄지 않는다.
+
+  `protected set` 으로도 목적은 그대로 달성된다 — 다른 클래스에서 `entity.done = true` 는 컴파일되지 않는다.
 
 - **공개 세터를 만들지 않는다.** 밖에서 `entity.done = true` 가 가능하면 위반이다.
 
@@ -77,7 +89,9 @@ fun addItem(product: Long, quantity: Int) {
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
-| 공개 세터(`var` 에 `private set` 없음) | 예측 불가능한 상태 변경 | Critical |
+| 공개 세터(`var` 에 `protected set` 없음) | 예측 불가능한 상태 변경 | Critical |
+| 생성자 파라미터에 붙인 `private set`·`protected set` | 문법 오류 — 컴파일되지 않는다 | Critical |
+| 엔티티 프로퍼티에 `private set` | `open` 프로퍼티라 금지된다 — `protected set` 을 쓴다 | Critical |
 | 밖에서 프로퍼티 직접 대입 | 불변식 우회 | Critical |
 | 자식 엔티티를 루트 밖에서 변경 | 애그리게이트 경계 붕괴 | Critical |
 | `MutableList` 를 그대로 노출 | 내부 컬렉션 변형 | Critical |
@@ -88,7 +102,7 @@ fun addItem(product: Long, quantity: Int) {
 
 ## 체크리스트
 
-- [ ] 모든 변경 가능 프로퍼티가 `private set` 인가
+- [ ] 모든 변경 가능 프로퍼티가 **클래스 본문에 선언**되고 `protected set` 인가
 
 - [ ] 상태 변경이 규칙을 가진 행위 메서드로만 일어나는가
 

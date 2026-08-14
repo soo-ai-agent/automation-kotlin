@@ -42,7 +42,7 @@ jobs:
         if: hashFiles('backend/settings.gradle.kts') != ''
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
 
       - name: 백엔드 빌드·푸시
         run: |

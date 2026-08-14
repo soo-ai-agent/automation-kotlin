@@ -203,7 +203,7 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | `CLAUDE_GRAPH` | `code` | 노드 구성 (`>` 순차 · `+` 병렬 · `?` 수습) |
 | `CLAUDE_MAX_ROUNDS` | `3` | 재수정 횟수 |
 | `CLAUDE_RUNNER` | `ubuntu-latest` | 잡이 도는 러너 (self-hosted 등) |
-| `CLAUDE_JAVA_VERSION` · `CLAUDE_NODE_VERSION` | `21` · `22` | 런타임 버전 |
+| `CLAUDE_JAVA_VERSION` · `CLAUDE_NODE_VERSION` | `25` · `22` | 런타임 버전 |
 | `CLAUDE_REVIEW_BAR` | — | 머지를 막는 기준 |
 | `CLAUDE_DIFF_LIMIT_BYTES` | `100000` | 리뷰가 한 번에 읽는 diff 상한 |
 
