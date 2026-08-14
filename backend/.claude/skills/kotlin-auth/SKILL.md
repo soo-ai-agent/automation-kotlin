@@ -7,6 +7,43 @@ description: 인증과 인가 규칙. 인증 정보를 컨트롤러에서만 꺼
 
 **전제:** 템플릿에는 Spring Security 가 없다. 인증을 쓰려면 `spring-boot-starter-security` 를 먼저 넣는다 (`backend/README.md` 2절).
 
+## 넣는 순간 기존 엔드포인트가 잠긴다
+
+의존성만 추가하고 설정을 안 하면 스프링이 **모든 경로에 인증을 요구한다.** 실제로 확인한 결과다.
+
+```
+GET /health              -> 401
+GET /actuator/prometheus -> 401
+```
+
+**헬스체크가 401 이면 배포된 컨테이너가 재시작을 반복하고, Prometheus 수집도 끊긴다.** 그래서 의존성을 넣는 순간 `SecurityFilterChain` 을 함께 만들어야 한다.
+
+```kotlin
+// core/api/config/SecurityConfig.kt
+@Configuration
+class SecurityConfig {
+    @Bean
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .authorizeHttpRequests {
+                it.requestMatchers("/health", "/actuator/**").permitAll()
+                    .anyRequest().authenticated()
+            }
+            .csrf { it.disable() }   // 토큰 인증이라 CSRF 가 필요 없을 때만
+        return http.build()
+    }
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+}
+```
+
+- **열어 줄 경로를 먼저 적고 `anyRequest().authenticated()` 로 닫는다.** 반대로 하면 새 엔드포인트가 기본으로 열린 채 배포된다.
+
+- `/actuator/**` 를 통째로 여는 것은 지금 노출된 것이 `prometheus` 하나이기 때문이다. 액추에이터 엔드포인트를 늘릴 때 다시 본다 (`kotlin-config`).
+
+- `csrf` 를 끄는 것은 **쿠키 세션이 아닐 때만**이다. 쿠키로 인증한다면 끄지 않는다.
+
 ## 인증(누구인가)과 인가(무엇을 할 수 있나)는 다른 자리에서 다룬다
 
 | | 무엇을 묻나 | 어디서 |
@@ -85,6 +122,8 @@ fun findByIdAndMemberId(id: Long, memberId: Long): TodoEntity?
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
+| security 의존성만 넣고 `SecurityFilterChain` 없음 | `/health`·`/actuator` 가 401 — 배포 컨테이너가 재시작 반복 | Critical |
+| `anyRequest().authenticated()` 없이 경로별로만 허용 | 새 엔드포인트가 기본으로 열린 채 배포됨 | Critical |
 | 사용자 식별자를 요청 파라미터·본문에서 받음 | 남의 데이터 접근 통로 | Critical |
 | 소유자 조건 없는 조회·수정·삭제 쿼리 | 남의 데이터 노출·파손 | Critical |
 | 소유자 스코프 자원에서 403 과 404 를 구분해 응답 | 존재 여부 유출 | Critical |
@@ -97,6 +136,8 @@ fun findByIdAndMemberId(id: Long, memberId: Long): TodoEntity?
 | 만료 없는 토큰 | 유출 시 회수 불가 | Important |
 
 ## 체크리스트
+
+- [ ] `SecurityFilterChain` 에서 `/health`·`/actuator/**` 를 열고 나머지를 닫았는가
 
 - [ ] 사용자 식별자를 인증 정보에서만 가져오는가 (요청 값이 아닌가)
 

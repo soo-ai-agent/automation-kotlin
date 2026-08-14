@@ -7,9 +7,13 @@ description: 구현 레이어 작성과 리뷰 규칙. domain/<도메인>/implem
 
 **자리:** `core/core-api/.../core/domain/<도메인>/implement/`
 
-## 역할
+## 역할 — 재사용 단위로 쪼갠다
 
 도메인 서비스가 조립할 **재사용 가능한 단위**다. 이름이 곧 역할이다.
+
+**이 레이어는 Spring 템플릿에 없다.** 이 저장소가 추가한 것이고, 목적은 둘이다 — 여러 유스케이스가 같은 조회·저장을 재사용하게 하는 것, 그리고 **엔티티를 도메인 모델로 바꿔 `storage` 밖으로 새지 않게** 막는 것 (`kotlin-module-layout`).
+
+한 클래스가 한 가지 일만 한다. `TodoService` 하나에 다 넣지 않고 `TodoFinder`·`TodoAppender` 로 쪼개는 이유다.
 
 | 이름 | 하는 일 |
 |---|---|

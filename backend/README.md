@@ -39,6 +39,10 @@ implementation("org.springframework.boot:spring-boot-starter-validation")
 
 인증을 쓸 계획이면 `spring-boot-starter-security` 도 함께 넣는다 — 컨트롤러 규칙의 `@AuthenticationPrincipal` 이 그것을 전제한다. 인증이 없는 프로젝트면 넣지 않아도 된다.
 
+**넣는다면 `SecurityFilterChain` 을 반드시 같이 만든다.** 의존성만 넣으면 모든 경로가 인증을 요구해 `/health` 와 `/actuator/prometheus` 가 401 이 되고, 배포된 컨테이너가 헬스체크 실패로 재시작을 반복한다.
+
+설정 코드는 `.claude/skills/kotlin-auth/SKILL.md` 에 있다.
+
 ### 검증 실패 응답 핸들러
 
 의존성만 넣으면 `@Valid` 가 걸리기는 하는데, 템플릿 `ApiControllerAdvice` 에는 검증 실패 예외 핸들러가 없다.
