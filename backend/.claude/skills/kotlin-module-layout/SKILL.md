@@ -16,6 +16,14 @@ description: 멀티모듈 배치와 레이어 의존 방향 규칙. 새 파일�
 | `support:logging` `support:monitoring` | 횡단 관심사 |
 | `tests:api-docs` | API 문서 테스트 |
 
+## 템플릿과 다른 점 — 여기가 성장형이다
+
+Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)이 동봉한 `ExampleService.kt` 는 `core/domain/` 평면에 있고 구현 레이어도 없다. **그것을 따라 하지 않는다.**
+
+템플릿 README 가 직접 밝히고 있다 — "This is not the best structure... **your structure must grow too**". 도메인 서브패키지와 구현 레이어가 그 성장형이고, 이 문서의 배치표가 이 저장소의 기준이다.
+
+동봉된 `Example*` 파일은 첫 도메인을 만든 뒤 지운다. 그때까지는 평면에 있어도 지적하지 않는다.
+
 ## 새 도메인 하나를 추가할 때의 파일 자리
 
 ```
@@ -67,7 +75,7 @@ Controller  →  Domain Service  →  Implement  →  Repository / Client
 | 하위 레이어가 상위 타입을 import | 역방향 의존 | Critical |
 | 다른 도메인의 구현 레이어 직접 호출 | 도메인 경계 침범 | Critical |
 | 도메인 모델에 JPA·Web 애너테이션 | 프레임워크 침투 | Important |
-| 도메인 디렉터리 없이 `core/domain` 평면에 파일 누적 | 경계 흐려짐 | Important |
+| 도메인 디렉터리 없이 `core/domain` 평면에 파일 누적 (템플릿 동봉 `Example*` 은 제외) | 경계 흐려짐 | Important |
 
 ## 체크리스트
 

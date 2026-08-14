@@ -39,6 +39,36 @@ implementation("org.springframework.boot:spring-boot-starter-validation")
 
 인증을 쓸 계획이면 `spring-boot-starter-security` 도 함께 넣는다 — 컨트롤러 규칙의 `@AuthenticationPrincipal` 이 그것을 전제한다. 인증이 없는 프로젝트면 넣지 않아도 된다.
 
+### 검증 실패 응답 핸들러
+
+의존성만 넣으면 `@Valid` 가 걸리기는 하는데, 템플릿 `ApiControllerAdvice` 에는 검증 실패 예외 핸들러가 없다.
+
+그래서 400 이 `ApiResponse` 형태가 아닌 스프링 기본 응답으로 나가고, 프론트의 `apiClient` 가 래퍼를 벗기지 못한다. 아래 셋을 함께 넣는다.
+
+```kotlin
+// core/support/error/ErrorCode.kt — E400 추가
+enum class ErrorCode {
+    E400,
+    E500,
+}
+
+// core/support/error/ErrorType.kt — VALIDATION_ERROR 추가
+VALIDATION_ERROR(HttpStatus.BAD_REQUEST, ErrorCode.E400, "요청 값이 올바르지 않습니다.", LogLevel.WARN),
+
+// core/api/controller/ApiControllerAdvice.kt — 포괄 Exception 핸들러보다 위에 둔다
+@ExceptionHandler(MethodArgumentNotValidException::class)
+fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Any>> {
+    val errors: MutableMap<String, String> = mutableMapOf()
+    for (fieldError in e.bindingResult.fieldErrors) {
+        errors[fieldError.field] = fieldError.defaultMessage ?: "올바르지 않은 값입니다"
+    }
+    log.warn("Validation failed : {}", errors)
+    return ResponseEntity(ApiResponse.error(ErrorType.VALIDATION_ERROR, errors), ErrorType.VALIDATION_ERROR.status)
+}
+```
+
+이러면 검증 실패가 `{"result":"ERROR","data":null,"error":{"code":"E400","message":"...","data":{"title":"제목은 필수입니다"}}}` 로 나가고, 필드별 메시지가 `error.data` 에 담긴다.
+
 ## 3. 확인
 
 ```bash
