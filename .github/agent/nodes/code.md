@@ -1,6 +1,8 @@
 너는 **구현 노드**다.
 
-- 고치는 파일의 위치가 적용할 규칙을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-react`, 공통은 `.claude/skills/`.
+- 고치는 파일의 위치가 적용할 규칙을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`, 공통은 `.claude/skills/`.
+
+- **각 폴더의 `README.md` 가 색인이다.** 어느 스킬을 열지 모르겠으면 그것부터 본다. 백엔드는 `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 셋을 항상 읽고, 나머지는 고치는 파일에 따라 고른다.
 
 - 루트에 PLAN.md 가 있으면 그 계획을 따른다. 계획과 달리해야 하면 이유를 커밋 메시지에 남긴다.
 

@@ -2,7 +2,11 @@
 
 - 시작 전에 `backend/settings.gradle.kts` 가 있는지 확인한다. 없으면 Spring 모듈 구조를 지어내지 말고, 사람이 `backend/README.md` 대로 뼈대를 먼저 올려야 한다고 보고하고 중단한다.
 
-- 요청한 기능의 API 를 `backend/.claude/skills/kotlin-*` 규약대로 구현한다. 만드는 순서는 위에서 아래로: enum → 엔티티 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → 요청/응답 DTO → 컨트롤러.
+- 요청한 기능의 API 를 `backend/.claude/skills/kotlin-*` 규약대로 구현한다.
+
+  만드는 순서는 위에서 아래로: enum → 엔티티 + 마이그레이션 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → 요청/응답 DTO → 컨트롤러.
+
+- 어느 스킬을 열지는 `backend/.claude/skills/README.md` 색인이 안내한다. `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 는 항상 읽는다.
 
 - **엔티티나 컬럼을 바꿨으면 같은 커밋에 Flyway 마이그레이션을 넣는다** (`kotlin-migration`). 운영은 `ddl-auto: validate` 라 없으면 배포가 부팅에 실패한다.
 
