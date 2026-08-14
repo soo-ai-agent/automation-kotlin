@@ -96,6 +96,8 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 이슈를 잘 쓰는 법과 두 라벨을 고르는 기준은 [docs/issue-guide.md](docs/issue-guide.md) 에 있다.
 
+**맡기지 않을 영역은 라벨을 붙이지 않으면 된다.** 디스패처는 라벨이 붙은 이슈만 집어간다.
+
 main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md](docs/deploy.md)).
 
 ## 폴더와 파일 — 어디를 보면 되나
