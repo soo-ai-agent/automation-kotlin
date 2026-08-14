@@ -18,6 +18,21 @@ npm run build    # 타입 검사 + 빌드 — 이게 통과해야 한다
 
 알림은 `src/lib/notify.ts` 하나를 거친다. 지금은 `window.alert` 이고, 알림 UI 를 도입하면 이 파일만 바꾼다.
 
+## E2E 테스트 (처음 한 번)
+
+`e2e` 노드가 사용자 흐름 테스트를 `frontend/e2e/` 에 쓴다. Playwright 를 한 번만 설치해 두면 된다.
+
+```bash
+npm install -D @playwright/test
+npx playwright install chromium
+```
+
+`package.json` 의 `scripts` 에 `"e2e": "playwright test"` 를 넣고, `playwright.config.ts` 를 만든다. 설정 내용과 작성 규칙은 `.claude/skills/frontend-e2e/SKILL.md` 에 있다.
+
+```bash
+npm run e2e
+```
+
 ## 백엔드와의 계약
 
 `web` 노드는 루트 [CONTRACT.md](../CONTRACT.md) 와 `backend/` 의 실제 응답 DTO 코드를 읽고 화면을 만든다.

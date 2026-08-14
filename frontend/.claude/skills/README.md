@@ -2,12 +2,13 @@
 
 > **이 폴더는 에이전트가 읽습니다.** `frontend/` 아래 파일을 고칠 때 자동으로 적용됩니다.
 
-React + TypeScript 프론트엔드 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
+React + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
 
 | 파일 | 무엇이 들어 있나 | 언제 |
 |---|---|---|
 | [frontend-react/SKILL.md](frontend-react/SKILL.md) | 규칙 요약 — 코드 스타일, 적발 신호, 체크리스트 | 프론트 작업·리뷰 전부 |
 | [frontend-react/chapters.md](frontend-react/chapters.md) | 0~16장 전문과 ❌/✅ 사례 | SKILL.md 만으로 판단이 안 설 때 해당 장만 |
+| [frontend-e2e/SKILL.md](frontend-e2e/SKILL.md) | Playwright E2E — 선택자 정책, 대기, 다이얼로그 함정 | `e2e` 노드, 사용자 흐름 테스트 |
 
 ## 핵심 다섯 줄
 

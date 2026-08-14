@@ -4,7 +4,7 @@
 
 **지금 이 폴더는 거의 비어 있다.** 에이전트가 따를 코딩 규칙(`.claude/skills/`)과 배포용 `Dockerfile` 만 있고, 실제 Spring 모듈은 없다.
 
-아래 1~4 를 따라 뼈대를 채우고 커밋해야 `api` 노드가 백엔드를 만들 수 있다. 한 번만 하면 된다.
+아래 1~5 를 따라 뼈대를 채우고 커밋해야 `api` 노드가 백엔드를 만들 수 있다. 한 번만 하면 된다.
 
 **모든 명령은 이 폴더 안에서 실행한다.** JDK 25 가 필요하다 — 템플릿의 `gradle.properties` 가 `javaVersion=25` 로 툴체인을 요구한다.
 
@@ -43,33 +43,35 @@ implementation("org.springframework.boot:spring-boot-starter-validation")
 
 의존성만 넣으면 `@Valid` 가 걸리기는 하는데, 템플릿 `ApiControllerAdvice` 에는 검증 실패 예외 핸들러가 없다.
 
-그래서 400 이 `ApiResponse` 형태가 아닌 스프링 기본 응답으로 나가고, 프론트의 `apiClient` 가 래퍼를 벗기지 못한다. 아래 셋을 함께 넣는다.
+그래서 400 이 `ApiResponse` 형태가 아닌 스프링 기본 응답으로 나가고, 프론트의 `apiClient` 가 래퍼를 벗기지 못한다.
+
+`ErrorCode.E400` · `ErrorType.VALIDATION_ERROR` · `MethodArgumentNotValidException` 핸들러 셋을 넣는다.
+
+복사할 코드는 `.claude/skills/kotlin-error/SKILL.md` 의 "검증 실패 핸들러" 절에 있다.
+
+## 3. 마이그레이션 도구 추가
+
+운영 프로파일은 `ddl-auto: validate` 로 돈다. **엔티티와 실제 테이블이 다르면 애플리케이션이 뜨지 않는다.**
+
+그런데 템플릿에는 스키마를 바꿀 수단이 없다. Flyway 를 넣는다.
 
 ```kotlin
-// core/support/error/ErrorCode.kt — E400 추가
-enum class ErrorCode {
-    E400,
-    E500,
-}
-
-// core/support/error/ErrorType.kt — VALIDATION_ERROR 추가
-VALIDATION_ERROR(HttpStatus.BAD_REQUEST, ErrorCode.E400, "요청 값이 올바르지 않습니다.", LogLevel.WARN),
-
-// core/api/controller/ApiControllerAdvice.kt — 포괄 Exception 핸들러보다 위에 둔다
-@ExceptionHandler(MethodArgumentNotValidException::class)
-fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Any>> {
-    val errors: MutableMap<String, String> = mutableMapOf()
-    for (fieldError in e.bindingResult.fieldErrors) {
-        errors[fieldError.field] = fieldError.defaultMessage ?: "올바르지 않은 값입니다"
-    }
-    log.warn("Validation failed : {}", errors)
-    return ResponseEntity(ApiResponse.error(ErrorType.VALIDATION_ERROR, errors), ErrorType.VALIDATION_ERROR.status)
-}
+// storage/db-core/build.gradle.kts
+implementation("org.flywaydb:flyway-core")
+runtimeOnly("org.flywaydb:flyway-mysql")
 ```
 
-이러면 검증 실패가 `{"result":"ERROR","data":null,"error":{"code":"E400","message":"...","data":{"title":"제목은 필수입니다"}}}` 로 나가고, 필드별 메시지가 `error.data` 에 담긴다.
+`local` 프로파일은 H2 메모리 DB 에 `ddl-auto: create` 라 마이그레이션을 돌릴 필요가 없다. `storage/db-core/src/main/resources/db-core.yml` 의 `local` 절에 한 줄을 더한다.
 
-## 3. 확인
+```yaml
+spring:
+  flyway:
+    enabled: false
+```
+
+마이그레이션 파일은 `storage/db-core/src/main/resources/db/migration/` 에 둔다. 파일 이름과 작성 규칙은 `.claude/skills/kotlin-migration/SKILL.md` 에 있다.
+
+## 4. 확인
 
 ```bash
 ./gradlew ktlintCheck unitTest
@@ -85,7 +87,7 @@ fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEn
 | `restDocsTest` | API 문서 생성 (에이전트는 안 돌린다) |
 | `:core:core-api:bootJar` | 배포 이미지 빌드 |
 
-## 4. 커밋해서 올리기
+## 5. 커밋해서 올리기
 
 **에이전트는 push 된 코드만 본다.** 로컬에서 만든 뼈대는 올리기 전까지 에이전트에게 존재하지 않는다 — 첫 구축을 지시하기 전에 반드시 올린다.
 
@@ -99,7 +101,7 @@ git push
 
 `api` 노드는 시작할 때 `backend/settings.gradle.kts` 가 있는지 확인하고, 없으면 구조를 지어내지 않고 보고 후 중단한다.
 
-## 5. 실행
+## 6. 실행
 
 ```bash
 ./gradlew :core:core-api:bootRun
@@ -107,15 +109,15 @@ git push
 
 기본 포트는 8080 이다. 프론트엔드는 `frontend/.env` 로 이 주소를 가리킨다 — 서로 읽지 않는다.
 
-## 6. 새 도메인을 추가할 때
+## 7. 새 도메인을 추가할 때
 
 파일을 어디에 두는지는 `.claude/skills/kotlin-module-layout/SKILL.md` 의 배치표를 본다. 만드는 순서는 위에서 아래로:
 
-    core-enum → 엔티티 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → DTO → 컨트롤러
+    core-enum → 엔티티 + 마이그레이션 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → DTO → 컨트롤러
 
 템플릿의 `Example*` 파일들이 각 레이어의 표준 형태다. 첫 도메인을 만든 뒤 지워도 된다.
 
-## 7. 응답 형식
+## 8. 응답 형식
 
 응답은 항상 `ApiResponse<T>` 로 감싼다. 새 엔드포인트를 만들면 저장소 루트 [CONTRACT.md](../CONTRACT.md) 에 계약을 기록한다 — 프론트가 그 문서를 보고 화면을 만든다.
 

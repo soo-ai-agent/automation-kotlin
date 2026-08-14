@@ -1,0 +1,158 @@
+---
+name: frontend-e2e
+description: Playwright E2E 테스트 작성과 리뷰 규칙. frontend/e2e 의 spec 파일 자리와 이름, 선택자 정책(getByRole 우선), 임의 대기 금지, window.alert·confirm 다이얼로그 처리, 백엔드를 띄울지 목킹할지 판단을 다룬다. e2e 노드가 항상 사용하고, "E2E 추가", "사용자 흐름 테스트" 요청에도 사용할 것.
+---
+
+# E2E 테스트 (Playwright)
+
+**자리:** `frontend/e2e/<도메인>.spec.ts`
+
+## 무엇을 하는 테스트인가
+
+유닛 테스트가 함수 하나를 보는 것이라면, E2E 는 **브라우저를 실제로 띄워 사람이 하는 것과 똑같이 클릭하고 입력해 본다.**
+
+그래서 "목록이 보이고 → 삭제를 누르고 → 확인을 눌렀더니 → 목록에서 사라졌다" 같은 **화면과 서버를 잇는 흐름**을 확인한다.
+
+한 파일에 한 도메인, 한 `test()` 에 한 흐름을 담는다. 흐름 하나가 길면 나누지 말고 그대로 둔다 — 중간을 잘라 놓으면 사용자 관점이 사라진다.
+
+## 처음 한 번 — 설치와 설정
+
+사람이 프론트를 세팅할 때 한 번만 한다 (`frontend/README.md` 참고). 이미 되어 있으면 넘어간다.
+
+```bash
+cd frontend
+npm install -D @playwright/test
+npx playwright install chromium
+```
+
+```json
+// package.json 의 scripts 에 추가
+"e2e": "playwright test",
+"e2e:ui": "playwright test --ui"
+```
+
+```ts
+// frontend/playwright.config.ts
+import {defineConfig} from "@playwright/test";
+
+export default defineConfig({
+    testDir: "./e2e",
+    use: {
+        baseURL: "http://localhost:5173",
+        trace: "on-first-retry",   // 실패했을 때만 추적 파일을 남긴다
+    },
+    // 테스트를 돌리면 개발 서버를 알아서 띄우고, 끝나면 내린다
+    webServer: {
+        command: "npm run dev",
+        url: "http://localhost:5173",
+        reuseExistingServer: true,
+    },
+});
+```
+
+`.gitignore` 에 `frontend/test-results/`, `frontend/playwright-report/` 를 넣는다.
+
+## 백엔드를 띄울까, 가짜 응답을 줄까
+
+**둘 다 맞다. 무엇을 확인하려는지에 따라 고른다.**
+
+| 확인하려는 것 | 방법 |
+|---|---|
+| 화면 흐름·표시·분기 (대부분) | `page.route` 로 API 응답을 가로채 가짜로 준다 |
+| 프론트와 백엔드가 실제로 맞물리는지 | 백엔드를 띄우고 진짜로 호출한다 |
+
+가짜 응답을 쓰면 **백엔드 없이도 CI 에서 돌아가고, 실패했을 때 원인이 프론트라는 것이 분명해진다.** 기본으로 이쪽을 쓴다.
+
+```ts
+await page.route("**/api/v1/users", async (route) => {
+    await route.fulfill({
+        json: {result: "SUCCESS", data: [{id: 1, name: "홍길동", email: "a@b.c", createdAt: "2026-08-14T10:00:00", lastLoginAt: null}], error: null},
+    });
+});
+```
+
+**가짜 응답도 `ApiResponse` 껍데기(`{result, data, error}`)를 그대로 지켜야 한다.** 껍데기를 빼먹으면 `apiClient` 가 실패로 처리한다.
+
+필드 이름과 타입은 지어내지 말고 `CONTRACT.md` 와 백엔드 응답 DTO 에서 확인한다.
+
+백엔드를 실제로 띄울 수 없는 환경이면 **테스트 코드만 남기고 실행하지 못한 이유를 결과에 적는다.** 돌리지 않은 것을 통과했다고 적지 않는다.
+
+## 이 프로젝트의 함정 — alert 과 confirm
+
+`src/lib/notify.ts` 는 지금 `window.alert` 과 `window.confirm` 을 쓴다.
+
+**Playwright 는 네이티브 다이얼로그를 자동으로 닫아 버린다.** 그래서 아무것도 안 하면 `confirm` 이 항상 "취소"로 처리되어 **삭제 같은 흐름이 조용히 실패한다.**
+
+다이얼로그를 쓰는 흐름에서는 반드시 핸들러를 먼저 건다.
+
+```ts
+// 확인 창에서 '확인'을 누른다
+page.once("dialog", (dialog) => dialog.accept());
+await page.getByRole("button", {name: "삭제"}).click();
+
+// 알림 창의 문구를 확인하고 닫는다
+page.once("dialog", (dialog) => {
+    expect(dialog.message()).toContain("삭제했습니다");
+    return dialog.dismiss();
+});
+```
+
+`once` 를 쓴다. `on` 으로 걸면 다음 테스트까지 남는다.
+
+알림 UI 를 도입해 `notify.ts` 가 더 이상 네이티브 다이얼로그를 쓰지 않게 되면, 이 절은 필요 없어지고 일반 요소 확인으로 바뀐다.
+
+## 무엇으로 요소를 찾나
+
+**사람이 화면을 알아보는 방식대로 찾는다.** 그래야 마크업을 바꿔도 테스트가 안 깨지고, 접근성도 함께 검증된다.
+
+| 순위 | 방법 | 예 |
+|---|---|---|
+| 1 | 역할과 이름 | `page.getByRole("button", {name: "삭제"})` |
+| 2 | 라벨·플레이스홀더 | `page.getByLabel("이메일")` |
+| 3 | 보이는 텍스트 | `page.getByText("등록된 사용자가 없습니다")` |
+| 4 | 위 셋으로 안 될 때만 | `page.getByTestId("user-row")` + JSX 에 `data-testid` |
+
+**CSS 클래스·태그 구조로 찾지 않는다.** `page.locator(".btn-danger > span")` 같은 선택자는 스타일만 바꿔도 깨진다.
+
+## 기다리는 법 — 임의 대기 금지
+
+```ts
+// ❌ 느린 환경에서 깨지고, 빠른 환경에서 시간만 버린다
+await page.waitForTimeout(2000);
+
+// ✅ 조건이 만족될 때까지 알아서 기다린다
+await expect(page.getByText("홍길동")).toBeVisible();
+await expect(page.getByRole("row")).toHaveCount(3);
+```
+
+Playwright 의 `expect` 는 조건이 맞을 때까지 자동으로 재시도한다. `waitForTimeout` 은 **디버깅할 때만** 쓰고 커밋하지 않는다.
+
+## 적발 신호
+
+| 신호 | 문제 | 심각도 |
+|---|---|---|
+| `waitForTimeout` 으로 대기 | 환경에 따라 깨지는 불안정한 테스트 | Critical |
+| `window.confirm` 을 쓰는 흐름에 `page.on("dialog")` 없음 | 항상 취소로 처리돼 테스트가 조용히 무의미해짐 | Critical |
+| 가짜 응답에 `ApiResponse` 껍데기(`{result, data, error}`) 누락 | `apiClient` 가 실패로 처리 | Critical |
+| 실행하지 않은 테스트를 통과했다고 보고 | 사실과 다른 보고 | Critical |
+| CSS 클래스·태그 구조 선택자 | 스타일 변경만으로 깨짐 | Important |
+| 필드 이름·타입을 `CONTRACT.md` 확인 없이 지어냄 | 실제 응답과 어긋난 테스트 | Important |
+| 한 `test()` 에 관련 없는 흐름 여러 개 | 실패 원인 파악 어려움 | Important |
+| `page.on("dialog")` 를 `once` 없이 사용 | 다음 테스트에 핸들러가 새어 나감 | Important |
+| 테스트끼리 실행 순서에 의존 | 병렬 실행에서 깨짐 | Important |
+
+## 체크리스트
+
+- [ ] 한 `test()` 가 사용자 흐름 하나를 처음부터 끝까지 담는가
+
+- [ ] 요소를 역할·라벨·텍스트로 찾는가 (CSS 선택자가 아닌가)
+
+- [ ] `waitForTimeout` 없이 `expect` 의 자동 재시도로 기다리는가
+
+- [ ] 다이얼로그를 쓰는 흐름에 `page.once("dialog", ...)` 를 걸었는가
+
+- [ ] 가짜 응답이 `ApiResponse` 껍데기와 `CONTRACT.md` 의 필드를 지키는가
+
+- [ ] 다른 테스트가 먼저 돌았는지에 기대지 않는가
+
+- [ ] 실행한 것과 실행하지 못한 것을 결과에 구분해 적었는가

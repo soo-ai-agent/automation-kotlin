@@ -4,7 +4,7 @@
 
 Kotlin + Spring Boot 멀티모듈 백엔드의 계층별 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
 
-**먼저 읽을 것은 `kotlin-common` 하나다.** 나머지 8종은 지금 고치는 파일이 어느 계층인지에 따라 골라 읽는다.
+**먼저 읽을 것은 `kotlin-common` 하나다.** 나머지 10종은 지금 고치는 파일이 어느 계층인지에 따라 골라 읽는다.
 
 | 스킬 | 언제 읽나 | 다루는 것 |
 |---|---|---|
@@ -16,19 +16,21 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 계층별 규칙이다. 스택과
 | [kotlin-implement](kotlin-implement/SKILL.md) | 조회·저장 상세 구현 | `Finder`·`Appender` 재사용 단위, 엔티티↔도메인 변환 |
 | [kotlin-entity](kotlin-entity/SKILL.md) | 테이블·상태 변경 | `@Entity`, `protected set` + 행위 메서드, 애그리게이트 |
 | [kotlin-repository](kotlin-repository/SKILL.md) | 쿼리 추가, 느린 쿼리 | 쿼리 메서드 이름, 페이징, fetch join 과 N+1 |
+| [kotlin-migration](kotlin-migration/SKILL.md) | **엔티티를 바꿀 때마다 함께** | Flyway 파일 이름·자리, 적용된 파일 불변, 무중단 배포 순서 |
+| [kotlin-error](kotlin-error/SKILL.md) | 실패 분기를 만들 때 | `ErrorCode`·`ErrorType`·`CoreException`, 상태코드·로그 레벨 |
 | [kotlin-test](kotlin-test/SKILL.md) | **기능 작업마다 함께** | 한 메서드 = 한 기능, MockK 범위, 계층별 테스트 대상 |
 
 ## 만드는 순서
 
 새 도메인 하나를 추가할 때는 위에서 아래로 만든다. 아래에서 위로 쌓아야 상위 계층이 이미 있는 것을 조립하게 된다.
 
-    enum → 엔티티 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → DTO → 컨트롤러
+    enum → 엔티티 + 마이그레이션 → 리포지토리 → 도메인 모델 → 구현 레이어 → 도메인 서비스 → DTO → 컨트롤러
 
 배치표(어느 모듈의 어느 패키지에 두는지)는 `kotlin-module-layout` 에 있다.
 
 ## 문서 구조
 
-스킬 9종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
+스킬 11종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
 
 - **규칙** — 지켜야 할 것
 
