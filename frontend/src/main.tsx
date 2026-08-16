@@ -1,6 +1,6 @@
 import {StrictMode} from "react";
 import {createRoot} from "react-dom/client";
-import User from "./pages/user/User";
+import User from "./user/pages/User";
 
 const rootElement: HTMLElement | null = document.getElementById("root");
 if (rootElement === null) {

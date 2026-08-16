@@ -1,6 +1,6 @@
 import {forwardRef, useImperativeHandle, type MouseEvent, type Ref} from "react";
-import {useUserDetail} from "../../hooks/useUserDetail";
-import {DetailStatus} from "../../enums/user";
+import {useUserDetail} from "../hooks/useUserDetail";
+import {DetailStatus} from "../enums/user";
 import {useServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
 import {formatDateTime, formatOptionalDateTime} from "../../utils/formatDate";
 

@@ -1,4 +1,4 @@
-import {apiClient, type ApiResult} from "../lib/apiClient";
+import {apiClient, type ApiResult} from "../../lib/apiClient";
 import type {User} from "../types/user";
 
 const USERS = "/api/v1/users";

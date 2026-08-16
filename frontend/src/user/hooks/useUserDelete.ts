@@ -1,8 +1,8 @@
 import {useCallback, useState} from "react";
-import {notify} from "../lib/notify";
+import {notify} from "../../lib/notify";
 import {deleteUser, deleteUsers} from "../services/userService";
 import {DeleteUserOutcome, UserResultMessages} from "../enums/user";
-import type {ServiceErrorHandler} from "./useServiceErrorHandler";
+import type {ServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
 
 export type UseUserDeleteParams = {
     selectedIds: number[];

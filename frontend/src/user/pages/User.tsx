@@ -1,7 +1,7 @@
-import UserTable from "../../components/data_table/UserTable";
-import UserToolbar from "../../components/data_table/UserToolbar";
-import UserDetailModal from "../../components/modal/UserDetailModal";
-import {useUsers} from "../../hooks/useUsers";
+import UserTable from "../components/UserTable";
+import UserToolbar from "../components/UserToolbar";
+import UserDetailModal from "../components/UserDetailModal";
+import {useUsers} from "../hooks/useUsers";
 
 const User = () => {
     const {table, modalRefs} = useUsers();
