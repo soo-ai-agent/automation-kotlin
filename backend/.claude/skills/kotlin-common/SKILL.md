@@ -148,6 +148,69 @@ val todo: Todo = finder.getById(id)
 3. **같은 이름이 둘 이상이라 네임스페이스가 구분자로 일하는가?** 그때만 object 로 남긴다.
 4. **상수만 모여 있는가?** 쓰는 클래스의 `companion object` 로 옮긴다.
 
+## data class 도 메서드를 갖는다 — util 로 빼기 전에 소유자를 찾는다
+
+**데이터만 있고 행동이 없는 타입 옆에, 그 데이터를 다루는 함수 모음이 따로 서 있으면 위반이다.**
+`data class` 는 값을 담기만 하는 그릇이 아니다. 그 값으로 하는 계산은 그 타입의 메서드다.
+
+```kotlin
+// X — 좌표는 데이터, 계산은 남의 것
+data class GeoPoint(val lat: Double, val lng: Double)
+
+object SpatialMath {
+    fun distanceMeters(a: GeoPoint, b: GeoPoint): Double = …
+}
+val d = SpatialMath.distanceMeters(from, to)
+```
+
+```kotlin
+// O — 자기 값으로 하는 계산은 자기가 안다
+data class GeoPoint(val lat: Double, val lng: Double) {
+    fun distanceMetersTo(other: GeoPoint): Double = …
+}
+val d = from.distanceMetersTo(to)
+```
+
+**첫 인자가 항상 같은 타입인 함수**는 그 타입의 메서드이거나 확장 함수여야 한다는 신호다.
+컬렉션을 받는 함수도 마찬가지다 — `List<GeoPoint>` 확장으로 올린다.
+
+### util 로 내릴 것과 내리지 말 것
+
+`support:util` 같은 공용 모듈에 내리기 전에 **소유자가 있는지 먼저 묻는다.** 판정은 하나다.
+
+> **다른 프로젝트에 그대로 옮겨도 말이 되는가?**
+
+| 내린다 | 내리지 않는다 |
+|---|---|
+| 좌표계 변환·통계 계산처럼 도메인을 모르는 순수 함수 | 우리 도메인 타입을 인자로 받는 것 — 그 타입의 메서드다 |
+| 문자열·날짜·인코딩 다루기 | 우리 업무 규칙을 아는 것(임계값·가중치·정책) |
+| 우리 이름을 하나도 안 쓰는 것 | 상위 계층 타입에 의존하는 것 |
+
+**util 로 내렸는데 인자에 우리 도메인 타입이 있으면 잘못 내린 것이다.** 되돌려 소유자에게 준다.
+
+## "없음"에 이름을 준다 — null 을 흘려보내지 않는다
+
+값이 없는 상태에 뜻이 있으면 `null` 이 아니라 **이름**을 준다. 부르는 쪽이 `null` 을 보고
+"아직인가, 끝난 건가, 실패한 건가"를 되짚게 만들지 않는다.
+
+```kotlin
+// X — 셋 다 null 이라 부르는 쪽이 구분할 수 없다
+fun findLocation(token: String): LocationView?
+```
+
+```kotlin
+// O — 없음에도 이름이 있다
+class LocationView private constructor(…) {
+    companion object {
+        fun waiting(): LocationView = …          // 아직 첫 보고 전
+        val EXPIRED: LocationView = …            // 기한이 지남
+    }
+}
+```
+
+조회 메서드의 `get`/`find` 규약(`getXxx` 는 없으면 예외, `findXxx` 는 `null`)은 그대로 지키되,
+**그 없음이 화면·응답에 그대로 나가는 값이면** 이름 있는 상태로 바꾼다.
+
 ## 이름은 영어 실력과 무관하게 읽혀야 한다
 
 표준 영어라도 추상적이면 바꾼다. 판정 순서:
