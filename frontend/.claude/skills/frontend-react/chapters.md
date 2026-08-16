@@ -672,22 +672,25 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 | 주입점·기본값이다 | `// 주입점 — 생략하면 중앙 httpClient 를 쓴다.` |
 | 화면마다 넘기는 게 다르다 | `// 목적지를 아직 안 고른 화면(홈)에서는 없다.` |
 
-**같은 이유가 연속되면 묶음 위에 한 줄만 적는다.** 필드마다 같은 문장을 되풀이하면 그게 곧 지워야 할 주석이다.
+**사유는 필드마다 그 자리에 적는다.** 묶음 위에 한 줄로 몰아 적으면 어느 필드 이야기인지 흐려진다(`coding-style.md` MUST — 이 규칙이 "되풀이 주석 금지"보다 우선한다).
+
+문장은 `<언제> 없음` 꼴로 끝내, 어떤 상황에서 값이 없는지가 바로 읽히게 한다.
 
 ```ts
-// O — 한 이유가 묶음 전체를 설명한다
+// O — 필드마다 언제 없는지가 다르고, 그 차이가 그 자리에 적혀 있다
 export interface MapMarker extends LatLng {
-  // 출발·도착 마커는 이 정보가 전부 없다.
-  type?: MapMarkerType;
-  label?: string;
-  cameraCount?: number;
+  type: MapMarkerType;
+  purpose?: string;     // 설치목적을 주는 원천이 CCTV 뿐이라 그 밖의 마커에는 없음
+  cameraCount?: number; // 카메라 대수를 주는 원천이 CCTV 뿐이라 그 밖의 마커에는 없음
+  phone?: string;       // 전화로 도움을 청할 수 있는 시설이 아니면 없음
 }
 
-// X — 같은 말을 세 번 한다
+// X — 묶음 위 한 줄. 어느 필드가 왜 없는지 흐려진다
 export interface MapMarker extends LatLng {
-  type?: MapMarkerType;    // 없을 수 있음
-  label?: string;          // 없을 수 있음
-  cameraCount?: number;    // 없을 수 있음
+  // 출발·도착 마커는 이 정보가 전부 없다.
+  purpose?: string;
+  cameraCount?: number;
+  phone?: string;
 }
 
 // X — 이유가 아니라 이름을 되풀이한다
@@ -695,9 +698,11 @@ export interface MapMarker extends LatLng {
 durationMs?: number;
 ```
 
+같은 문장이 여러 줄 반복되면 주석을 줄일 게 아니라 **`?` 를 줄일 자리**다 — 정말 같은 조건에서 함께 비는 값이면 한 덩이(전용 타입)로 묶어 그 덩이 하나를 `?` 로 만든다.
+
 `| null` 도 같다. "왜 빌 수 있는지"를 적는다 — `lastRefreshCount: number | null;` 위의 `// 갱신에 실패했거나 아직 한 번도 안 돌았다.` 가 그것이다.
 
-찾을 때: `?:` 선언을 훑어 **바로 위(또는 묶음 위)에 주석이 없는 줄**을 본다. 그 줄이 곧 위반이다.
+찾을 때: `?:` 선언을 훑어 **그 줄에도 바로 위에도 사유가 없는 줄**을 본다. 그 줄이 곧 위반이다.
 
 ### 11-2. 이름을 되풀이하는 주석은 지운다 (MUST)
 
