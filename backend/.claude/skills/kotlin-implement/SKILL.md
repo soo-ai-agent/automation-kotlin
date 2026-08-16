@@ -5,7 +5,7 @@ description: 구현 레이어 작성과 리뷰 규칙. domain/<도메인>/implem
 
 # Implement (구현 레이어)
 
-**자리:** `core/core-api/.../core/domain/<도메인>/implement/`
+**자리:** `core/core-<도메인>/.../<도메인>/domain/<도메인>/implement/`
 
 ## 역할 — 재사용 단위로 쪼갠다
 
@@ -17,7 +17,7 @@ description: 구현 레이어 작성과 리뷰 규칙. domain/<도메인>/implem
 
 | 이름 | 하는 일 |
 |---|---|
-| `XxxFinder` | 조회. 없으면 `CoreException` 을 던지는 `getXxx`, 목록을 주는 `listXxx` |
+| `XxxFinder` | 조회. 없으면 `ApiException` 하위 예외 을 던지는 `getXxx`, 목록을 주는 `listXxx` |
 | `XxxAppender` | 신규 저장 |
 | `XxxUpdater` | 기존 상태 변경 (엔티티 행위 메서드 호출) |
 | `XxxRemover` | 삭제·비활성화 |
@@ -33,7 +33,7 @@ class TodoFinder(
 
     fun getOwned(memberId: Long, todoId: Long): Todo {
         val entity: TodoEntity = todoRepository.findByIdAndMemberId(todoId, memberId)
-            ?: throw CoreException(ErrorType.TODO_NOT_FOUND)
+            ?: throw TodoNotFoundException()
         return Todo.from(entity)
     }
 }

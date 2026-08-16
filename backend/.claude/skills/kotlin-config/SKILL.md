@@ -12,7 +12,7 @@ description: 설정과 비밀값 규칙. 모듈별 yml 파일의 소유와 sprin
 `core-api` 가 모든 설정을 갖지 않는다. 각 모듈이 자기 설정 파일을 갖고, `core-api` 가 그것을 끌어다 합친다.
 
 ```yaml
-# core/core-api/src/main/resources/application.yml
+# core/core-<도메인>/src/main/resources/application.yml
 spring:
   config:
     import:
@@ -28,7 +28,7 @@ spring:
 | 외부 API 주소·타임아웃 | `clients/client-<이름>/.../client-<이름>.yml` |
 | 로그 레벨·포맷 | `support/logging/.../logging.yml` |
 | 액추에이터·메트릭 | `support/monitoring/.../monitoring.yml` |
-| 서버 포트·스레드 등 앱 전역 | `core/core-api/.../application.yml` |
+| 서버 포트·스레드 등 앱 전역 | `core/core-<도메인>/.../application.yml` |
 
 **새 모듈을 만들면 그 모듈의 yml 을 만들고 `application.yml` 의 `import` 에 한 줄 추가한다.** 빠뜨리면 설정이 조용히 무시된다.
 

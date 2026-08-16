@@ -5,7 +5,7 @@ description: Spring REST Docs 로 API 문서를 만드는 규칙. restdocs 태�
 
 # API 문서 테스트 (Spring REST Docs)
 
-**자리:** 테스트는 `core/core-api/src/test/.../controller/v1/XxxControllerTest.kt`, 문서는 `core/core-api/src/docs/asciidoc/index.adoc`
+**자리:** 테스트는 `core/core-<도메인>/src/test/.../controller/v1/XxxControllerTest.kt`, 문서는 `core/core-<도메인>/src/docs/asciidoc/index.adoc`
 
 ## 문서를 손으로 쓰지 않는다
 
@@ -72,7 +72,7 @@ class TodoControllerTest : RestDocsTest() {
 
 - `document()` 의 첫 인자가 **스니펫 폴더 이름**이다. `<도메인><동작>` 카멜케이스로 쓴다 (`todoCreate`, `todoList`, `todoDelete`). 이 이름으로 `index.adoc` 에서 끌어 쓴다.
 
-- **응답 필드를 하나라도 빠뜨리면 테스트가 실패한다.** `ApiResponse` 껍데기의 `result`·`error` 까지 전부 적는다. 쓰지 않는 필드는 `.ignored()`.
+- **응답 필드를 하나라도 빠뜨리면 테스트가 실패한다.** 응답 DTO 껍데기의 `result`·`error` 까지 전부 적는다. 쓰지 않는 필드는 `.ignored()`.
 
 - 경로 변수는 `pathParameters`, 쿼리는 `queryParameters` 로 함께 문서화한다.
 
@@ -129,7 +129,7 @@ include::{snippets}/todoCreate/response-fields.adoc[]
 
 - [ ] `RestDocsTest` 를 상속하고 서비스는 `mockk()` 인가
 
-- [ ] `ApiResponse` 껍데기(`result`·`error`)까지 모든 응답 필드를 적었는가
+- [ ] 응답 DTO 껍데기(`result`·`error`)까지 모든 응답 필드를 적었는가
 
 - [ ] 스니펫 이름이 `<도메인><동작>` 이고 중복되지 않는가
 

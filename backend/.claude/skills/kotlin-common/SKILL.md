@@ -21,7 +21,7 @@ description: Kotlin + Spring Boot 백엔드 전 레이어 공통 규칙. 자료�
 
 - nullable(`?`)은 "정말 없을 수 있는 값"에만 쓴다. 습관적 `?` 금지.
 
-- `!!` 는 금지다. 필요하면 `?: throw CoreException(...)` 으로 없음을 명시적으로 다룬다.
+- `!!` 는 금지다. 필요하면 `?: throw XxxNotFoundException()` 으로 없음을 명시적으로 다룬다.
 
 ```kotlin
 // ✅
@@ -88,13 +88,13 @@ val firstActive: Member? = members.firstOrNull { it.isActive }
 
 ## 예외
 
-- 도메인 오류는 `CoreException(ErrorType.XXX)` 로 던진다. 계층마다 예외 타입을 새로 만들지 않는다.
+- 도메인 오류는 `ApiException` 을 상속한 예외로 던진다. 그 예외가 status·code·detail 을 스스로 갖는다.
 
 - `try/catch` 는 **처리할 수 있는 타입만** 잡는다. `catch (e: Exception)` 은 전역 핸들러(`ApiControllerAdvice`)와 배치 루프 같은 최상위 경계에서만 쓴다.
 
 - 잡되 처리하지 않을 것은 잡지 않는다. 로그만 찍고 다시 던질 거면 `catch` 를 없앤다.
 
-- 예외를 바꿔 던질 때 원인을 잃지 않는다: `throw CoreException(ErrorType.X, cause = e)`.
+- 예외를 바꿔 던질 때 원인을 잃지 않는다: `throw XxxFailedException(cause = e)`.
 
 - `catch` 블록에는 왜 이 타입인지, 왜 여기서 멈추는지 주석을 남긴다.
 
@@ -107,7 +107,7 @@ val firstActive: Member? = members.firstOrNull { it.isActive }
 ```kotlin
 // ✅ 규칙 예외와 이유
 // 외부 정산 API 가 5xx 를 200 으로 내려보내 본문으로 판별한다 (2026-03 벤더 확인)
-if (body.code != "OK") throw CoreException(ErrorType.EXTERNAL_ERROR)
+if (body.code != "OK") throw ExternalCallFailedException()
 
 // ❌ 코드를 그대로 옮긴 주석
 // id 로 todo 를 찾는다
@@ -123,6 +123,39 @@ val todo: Todo = finder.getById(id)
 - 커밋 전 `./gradlew ktlintCheck unitTest` 가 통과해야 한다.
 
 - 테스트를 지우거나 단언을 약화해 통과시키지 않는다.
+
+## IDE 경고가 이 문서보다 우선한다
+
+경고와 규칙이 부딪히면 **경고를 따라 코드를 고친다.** 검사를 끄는 것은 그 검사를 따르면
+목적 자체가 무너질 때뿐이고, 끌 때는 `.idea/inspectionProfiles/` 에 사유를 적어 팀이 공유한다.
+
+## 지나가기만 하는 함수는 호출부로 합친다
+
+한 번만 쓰이면서 **이름이 본문보다 덜 말하는** 함수는 지운다.
+판정은 하나 — **호출부에 그대로 넣었을 때 더 잘 읽히는가.**
+
+이름이 공식·관용구·좌표계 변환처럼 본문이 못 보여주는 것을 담으면 남긴다.
+지우는 대신 **그 데이터를 가진 타입의 메서드로 옮기는** 편이 나을 때도 있다
+(`statusOf(record)` → `record.status()`).
+
+## object 를 언제 걷고 언제 남기나
+
+위에서부터 묻고 걸리면 멈춘다.
+
+1. **소유할 도메인 객체가 있는가?** 있으면 그 타입의 메서드로 옮긴다.
+2. **메서드 이름이 홀로 서는가?** `escape`·`normalize`·`parse` 처럼 object 이름을 빌려야
+   뜻이 통하면 이름을 자립시켜 **최상위 함수**로 올린다(`escapeForJs`·`normalizeRequestPath`).
+3. **같은 이름이 둘 이상이라 네임스페이스가 구분자로 일하는가?** 그때만 object 로 남긴다.
+4. **상수만 모여 있는가?** 쓰는 클래스의 `companion object` 로 옮긴다.
+
+## 이름은 영어 실력과 무관하게 읽혀야 한다
+
+표준 영어라도 추상적이면 바꾼다. 판정 순서:
+중학교 영어에 나오는가 → 한국어 한 단어로 옮겨지는가 → 이미 쓰는 낱말과 겹치지 않는가.
+약어는 원문이 널리 쓰이는 것만 둔다(`CSV`·`JWT`).
+
+**예시 값을 코드에 박지 않는다.** 기본값처럼 보이는 이메일·토큰이 응답으로 새어 나간다.
+환경변수로 주지 않으면 빈 값으로 둔다.
 
 ## 적발 신호
 

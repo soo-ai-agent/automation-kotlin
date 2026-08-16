@@ -1,11 +1,11 @@
 ---
 name: kotlin-controller
-description: 컨트롤러 작성과 리뷰 규칙. core-api 의 controller 패키지, @RestController, 요청/응답 변환, 인증 정보 추출, ApiResponse 래핑, HTTP 동사와 상태코드를 다룰 때 사용한다. "엔드포인트 추가", "API 만들어줘" 요청에도 사용할 것.
+description: 컨트롤러 작성과 리뷰 규칙. core-<도메인> 의 controller 패키지, @RestController, 요청/응답 변환, 인증 정보 추출, 응답 DTO 래핑, HTTP 동사와 상태코드를 다룰 때 사용한다. "엔드포인트 추가", "API 만들어줘" 요청에도 사용할 것.
 ---
 
 # Controller
 
-**자리:** `core/core-api/.../core/api/controller/v1/XxxController.kt`
+**자리:** `core/core-<도메인>/.../<도메인>/api/controller/XxxController.kt`
 
 ## 하는 일은 셋뿐
 
@@ -13,7 +13,7 @@ description: 컨트롤러 작성과 리뷰 규칙. core-api 의 controller 패�
 
 2. 인증 정보 추출 (`@AuthenticationPrincipal` 등)
 
-3. 도메인 결과 → 응답 DTO 변환 후 `ApiResponse` 로 감싸기
+3. 도메인 결과 → 응답 DTO 변환 (`XxxResponse.from(result)`). **래퍼로 감싸지 않는다** — 응답 DTO 를 그대로 돌린다
 
 그 밖의 판단은 전부 도메인 서비스의 몫이다. 컨트롤러에 `if` 로 된 업무 규칙이 보이면 위반이다.
 
@@ -24,18 +24,18 @@ class TodoController(
     private val todoService: TodoService,
 ) {
     @GetMapping
-    fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponseDto>> {
+    fun list(@AuthenticationPrincipal member: MemberPrincipal): List<TodoResponse> {
         val results: List<TodoResult> = todoService.list(member.id)
-        return ApiResponse.success(results.map(TodoResponseDto::from))
+        return results.map(TodoResponse::from)
     }
 
     @PostMapping
     fun create(
         @AuthenticationPrincipal member: MemberPrincipal,
         @Valid @RequestBody request: TodoCreateRequestDto,
-    ): ApiResponse<TodoResponseDto> {
+    ): List<TodoResponse> {
         val result: TodoResult = todoService.create(member.id, request.toCommand())
-        return ApiResponse.success(TodoResponseDto.from(result))
+        return TodoResponseDto.from(result))
     }
 }
 ```
@@ -56,7 +56,7 @@ class TodoController(
 
 - 컨트롤러에서 리포지토리·구현 레이어를 직접 부르지 않는다. 도메인 서비스만 부른다.
 
-- 응답은 항상 `ApiResponse` 로 감싼다.
+- 응답은 항상 응답 DTO 로 감싼다.
 
 ## 적발 신호
 
@@ -70,7 +70,7 @@ class TodoController(
 | 상태를 바꾸는 GET / 조회용 POST | HTTP 의미론 위반 | Critical |
 | 버전 없는 경로 | 클라이언트 파손 위험 | Important |
 | 필드 주입 | 테스트·불변성 저해 | Important |
-| `ApiResponse` 로 감싸지 않은 응답 | 응답 형식 불일치 | Important |
+| 응답 DTO 로 감싸지 않은 응답 | 응답 형식 불일치 | Important |
 
 ## 체크리스트
 

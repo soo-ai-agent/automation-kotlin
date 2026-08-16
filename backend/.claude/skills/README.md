@@ -26,13 +26,13 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 | 4 | [kotlin-implement](kotlin-implement/SKILL.md) | 조회·저장 상세 — `Finder`·`Appender` 재사용 단위, 엔티티↔도메인 변환 |
 | 5 | [kotlin-domain-service](kotlin-domain-service/SKILL.md) | 업무 흐름 — 유스케이스 조립, `@Transactional` 경계 |
 | 6 | [kotlin-dto](kotlin-dto/SKILL.md) | 요청·응답 형태 — `RequestDto`·`ResponseDto` 이름 규약, 검증 애너테이션 |
-| 7 | [kotlin-controller](kotlin-controller/SKILL.md) | 엔드포인트 — `@RestController`, `ApiResponse` 래핑, 인증 정보 추출 |
+| 7 | [kotlin-controller](kotlin-controller/SKILL.md) | 엔드포인트 — `@RestController`, 응답 DTO 래핑, 인증 정보 추출 |
 
 ## 상황에 따라
 
 | 스킬 | 언제 |
 |---|---|
-| [kotlin-error](kotlin-error/SKILL.md) | 실패 분기를 만들 때 — `ErrorCode`·`ErrorType`·`CoreException`, 상태코드·로그 레벨 |
+| [kotlin-error](kotlin-error/SKILL.md) | 실패 분기를 만들 때 — 예외의 `code`·예외가 스스로 가진 status·code·`ApiException` 하위 예외, 상태코드·로그 레벨 |
 | [kotlin-auth](kotlin-auth/SKILL.md) | 로그인·권한·"내 것만 조회" — 소유자 스코프, 401·403·404 구분 |
 | [kotlin-client](kotlin-client/SKILL.md) | 외부 API 연동 — `clients/client-*`, `internal` 캡슐화, 타임아웃 |
 | [kotlin-config](kotlin-config/SKILL.md) | 설정값·접속 정보·API 키 — 모듈별 yml, 프로파일 5종, 비밀값 주입 |

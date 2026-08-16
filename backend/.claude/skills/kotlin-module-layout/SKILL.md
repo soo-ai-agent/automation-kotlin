@@ -9,7 +9,7 @@ description: 멀티모듈 배치와 레이어 의존 방향 규칙. 새 파일�
 
 이 프로젝트는 폴더가 아니라 **Gradle 모듈**로 나뉘어 있다. 모듈은 폴더와 달리 **서로 참조할 수 있는 방향이 빌드 설정으로 강제된다.**
 
-`storage:db-core` 는 `core:core-api` 를 참조할 수 없다. 실수로 참조하면 컴파일이 안 된다. 규칙을 사람이 기억하는 대신 빌드가 지켜 주는 것이다.
+`storage:db-core` 는 `core:core-<도메인>` 를 참조할 수 없다. 실수로 참조하면 컴파일이 안 된다. 규칙을 사람이 기억하는 대신 빌드가 지켜 주는 것이다.
 
 ## 엔티티와 도메인 모델이 둘인 이유
 
@@ -26,14 +26,39 @@ description: 멀티모듈 배치와 레이어 의존 방향 규칙. 새 파일�
 
 ## 모듈
 
-| 모듈 | 담는 것 |
+| 모듈 | 담는 것 | 담지 않는 것 |
+|---|---|---|
+| `api` | **유일한 부팅 모듈.** 부팅 클래스, ControllerAdvice, 헬스, 전역 설정 | 특정 도메인의 Controller·Service |
+| `core:core-<도메인>` | 한 도메인을 통째로 — 그 도메인의 Controller·DTO·Service·구현체·도메인 모델 | 다른 도메인의 코드, 저장 구현, 외부 호출 |
+| `core:core-common` | **둘 이상의 도메인이** 쓰는 것만 — 예외 베이스, 공용 요청 DTO | 한 도메인만 쓰는 것 |
+| `core:core-enum` | **여러 모듈이** 공유하는 enum | 한 모듈만 쓰는 enum, 값·로직 |
+| `storage:db-core` | 저장·조회. 엔티티·리포지토리·저장 모델 | 비즈니스 흐름, HTTP |
+| `clients:client-*` | 외부 시스템 호출 어댑터 | 비즈니스 판단, 저장소 접근 |
+| `support:*` | 로깅·모니터링·도메인 지식 없는 범용 함수 | 도메인 코드 일체 |
+
+### 도메인 모듈 안은 두 겹이다
+
+```
+core/core-<도메인>/…/core/<도메인>/
+  api/     controller/ · request/ · response/
+  domain/  service/ · model/ · error/ · (config/)
+```
+
+`api` → `domain` 한 방향이다. `domain` 이 `api` 의 DTO 를 알면 위반이다.
+응답 DTO 로의 변환은 **Controller 가** 하고, 변환 함수는 그 DTO 의 `companion` 이 갖는다.
+
+### 모듈로 나눌지, 패키지로 둘지
+
+역참조가 0인 것만으로는 부족하다. **바깥(부팅 모듈·다른 도메인)이 그 모듈을 import 하는지 센다.**
+
+| 재는 것 | 나눌 값이 있는 신호 |
 |---|---|
-| `core:core-api` | 컨트롤러, 도메인 서비스, 구현 레이어, 지원 코드(error/response) |
-| `core:core-enum` | 도메인 enum |
-| `storage:db-core` | JPA 엔티티, 리포지토리, DB 설정 |
-| `clients:client-*` | 외부 시스템 호출 어댑터 |
-| `support:logging` `support:monitoring` | 횡단 관심사 |
-| `tests:api-docs` | API 문서 테스트 |
+| 역참조 수 | 0 (필요조건일 뿐) |
+| **바깥의 import 수** | **1 이상.** 0이면 패키지로 충분하다 |
+
+Spring 은 컴포넌트 스캔으로 빈을 찾으므로, 도메인 안쪽 협력자를 모듈로 떼어도
+바깥은 그 이름을 부를 일이 없다. 그러면 경계가 파는 것은 내부 방향 강제뿐이고,
+그건 의존 방향 테스트로 더 싸게 산다. 모듈을 접으면 그 자리에 방향 테스트를 남긴다.
 
 ## 템플릿과 다른 점 — 여기가 성장형이다
 
@@ -49,13 +74,13 @@ Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)이 동봉한 `ExampleS
 core/core-enum/.../core/enums/TodoStatus.kt                     enum
 storage/db-core/.../storage/db/core/TodoEntity.kt               엔티티
 storage/db-core/.../storage/db/core/TodoRepository.kt           리포지토리
-core/core-api/.../core/domain/todo/Todo.kt                      도메인 모델
-core/core-api/.../core/domain/todo/implement/TodoFinder.kt      구현 레이어
-core/core-api/.../core/domain/todo/implement/TodoAppender.kt
-core/core-api/.../core/domain/todo/TodoService.kt               도메인 서비스
-core/core-api/.../core/api/controller/v1/request/TodoCreateRequestDto.kt
-core/core-api/.../core/api/controller/v1/response/TodoResponseDto.kt
-core/core-api/.../core/api/controller/v1/TodoController.kt      컨트롤러
+core/core-<도메인>/.../<도메인>/domain/todo/Todo.kt                      도메인 모델
+core/core-<도메인>/.../<도메인>/domain/todo/implement/TodoFinder.kt      구현 레이어
+core/core-<도메인>/.../<도메인>/domain/todo/implement/TodoAppender.kt
+core/core-<도메인>/.../<도메인>/domain/todo/TodoService.kt               도메인 서비스
+core/core-<도메인>/.../<도메인>/api/controller/request/TodoCreateRequestDto.kt
+core/core-<도메인>/.../<도메인>/api/controller/response/TodoResponseDto.kt
+core/core-<도메인>/.../<도메인>/api/controller/TodoController.kt      컨트롤러
 ```
 
 **만드는 순서는 위에서 아래로.** 아래에서 위로 쌓아야 상위 레이어가 이미 있는 것을 조립하게 된다.

@@ -1,6 +1,6 @@
 ---
 name: kotlin-client
-description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(Api·Client·Config·Dto·model), internal 로 Feign 인터페이스와 DTO 를 모듈 안에 가두는 법, 타임아웃 설정, 외부 실패를 CoreException 으로 번역하기, 트랜잭션 안에서 호출 금지를 다룬다. 외부 API·결제·알림 연동을 붙일 때 사용한다. "외부 API 연동", "Feign", "결제 붙이기" 요청에도 사용할 것.
+description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(Api·Client·Config·Dto·model), internal 로 RestClient 호출부와 DTO 를 모듈 안에 가두는 법, 타임아웃 설정, 외부 실패를 ApiException 하위 예외 으로 번역하기, 트랜잭션 안에서 호출 금지를 다룬다. 외부 API·결제·알림 연동을 붙일 때 사용한다. "외부 API 연동", "RestClient", "결제 붙이기" 요청에도 사용할 것.
 ---
 
 # 외부 시스템 연동 (clients)
@@ -15,9 +15,9 @@ description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(A
 
 | 파일 | 역할 | 공개 범위 |
 |---|---|---|
-| `<이름>Api.kt` | Feign 인터페이스. HTTP 규격 그대로 | **`internal`** |
+| `<이름>ApiSpec.kt` | 엔드포인트·옵션 상수. 외부 규격이 바뀌면 여기만 고친다 | **`internal`** |
 | `<이름>RequestDto.kt`·`<이름>ResponseDto.kt` | 외부가 요구하는·주는 JSON 모양 | **`internal`** |
-| `<이름>Config.kt` | `@EnableFeignClients` | **`internal`** |
+| `<이름>Client.kt` | `RestClient` 로 호출하고 우리 말로 번역한다 | 공개 |
 | `<이름>Client.kt` | 바깥이 부르는 유일한 창구 | `public` |
 | `model/<이름>ClientResult.kt` | 바깥으로 나가는 결과 모델 | `public` |
 
@@ -25,7 +25,14 @@ description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(A
 
 **외부 API 의 JSON 모양이 우리 도메인으로 새어 들어오면 안 된다.** 외부가 필드 이름을 바꾸면 우리 서비스까지 고쳐야 하기 때문이다.
 
-그래서 Feign 인터페이스와 DTO 를 `internal` 로 막고, `Client` 가 우리 말로 번역한 `ClientResult` 만 내보낸다.
+HTTP 호출은 **`RestClient`** 로 한다(RestClient 아님). 자동구성된 `RestClient.Builder` 를 주입받아
+`clone().build()` 로 쓰면 타임아웃 같은 전역 설정이 한곳에서 걸린다.
+
+그래서 통신 DTO 를 `internal` 로 막고, `Client` 가 우리 말로 번역한 결과만 내보낸다.
+
+**외부 응답을 문자열로 먼저 받아야 할 때가 있다.** 규격을 어긴 본문(제어문자 등)이 오면
+바로 파싱하다 실패하고, 그 실패가 겉면 메시지에 가려 원인이 안 보인다. 실제로 겪은 사례가 있어
+**외부 호출 실패 로그에는 원인 사슬(cause)까지 남긴다** — `e.message` 만 남기면 진짜 원인이 사라진다.
 
 ```kotlin
 // ❌ 밖에서 보이면 안 되는 것들
@@ -67,7 +74,7 @@ class ExampleClient internal constructor(
 spring.cloud.openfeign:
   client:
     config:
-      example-api:                # @FeignClient 의 value 와 같아야 한다
+      example-api:                # RestClient 의 value 와 같아야 한다
         connectTimeout: 2100
         readTimeout: 5000
 ```
@@ -78,15 +85,15 @@ spring.cloud.openfeign:
 
 ## 실패를 우리 말로 번역한다
 
-외부 예외(`FeignException`)가 도메인까지 올라가면, 도메인이 외부 라이브러리를 알게 된다.
+외부 예외(`RestClientException`)가 도메인까지 올라가면, 도메인이 외부 라이브러리를 알게 된다.
 
-`Client` 나 구현 레이어에서 잡아 `CoreException` 으로 바꾼다 (`kotlin-error`).
+`Client` 나 구현 레이어에서 잡아 `ApiException` 하위 예외 으로 바꾼다 (`kotlin-error`).
 
 ```kotlin
 try {
     return exampleApi.example(request).toResult()
-} catch (e: FeignException) {
-    throw CoreException(ErrorType.EXAMPLE_API_ERROR, cause = e)   // 원인을 안고 간다
+} catch (e: RestClientException) {
+    throw ExampleApiFailedException(cause = e)   // 원인을 안고 간다
 }
 ```
 
@@ -105,9 +112,9 @@ DB 트랜잭션을 열어 둔 채 외부를 호출하면, 외부가 느린 만�
 | 신호 | 문제 | 심각도 |
 |---|---|---|
 | `@Transactional` 안에서 외부 호출 | 외부 장애가 DB 커넥션 고갈로 전파 | Critical |
-| Feign 인터페이스·DTO 가 `public` | 외부 JSON 규격이 도메인으로 샘 | Critical |
+| RestClient 호출부·DTO 가 `public` | 외부 JSON 규격이 도메인으로 샘 | Critical |
 | 타임아웃 미설정 | 응답 없는 외부에 스레드가 묶임 | Critical |
-| `FeignException` 이 도메인까지 올라감 | 도메인이 외부 라이브러리를 알게 됨 | Critical |
+| `RestClientException` 이 도메인까지 올라감 | 도메인이 외부 라이브러리를 알게 됨 | Critical |
 | 외부 응답 원문을 사용자 응답에 그대로 노출 | 내부 주소·키 유출 | Critical |
 | 비멱등 호출(결제·발송)에 재시도 | 중복 처리 | Critical |
 | 코드에 외부 URL 하드코딩 | 환경별 전환 불가 | Important |
@@ -116,13 +123,13 @@ DB 트랜잭션을 열어 둔 채 외부를 호출하면, 외부가 느린 만�
 
 ## 체크리스트
 
-- [ ] Feign 인터페이스·DTO·Config 가 `internal` 인가
+- [ ] RestClient 호출부·DTO·Config 가 `internal` 인가
 
 - [ ] 바깥에 나가는 것이 `Client` 와 `model/*ClientResult` 뿐인가
 
 - [ ] `connectTimeout`·`readTimeout` 을 설정했는가
 
-- [ ] 외부 예외를 `CoreException` 으로 바꾸면서 원인을 안고 가는가
+- [ ] 외부 예외를 `ApiException` 하위 예외 으로 바꾸면서 원인을 안고 가는가
 
 - [ ] 트랜잭션 밖에서 호출하는가
 

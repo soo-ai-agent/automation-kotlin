@@ -57,9 +57,9 @@ class SecurityConfig {
 
 ```kotlin
 @GetMapping
-fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponseDto>> {
+fun list(@AuthenticationPrincipal member: MemberPrincipal): List<TodoResponse> {
     val results: List<TodoResult> = todoService.list(member.id)   // 식별자만 넘긴다
-    return ApiResponse.success(results.map(TodoResponseDto::from))
+    return results.map(TodoResponseDto::from))
 }
 ```
 
@@ -76,7 +76,7 @@ fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<Tod
 ```kotlin
 // ❌ 다 꺼내 놓고 나중에 확인 — 목록에서는 아예 걸러지지도 않는다
 val todo = todoRepository.findByIdOrNull(id)
-if (todo.memberId != memberId) throw CoreException(ErrorType.FORBIDDEN)
+if (todo.memberId != memberId) throw TodoForbiddenException()
 
 // ✅ 소유자를 쿼리 조건에 넣는다
 fun findByIdAndMemberId(id: Long, memberId: Long): TodoEntity?
@@ -102,7 +102,7 @@ fun findByIdAndMemberId(id: Long, memberId: Long): TodoEntity?
 
 - 로그인 실패 응답에 "없는 아이디"와 "틀린 비밀번호"를 구분해 주지 않는다. 계정 존재 여부가 새어 나간다.
 
-- **해시·토큰·리프레시 토큰을 응답 DTO·로그·예외 메시지에 넣지 않는다** (`kotlin-error`·`kotlin-config`).
+- **해시·토큰·리프레시 토큰을 응답 DTO ·로그·예외 메시지에 넣지 않는다** (`kotlin-error`·`kotlin-config`).
 
 - 서명 키는 저장소에 두지 않고 환경변수로 받는다 (`kotlin-config`).
 

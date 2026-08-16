@@ -32,7 +32,7 @@ class TodoAppenderTest {
     @Test
     fun `제목이 공백이면 예외를 던진다`() {
         assertThatThrownBy { appender.append(memberId = 1L, command = TodoCreateCommand("  ")) }
-            .isInstanceOf(CoreException::class.java)
+            .isInstanceOf(ApiException 하위 예외 —:class.java)
     }
 }
 ```
@@ -95,6 +95,33 @@ fun `todo 생성 테스트`() {
 - 테스트 대상은 목으로 만들지 않는다. 목이 대상을 대신하면 아무것도 검증하지 않는 테스트가 된다.
 
 - 반복되는 픽스처는 파일 하단의 작은 팩토리 함수로 만든다(`private fun todoEntity(...)`). 프레임워크를 도입하지 않는다.
+
+## 완료 전 검증 — 네 가지를 하고 숫자를 남긴다
+
+`BUILD SUCCESSFUL` 은 증명이 아니다. 보고에는 형용사 대신 숫자를 쓴다.
+
+**(1) 테스트 실계수를 센다.** Gradle 은 캐시로 태스크를 건너뛰고도 성공이라 말한다.
+
+```bash
+python3 -c "
+import pathlib,re
+tot=0
+for d in pathlib.Path('.').rglob('build/test-results/test'):
+    tot+=sum(int(re.search(r'tests=\"(\d+)\"', f.read_text()[:400]).group(1)) for f in d.glob('*.xml'))
+print(tot)"
+```
+리팩토링이면 이전 계수와 같아야 한다.
+
+**(2) 변이로 이빨을 본다.** 바꾼 규칙마다 그것을 무력화하고 테스트가 깨지는지 본다.
+조건을 `true` 로, 상수를 다른 값으로 바꿔 돌린다. **합격 기준은 1건 이상 실패.**
+0이면 그 규칙에는 테스트가 없다 — 고치기 전에 테스트를 먼저 쓴다.
+
+**(3) 다른 포트로 실제 띄운다.** 상시 dev 서버를 죽이지 않는다.
+기동에 무엇이 필요한지는 프로젝트마다 다르니 한 번 알아내 CLAUDE.md 에 적어 둔다.
+
+**(4) 와이어 계약을 실호출로 대조한다.** 응답 필드명·enum 값을 건드렸으면 반드시 눈으로 본다.
+
+보고에는 **하지 못한 검증**도 적는다. 빠뜨린 것을 적지 않으면 다음 사람이 속는다.
 
 ## 적발 신호
 

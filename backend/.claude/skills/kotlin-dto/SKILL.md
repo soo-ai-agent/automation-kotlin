@@ -5,7 +5,7 @@ description: 요청·응답 DTO 작성과 리뷰 규칙. controller/v1/request �
 
 # Request / Response DTO
 
-**자리:** `core/core-api/.../core/api/controller/v1/request|response/`
+**자리:** `core/core-<도메인>/.../<도메인>/api/controller/request|response/`
 
 ## 이름 — 접미사가 자리를 말한다
 
@@ -39,7 +39,7 @@ data class TodoCreateRequestDto(
 
 - Kotlin 에서 Bean Validation 은 **`@field:`** 접두가 필요하다. 빠뜨리면 검증이 걸리지 않는다.
 
-- `Unresolved reference 'validation'` 이 나면 `core/core-api/build.gradle.kts` 에 `spring-boot-starter-validation` 이 빠진 것이다.
+- `Unresolved reference 'validation'` 이 나면 `core/core-<도메인>/build.gradle.kts` 에 `spring-boot-starter-validation` 이 빠진 것이다.
 
   이 의존성은 사람이 뼈대를 만들 때 넣는다 (`backend/README.md` 2절).
 
@@ -74,6 +74,23 @@ data class TodoResponseDto(
 - 응답에 비밀번호 해시·내부 식별자·감사 컬럼 같은 내부 정보를 담지 않는다.
 
 - 필드 타입을 명시하고 nullable 을 최소화한다. 없을 수 있는 값만 `?`.
+
+- **`?` 필드는 선언 바로 위에 사유를 적는다.** 문장은 `<언제> null 이 가능함` 꼴로 끝낸다.
+  클래스 위에 한 줄로 몰아 적으면 어느 필드 이야기인지 흐려진다.
+
+  ```kotlin
+  data class SlackConfigSummary(
+      val webhookConfigured: Boolean,
+      // 웹훅을 설정하지 않으면 null 이 가능함
+      val webhookMasked: String?,
+  )
+  ```
+
+- **요청 DTO 의 검증 대상은 nullable 로 둔다.** `@field:NotNull val lat: Double?` 에서 `?` 를
+  지우면 안 된다. Kotlin non-null 원시 타입은 값이 없을 때 예외가 아니라 **기본값이 들어간다.**
+  실측: 위도를 안 보낸 요청이 `lat=0.0`(적도)으로 계산돼 "위도가 없습니다" 대신
+  "거리가 너무 멉니다"가 나갔다. nullable + `@NotNull` 이면 어느 필드가 빠졌는지 응답에 담긴다.
+  요청 DTO 안의 `Int`·`Double`·`Boolean` 은 non-null 로 선언하지 않는다.
 
 ## 적발 신호
 
