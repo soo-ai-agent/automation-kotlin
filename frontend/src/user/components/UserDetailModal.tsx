@@ -1,8 +1,8 @@
 import {forwardRef, useImperativeHandle, type MouseEvent, type Ref} from "react";
 import {useUserDetail} from "../hooks/useUserDetail";
 import {DetailStatus} from "../enums/user";
-import {useServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
-import {formatDateTime, formatOptionalDateTime} from "../../utils/formatDate";
+import {useServiceErrorHandler} from "../../common/hooks/useServiceErrorHandler";
+import {formatDateTime, formatOptionalDateTime} from "../../common/utils/formatDate";
 
 /** 부모에게서 받는 값이 없다. 여는 것은 ref 의 openDetail 이 한다. */
 type UserDetailModalProps = Record<never, never>;

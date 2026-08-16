@@ -20,14 +20,18 @@ src/
 │   ├── lib/                # 이 도메인의 순수 로직·파생 계산
 │   ├── types/              # 이 도메인의 서버 DTO·Row 타입
 │   └── enums/              # 이 도메인의 메시지·결과·구분 enum
-└── (공용 — 평면 유지)
-    ├── components/<종류>/  # 여러 도메인이 쓰는 표현 컴포넌트. ui · layout · map · modal
-    └── hooks/ services/ api/ lib/ types/ utils/ enums/
+└── common/                 # 여러 도메인이 쓰는 것만. 도메인과 나란히 서는 유일한 비도메인 폴더
+    ├── components/<종류>/  # ui · layout · map · modal
+    └── hooks/ services/ api/ lib/ types/ utils/ enums/ styles/ testing/
 ```
 
-**공용에는 도메인 폴더를 파지 않는다.** 공용에서 하위 폴더로 한 번 더 나누는 것은 `components/<종류>/` 뿐이고 나머지는 평면이다.
+**최상위에는 도메인과 `app`·`common` 만 둔다.** 공용 계층을 최상위에 흩어 놓으면 `route/`(도메인) 옆에 `hooks/`(계층)가 서서 한 줄에 두 기준이 섞여 보인다.
 
-`hooks/route/` 는 위반이다 — route 만 쓰면 `route/hooks/` 로 가야 하고, 여럿이 쓰면 `hooks/` 바로 아래다.
+이름은 `shared` 가 아니라 **`common`** 이다. `share` 도메인이 있는 앱에서 `shared/` 는 한 글자 차이로 헷갈린다.
+
+**공용 안에도 도메인 폴더를 파지 않는다.** `common/` 에서 하위 폴더로 한 번 더 나누는 것은 `components/<종류>/` 뿐이고 나머지는 평면이다.
+
+`common/hooks/route/` 는 위반이다 — route 만 쓰면 `route/hooks/` 로 가야 하고, 여럿이 쓰면 `common/hooks/` 바로 아래다.
 
 ### 어느 도메인의 것인지 정하는 법
 
@@ -724,6 +728,31 @@ durationMs?: number;
 - 닫힌 값 집합은 `enum`. 다만 객체 구조·함수 시그니처·라우팅 파라미터 타입은 enum 대상이 아니다.
 
 - **enum 선언 위치는 `enums/` 로 고정한다.** 한 도메인의 enum(메시지·결과·상태)은 `<도메인>/enums/`, 여러 도메인이 쓰는 것과 인프라 enum 은 공용 `src/enums/` 에 각자 파일로. 사용처 파일 안 인라인 선언은 위반이다.
+
+### 11-3. 서버 DTO 는 `types/` 에만 산다 (MUST)
+
+서비스 파일 안에 응답 인터페이스를 선언하면, **계약서(서버 응답)와 업무 규칙이 한 파일에서 섞인다.** 서버가 필드를 하나 바꿀 때 어디를 보면 되는지가 흐려진다.
+
+| 무엇 | 어디 |
+|---|---|
+| 요청 본문·응답 페이로드·행(row) | `<도메인>/types/<자원>.ts` |
+| 클라이언트 옵션 — `*Options`·`*Query`(주입점·페이지·signal) | 서비스 파일 |
+| 결과 표현 — `*Result`·`*Outcome`(결과 enum·판정) | 서비스 파일 |
+
+```ts
+// O — route/types/routeCompare.ts : 서버가 주는 모양만
+export interface RouteOption { id: string; name: string; score: number; }
+
+// O — route/services/routeCompare.ts : 규칙과 옵션만
+import type { RouteOption } from '../types/routeCompare';
+export interface RouteCompareClientOptions { /* 주입점 — 생략하면 기본 엔드포인트 */ endpoint?: string; }
+
+// X — 한 파일이 계약서이자 업무 규칙
+export interface RouteOption { … }
+export async function fetchRouteCompare(…) { … }
+```
+
+**`types/` 는 아무것도 import 하지 않는 바닥이다.** `types/` 가 `services/` 를 참조하면 방향이 뒤집힌 것이다 — 값(함수·상수)이 필요해 보이면 그건 DTO 가 아니다.
 
 ## 12. 이름 규칙
 

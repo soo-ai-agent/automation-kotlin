@@ -1,8 +1,8 @@
 import type {MouseEvent} from "react";
-import {type ListState} from "../../lib/listState";
-import {ListStatus} from "../../enums/listStatus";
+import {type ListState} from "../../common/lib/listState";
+import {ListStatus} from "../../common/enums/listStatus";
 import type {User} from "../types/user";
-import {formatDateTime, formatOptionalDateTime} from "../../utils/formatDate";
+import {formatDateTime, formatOptionalDateTime} from "../../common/utils/formatDate";
 
 type UserTableProps = {
     users: User[];

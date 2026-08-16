@@ -39,15 +39,20 @@ src/
   <도메인>/           user · order · admin …
     pages/            화면(RN 은 screens/)  ·  components/  ·  hooks/
     services/  api/  lib/  types/  enums/
-  components/<종류>/  여러 도메인이 쓰는 표현 컴포넌트만. ui · layout · modal · data_table
-  hooks/ services/ api/ lib/ types/ utils/ enums/    공용. 평면 유지, 도메인 폴더 금지
+  common/             여러 도메인이 쓰는 것만 모은다
+    components/<종류>/   ui · layout · modal · data_table
+    hooks/ services/ api/ lib/ types/ utils/ enums/
 ```
+
+**최상위에는 도메인과 `app`·`common` 만 둔다.** 공용 계층을 최상위에 흩어 놓으면 도메인과 계층이 한 줄에 섞여 보인다.
+
+이름은 `shared` 가 아니라 **`common`** 이다 — `share` 도메인이 있는 앱에서 `shared/` 는 한 글자 차이로 헷갈린다.
 
 **소유는 쓰는 쪽이 정한다.** 화면을 뿌리로 import 를 거꾸로 따라가 한 도메인만 쓰면 그 도메인이 갖고, 둘 이상이 쓰면 공용 평면에 남는다.
 
 예외는 둘 — 이름이 도메인을 말하는데 남도 쓰는 것은 소유 도메인으로, 이름에 도메인이 없고 플랫폼 API 만 다루는 것은 한 도메인만 써도 공용에 남긴다.
 
-**흔한 오해**: `components/user/` 처럼 공용 계층 아래에 도메인 폴더를 파는 것. user 만 쓰면 `user/components/` 로 가야 한다.
+**흔한 오해**: `common/components/user/` 처럼 공용 안에 도메인 폴더를 파는 것. user 만 쓰면 `user/components/` 로 가야 한다.
 
 ### 옮길 때
 
@@ -92,6 +97,10 @@ src/
 - MUST: 알림은 `notify.*` 한 창구로만. 컴포넌트에서 `alert`/`Swal`/토스트 직접 호출 금지. (8장)
 
 - MUST: 참조는 `pages → hooks → services → api → lib` 한 방향. 역방향·건너뛰기 금지. (0장)
+
+- MUST: **서버 DTO(요청 본문·응답 페이로드·행)는 `<도메인>/types/` 에만 둔다.** 서비스 파일 안에 선언하지 않는다.
+
+  서비스에 남는 것은 클라이언트 옵션(`*Options`·`*Query`)과 결과 표현(`*Result`·`*Outcome`)뿐이다. (11-3장)
 
 - MUST: 파일 이름·확장자·export 는 0-2장 표를 따른다. **화면만 default export**, hooks·services·api·lib·types 는 named. JSX 없으면 `.ts`.
 
@@ -173,7 +182,9 @@ frontend/src/
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
-| 공용 계층 아래 도메인 폴더(`components/user/`·`hooks/order/`) | 도메인 최상위 위반 — 그 도메인 폴더로 (0장) | Critical |
+| 최상위에 계층 폴더가 도메인과 나란히 | `common/` 으로 모아야 한다 (0장) | Critical |
+| 공용 아래 도메인 폴더(`common/components/user/`) | 도메인 최상위 위반 — 그 도메인 폴더로 (0장) | Critical |
+| 서비스 파일 안의 서버 DTO 선언 | DTO 의 거처는 `<도메인>/types/` (11-3장) | Important |
 | 사유 주석 없는 `?` 선언 | 안 오는 값인지 안 줘도 되는 값인지 못 읽는다 (11-1장) | Critical |
 | 이름을 되풀이할 뿐인 주석 | 정보 0, 이름 바뀌면 거짓말 (11-2장) | Important |
 | 페이지·컴포넌트에 `useState`/`useEffect` | 페이지 무상태 위반 — 상태는 훅으로 (1·2장) | Critical |
@@ -198,7 +209,9 @@ frontend/src/
 
 - [ ] 페이지가 훅 1개 호출 + JSX 뿐인가 (`useState` 0개)
 
-- [ ] 도메인이 최상위이고, 공용 계층에 도메인 폴더가 없는가
+- [ ] 최상위가 도메인 + `app`·`common` 뿐이고, 공용 안에 도메인 폴더가 없는가
+
+- [ ] 서버 DTO 가 서비스가 아니라 `<도메인>/types/` 에 있는가
 
 - [ ] 참조가 `pages → hooks → services → api → lib` 한 방향인가
 

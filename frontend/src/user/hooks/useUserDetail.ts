@@ -3,7 +3,7 @@ import {useCallback, useState} from "react";
 import {getUserDetail} from "../services/userService";
 import {UserResultMessages} from "../enums/user";
 import type {User} from "../types/user";
-import type {ServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
+import type {ServiceErrorHandler} from "../../common/hooks/useServiceErrorHandler";
 
 /** 열림 여부·로딩 여부·사용자를 따로 두지 않는다. 세 상태가 한 값으로 표현되어 모순 조합이 없다. */
 export type DetailState =

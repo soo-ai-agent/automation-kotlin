@@ -3,7 +3,7 @@ import {useUserDelete} from "./useUserDelete";
 import {useUserList} from "./useUserList";
 import {useUserModalRefs} from "./useUserModalRefs";
 import {useUserSelection} from "./useUserSelection";
-import {useServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
+import {useServiceErrorHandler} from "../../common/hooks/useServiceErrorHandler";
 
 export function useUsers() {
     const {handleError} = useServiceErrorHandler();

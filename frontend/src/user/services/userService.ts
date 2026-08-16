@@ -1,10 +1,10 @@
 import {DeleteUserOutcome, UserResultMessages} from "../enums/user";
-import {SessionResultMessages} from "../../enums/session";
-import {ErrorLevel} from "../../enums/errorLevel";
+import {SessionResultMessages} from "../../common/enums/session";
+import {ErrorLevel} from "../../common/enums/errorLevel";
 import {user} from "../api/user";
-import type {ApiResult} from "../../lib/apiClient";
+import type {ApiResult} from "../../common/lib/apiClient";
 import type {User} from "../types/user";
-import {ServiceError} from "../../services/ServiceError";
+import {ServiceError} from "../../common/services/ServiceError";
 
 export async function getUserList(): Promise<User[]> {
     const result: ApiResult<User[]> = await user.list();

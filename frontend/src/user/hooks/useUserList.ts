@@ -1,10 +1,10 @@
 import {useCallback, useState} from "react";
-import {type ListState} from "../../lib/listState";
-import {ListStatus} from "../../enums/listStatus";
+import {type ListState} from "../../common/lib/listState";
+import {ListStatus} from "../../common/enums/listStatus";
 import {getUserList} from "../services/userService";
 import {UserResultMessages} from "../enums/user";
 import type {User} from "../types/user";
-import type {ServiceErrorHandler} from "../../hooks/useServiceErrorHandler";
+import type {ServiceErrorHandler} from "../../common/hooks/useServiceErrorHandler";
 
 export function useUserList(handleError: ServiceErrorHandler) {
     const [users, setUsers] = useState<User[]>([]);
