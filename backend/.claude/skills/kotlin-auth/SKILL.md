@@ -75,7 +75,7 @@ fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<Tod
 
 ```kotlin
 // ❌ 다 꺼내 놓고 나중에 확인 — 목록에서는 아예 걸러지지도 않는다
-val todo = todoRepository.findByIdOrNull(id)
+val todo = todoRepository.findOneById(id)
 if (todo.memberId != memberId) throw TodoForbiddenException()
 
 // ✅ 소유자를 쿼리 조건에 넣는다

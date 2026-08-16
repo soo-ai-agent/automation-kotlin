@@ -36,6 +36,17 @@ interface TodoRepository : JpaRepository<TodoEntity, Long> {
 
 - 소유자 스코프가 있는 데이터는 **조회 단계에서 소유자 조건을 건다**(`findByIdAndMemberId`). 조회 후 애플리케이션에서 비교하지 않는다.
 
+## 단건 조회는 파생 쿼리로 — `findByIdOrNull` 을 쓰지 않는다
+
+`findByIdOrNull` 은 최상위 확장 함수라 **mockk 로 스텁할 수 없다**(`mockkStatic` 이 필요해진다).
+인터페이스에 파생 쿼리를 선언하면 일반 메서드라 그대로 목이 된다.
+
+```kotlin
+interface TodoRepository : JpaRepository<TodoEntity, Long> {
+    fun findOneById(id: Long): TodoEntity?
+}
+```
+
 ## 적발 신호
 
 | 신호 | 문제 | 심각도 |

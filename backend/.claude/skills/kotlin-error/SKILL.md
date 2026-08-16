@@ -16,11 +16,14 @@ description: 실패를 표현하는 규칙. 예외가 자기 응답(status·code
 abstract class ApiException(
     val status: HttpStatus,
     val code: String,
-    val title: String,
     val detail: String,                       // 사용자 문구(내부 수치 없음)
     val fieldErrors: List<ApiFieldError> = emptyList(),
-    message: String,                          // 로그용. 내부 값을 담아도 된다
-) : RuntimeException(message)
+    message: String = detail,                 // 로그용. 내부 값을 담아도 된다
+    cause: Throwable? = null,                 // 외부 예외를 감쌀 때 원인을 잃지 않게
+) : RuntimeException(message, cause)
+
+// 응답에 나가는 값(code·detail·fieldErrors)만 갖는다.
+// 응답에 안 쓰는 필드를 여기 두면 죽은 값이 된다
 ```
 
 advice 는 종류를 묻지 않고 값만 옮겨 담는다. 새 예외를 추가해도 핸들러는 늘지 않는다.
@@ -30,8 +33,13 @@ advice 는 종류를 묻지 않고 값만 옮겨 담는다. 새 예외를 추가
 fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Any>> = …   // 이 하나로 끝난다
 ```
 
-**프레임워크 예외**(`MethodArgumentNotValidException` 등)는 `ApiException` 을 상속할 수 없어
-개별 핸들러가 남는다. 그 외에는 늘리지 않는다.
+**프레임워크 예외**는 `ApiException` 을 상속할 수 없어 개별 핸들러가 남는다.
+필요한 것은 둘뿐이고, 그 외에는 늘리지 않는다.
+
+| 프레임워크 예외 | 언제 | 응답 |
+|---|---|---|
+| `MethodArgumentNotValidException` | `@Valid` 검증 실패 | 400 + fieldErrors |
+| `HttpMessageNotReadableException` | 본문 누락·깨진 JSON | 400 (없으면 **500 으로 나간다** — 실측) |
 
 ## 예외는 던지는 도메인이 소유한다
 
@@ -54,12 +62,11 @@ fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Any>> = … 
 
 ```kotlin
 // core/core-<도메인>/.../<도메인>/domain/error/TodoNotFoundException.kt
-class TodoNotFoundException : ApiException(
+class TodoNotFoundException(todoId: Long) : ApiException(
     status = HttpStatus.NOT_FOUND,
     code = "TODO_NOT_FOUND",
-    title = "Not Found",
     detail = "할 일을 찾을 수 없습니다.",      // 사용자에게 보이는 문구
-    message = "할 일을 찾을 수 없습니다.",     // 로그용. 내부 값을 담아도 된다
+    message = "할 일이 없다: id=$todoId",      // 로그용. 내부 값을 담아도 된다
 )
 ```
 
@@ -70,8 +77,8 @@ class TodoNotFoundException : ApiException(
 
 ```kotlin
 fun find(id: Long): Todo {
-    val entity: TodoEntity = todoRepository.findByIdOrNull(id)
-        ?: throw TodoNotFoundException()
+    val entity: TodoEntity = todoRepository.findOneById(id)
+        ?: throw TodoNotFoundException(id)
     return entity.toModel()
 }
 ```
