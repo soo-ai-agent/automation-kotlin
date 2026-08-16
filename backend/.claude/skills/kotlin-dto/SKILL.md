@@ -86,10 +86,11 @@ data class TodoResponseDto(
   )
   ```
 
-- **요청 DTO 의 검증 대상은 nullable 로 둔다.** `@field:NotNull val lat: Double?` 에서 `?` 를
-  지우면 안 된다. Kotlin non-null 원시 타입은 값이 없을 때 예외가 아니라 **기본값이 들어간다.**
-  실측: 위도를 안 보낸 요청이 `lat=0.0`(적도)으로 계산돼 "위도가 없습니다" 대신
-  "거리가 너무 멉니다"가 나갔다. nullable + `@NotNull` 이면 어느 필드가 빠졌는지 응답에 담긴다.
+- **요청 DTO 의 검증 대상은 nullable 로 둔다.** `@field:NotNull val quantity: Int?` 에서 `?` 를
+  지우면 안 된다. Kotlin non-null 원시 타입은 값이 없을 때 예외가 아니라 **기본값이 들어간다**
+  (`Int`·`Double` 은 `0`, `Boolean` 은 `false`). 그래서 필드를 통째로 안 보낸 요청이
+  "값이 없습니다" 가 아니라 **0 을 보낸 요청과 똑같이** 처리되고, 엉뚱한 곳에서 다른 메시지로
+  실패한다. nullable + `@NotNull` 이면 어느 필드가 빠졌는지 응답에 담긴다.
   요청 DTO 안의 `Int`·`Double`·`Boolean` 은 non-null 로 선언하지 않는다.
 
 ## 적발 신호

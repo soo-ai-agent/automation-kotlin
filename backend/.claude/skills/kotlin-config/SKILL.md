@@ -9,7 +9,7 @@ description: 설정과 비밀값 규칙. 모듈별 yml 파일의 소유와 sprin
 
 ## 설정 파일은 모듈이 소유한다
 
-`core-api` 가 모든 설정을 갖지 않는다. 각 모듈이 자기 설정 파일을 갖고, `core-api` 가 그것을 끌어다 합친다.
+부팅 모듈이 모든 설정을 갖지 않는다. 각 모듈이 자기 설정 파일을 갖고, 부팅 모듈 `api` 가 그것을 끌어다 합친다.
 
 ```yaml
 # core/core-<도메인>/src/main/resources/application.yml

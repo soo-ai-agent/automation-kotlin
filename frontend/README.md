@@ -12,7 +12,7 @@ npm run build    # 타입 검사 + 빌드 — 이게 통과해야 한다
 
 주소·경로는 `frontend/.env` 에 있다. 처음 한 번 `cp .env.example .env` 하고 값을 채운다. 백엔드 기본 포트는 Spring Boot 기본값인 8080 이다.
 
-`src/lib/apiClient.ts` 의 `ApiResponseDTO` 는 백엔드 `ApiResponse<T>`(core-api 의 `support/response/ApiResponse.kt`) 와 이미 맞춰져 있다 — `{result, data, error}`.
+`src/lib/apiClient.ts` 의 `ApiResponseDTO` 는 백엔드 `ApiResponse<T>`(`core:core-common` 의 `response/ApiResponse.kt`) 와 이미 맞춰져 있다 — `{result, data, error}`.
 
 응답 래퍼를 바꿨다면 고치는 곳은 이 타입 하나다.
 

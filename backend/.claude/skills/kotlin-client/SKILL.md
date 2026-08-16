@@ -9,7 +9,7 @@ description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(A
 
 ## 모듈 하나가 외부 시스템 하나
 
-결제, 알림, 지도처럼 붙일 외부 시스템마다 모듈을 만든다. `settings.gradle.kts` 에 `clients:client-<이름>` 을 등록하고, `core-api` 가 그것을 `implementation` 으로 가져다 쓴다.
+결제, 알림, 지도처럼 붙일 외부 시스템마다 모듈을 만든다. `settings.gradle.kts` 에 `clients:client-<이름>` 을 등록하고, 그 외부 시스템을 부르는 도메인 모듈이 `implementation` 으로 가져다 쓴다.
 
 한 모듈 안의 파일은 넷이다. **역할이 겹치지 않게 나뉘어 있고, 그중 밖으로 나가는 것은 둘뿐이다.**
 

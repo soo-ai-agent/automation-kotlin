@@ -6,7 +6,7 @@
 
 ## 응답 래퍼
 
-모든 응답은 `ApiResponse<T>` 로 감싸진다 (`core-api` 의 `support/response/ApiResponse.kt`). 아래 엔드포인트 표에는 **`data` 안쪽의 모양**만 적는다.
+모든 응답은 `ApiResponse<T>` 로 감싸진다 (`core:core-common` 의 `response/ApiResponse.kt`). 아래 엔드포인트 표에는 **`data` 안쪽의 모양**만 적는다.
 
 ```json
 { "result": "SUCCESS", "data": { }, "error": null }
