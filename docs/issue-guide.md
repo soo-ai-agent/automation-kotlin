@@ -62,7 +62,7 @@
 - [ ] 할 일이 0개면 0% 로 표시된다
 
 ## 참고 (선택)
-- 목록 API: backend/core/core-api/.../controller/v1/TodoController.kt
+- 목록 API: backend/core/core-todo/.../todo/api/controller/TodoController.kt
 - 목록 화면: frontend/src/pages/todo/Todo.tsx
 ```
 

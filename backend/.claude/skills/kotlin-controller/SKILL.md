@@ -13,7 +13,8 @@ description: 컨트롤러 작성과 리뷰 규칙. core-<도메인> 의 controll
 
 2. 인증 정보 추출 (`@AuthenticationPrincipal` 등)
 
-3. 도메인 결과 → 응답 DTO 변환 (`XxxResponse.from(result)`). **래퍼로 감싸지 않는다** — 응답 DTO 를 그대로 돌린다
+3. 도메인 결과 → 응답 DTO 변환 후 `ApiResponse` 로 감싸기.
+   **래퍼는 프론트 계약이다**(`CONTRACT.md` 의 `{result, data, error}`) — 벗기면 프론트 `apiClient` 가 못 읽는다
 
 그 밖의 판단은 전부 도메인 서비스의 몫이다. 컨트롤러에 `if` 로 된 업무 규칙이 보이면 위반이다.
 
@@ -24,18 +25,18 @@ class TodoController(
     private val todoService: TodoService,
 ) {
     @GetMapping
-    fun list(@AuthenticationPrincipal member: MemberPrincipal): List<TodoResponse> {
+    fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponse>> {
         val results: List<TodoResult> = todoService.list(member.id)
-        return results.map(TodoResponse::from)
+        return ApiResponse.success(results.map(TodoResponse::from))
     }
 
     @PostMapping
     fun create(
         @AuthenticationPrincipal member: MemberPrincipal,
         @Valid @RequestBody request: TodoCreateRequestDto,
-    ): List<TodoResponse> {
+    ): ApiResponse<TodoResponse> {
         val result: TodoResult = todoService.create(member.id, request.toCommand())
-        return TodoResponseDto.from(result))
+        return ApiResponse.success(TodoResponse.from(result))
     }
 }
 ```

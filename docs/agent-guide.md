@@ -52,7 +52,7 @@ flowchart TD
 
 일꾼과 리뷰어가 자동으로 읽으며, 어떤 규칙이 적용될지는 고치는 파일의 위치가 정한다.
 
-    backend/core/core-api/... 를 고치면  → 백엔드 계층 규칙 (kotlin-*)
+    backend/api/... 또는 backend/core/core-<도메인>/... 를 고치면  → 백엔드 계층 규칙 (kotlin-*)
     frontend/src/... 를 고치면           → 프론트엔드 규칙 (frontend-react)
 
 리뷰어가 머지를 막는 것은 두 가지뿐이다 — [코드 리뷰 규칙](../common/docs/code-review/rules.md)의 MUST 위반과 해당 영역 스킬의 Critical 항목. 스타일 취향이나 있으면 좋을 개선은 통과시키고 코멘트로만 남긴다.

@@ -57,9 +57,9 @@ class SecurityConfig {
 
 ```kotlin
 @GetMapping
-fun list(@AuthenticationPrincipal member: MemberPrincipal): List<TodoResponse> {
+fun list(@AuthenticationPrincipal member: MemberPrincipal): ApiResponse<List<TodoResponse>> {
     val results: List<TodoResult> = todoService.list(member.id)   // 식별자만 넘긴다
-    return results.map(TodoResponseDto::from))
+    return ApiResponse.success(results.map(TodoResponseDto::from))
 }
 ```
 

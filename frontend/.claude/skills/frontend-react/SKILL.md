@@ -4,9 +4,9 @@ description: >
   React + TypeScript 프론트엔드 코드 작성·수정·리팩터링·리뷰 기준. '프론트',
   'React', '컴포넌트', '훅', '화면', 'UI 코드', '프론트 리뷰' 요청 시 반드시
   사용할 것. 자기완결적 — 규칙을 그대로 구현해 tsc strict 를 통과한
-  frontend/src/ 가 곧 정답 코드다(인프라 7개 + 사용자 목록 화면 13개). 핵심: 6단 레이어 고정, 페이지 무상태(useState/useEffect
+  frontend/src/ 가 곧 정답 코드다(인프라 7개 + 사용자 목록 화면 13개). 핵심: 도메인 최상위 + 그 아래 계층, 페이지 무상태(useState/useEffect
   금지), 결과 enum vs ServiceError 2분법, 메시지 enum, notify 단일 창구, 모달
-  forwardRef. 요약은 Quick Rules, 각 장 전문은 chapters.md. 공통 문서
+  forwardRef, `?` 마다 사유 주석. 요약은 Quick Rules, 각 장 전문은 chapters.md. 공통 문서
   (common/docs/code-review/rules.md) 위에 적용하며 충돌 시 이 문서가 우선. 백엔드는
   backend/.claude/skills/kotlin-* 이 담당.
 ---
@@ -29,17 +29,47 @@ description: >
 
 이 스킬의 임무는 두 가지다: ① 규칙에 맞게 작성한다. ② 기존 코드가 규칙을 지키는지, 알아보기 힘든 이름·구조 이탈이 없는지 확인하고 지적한다. (마지막 장 "코드 리뷰 절차")
 
+## 폴더 — 0장이 기준이다
+
+전문은 같은 폴더 `chapters.md` 0장에 있다. 요약하면 **도메인이 최상위**이고 그 아래가 계층이다. 한 도메인의 코드는 한 폴더 안에서 끝나야 한다.
+
+```
+src/
+  app/                라우팅·전역 스토어·부트스트랩. 어떤 도메인도 아니다
+  <도메인>/           user · order · admin …
+    pages/            화면(RN 은 screens/)  ·  components/  ·  hooks/
+    services/  api/  lib/  types/  enums/
+  components/<종류>/  여러 도메인이 쓰는 표현 컴포넌트만. ui · layout · modal · data_table
+  hooks/ services/ api/ lib/ types/ utils/ enums/    공용. 평면 유지, 도메인 폴더 금지
+```
+
+**소유는 쓰는 쪽이 정한다.** 화면을 뿌리로 import 를 거꾸로 따라가 한 도메인만 쓰면 그 도메인이 갖고, 둘 이상이 쓰면 공용 평면에 남는다.
+
+예외는 둘 — 이름이 도메인을 말하는데 남도 쓰는 것은 소유 도메인으로, 이름에 도메인이 없고 플랫폼 API 만 다루는 것은 한 도메인만 써도 공용에 남긴다.
+
+**흔한 오해**: `components/user/` 처럼 공용 계층 아래에 도메인 폴더를 파는 것. user 만 쓰면 `user/components/` 로 가야 한다.
+
+### 옮길 때
+
+1. import 는 손으로 고치지 않는다. **이동표(옛 경로 → 새 경로)로 상대 경로를 다시 계산**한다. `TS2307` 을 이름으로 맞추면 같은 이름이 두 계층에 있을 때 틀린다.
+
+2. **`tsc` 통과가 끝이 아니다.** 부작용 전용 import(`import "./x"`)는 타입 검사를 빠져나간다 — 웹은 `vitest`/`npm run build`, RN 은 `expo export` 로 번들까지 돌려야 드러난다.
+
+3. 폴더 이름이 파일명과 겹치면 `user/user/` 같은 중첩이 생긴다. 평탄화한다.
+
+4. 옮긴 뒤 빈 폴더를 지운다.
+
 ## 어디부터 읽나
 
 | 지금 하려는 일 | 읽을 곳 |
 |---|---|
 | 새 화면을 만든다 | **동봉 코드**(바로 아래) → chapters.md 15장 파일 표 → 필요할 때 해당 장 |
 | 규칙만 빠르게 확인한다 | Quick Rules |
-| 어디에 파일을 둘지 모르겠다 | chapters.md 0장(폴더) · 0-2장(이름·확장자·export) |
+| 어디에 파일을 둘지 모르겠다 | chapters.md 0장(도메인·계층) · 0-2장(이름·확장자·export) |
 | 남의 코드를 리뷰한다 | chapters.md 16장 리뷰 절차 8단계 |
 | 부엉이 기존 코드를 옮긴다 | chapters.md 14장 이관 지도 |
 
-**장 구성:** 0 폴더·이름 · 1 페이지 무상태 · 2 훅 · 3 services · 4 api · 5 lib · 6 메시지 enum · 7 결과/에러 · 8 알림 · 9 모달 · 10 상태·useEffect · 11 타입 · 12 이름 · 13 따라 하면 안 되는 것 · 14 부엉이 이관 · 15 구축 순서 · 16 리뷰
+**장 구성:** 0 도메인·계층·이름 · 1 페이지 무상태 · 2 훅 · 3 services · 4 api · 5 lib · 6 메시지 enum · 7 결과/에러 · 8 알림 · 9 모달 · 10 상태·useEffect · 11 타입 · 12 이름 · 13 따라 하면 안 되는 것 · 14 부엉이 이관 · 15 구축 순서 · 16 리뷰
 
 ## 코드 스타일
 
@@ -53,7 +83,7 @@ description: >
 
 - MUST: 사용자에게 보이는 문장은 전부 `export enum XxxResultMessages` 에 모은다. 호출부 인라인 문자열 금지. (6장)
 
-- MUST: **enum 선언은 `src/enums/` 에만 둔다.** 도메인 enum 은 도메인당 파일 하나(`enums/user.ts`), 인프라 enum 은 각자 파일. services·hooks·lib 파일 안 인라인 선언 금지.
+- MUST: **enum 선언은 `enums/` 에만 둔다.** 한 도메인의 enum 은 `<도메인>/enums/`, 여럿이 쓰는 것과 인프라 enum 은 공용 `src/enums/`. services·hooks·lib 파일 안 인라인 선언 금지.
 
 - MUST: 예상된 비정상 분기는 **결과 enum 반환**, 진짜 실패는 **`ServiceError` throw**. 불리언 반환 금지. (7장)
 
@@ -69,7 +99,15 @@ description: >
 
 - MUST: `unknown` 도 최소화한다. 쓰게 되면 "왜 모양을 보장할 수 없는지" 주석을 반드시 달고(catch 예외, 직렬화 경계 등), 받은 즉시 판정 함수에서 좁힌다. 사유를 못 쓰겠으면 명시적 타입이 있어야 한다는 뜻이다.
 
-- MUST: `nullable`(`?`, `| null`)을 선언하면 "왜 없음이 가능한지"를 주석으로 남긴다. 못 적으면 기본값·빈 컬렉션·전용 타입으로 바꾼다.
+- MUST: `nullable`(`?`, `| null`)을 선언하면 **"왜 없음이 가능한지"를 주석으로 남긴다.** 못 적으면 기본값·빈 컬렉션·전용 타입으로 바꾼다.
+
+  쓸 만한 이유는 넷뿐 — 외부 규격 · 원천 데이터 누락 · 주입점/기본값 · 화면마다 다른 선택 입력. (11-1장)
+
+- MUST: 같은 이유가 연속되는 `?` 는 **묶음 위에 한 줄만** 적는다. 필드마다 같은 문장을 되풀이하면 그게 곧 지워야 할 주석이다. (11-1장)
+
+- MUST: **이름과 타입이 이미 말한 것을 옮겨 적는 주석은 지운다**(`/** 소요 ms. */ durationMs`).
+
+  되풀이인데 그 줄에 `?` 가 있으면 지우지 말고 `?` 사유로 바꿔 쓴다. (11-2장)
 
 - MUST: 스타일 정의(StyleSheet.create·큰 인라인 style·CSS-in-JS)는 컴포넌트에 두지 않고 별도 스타일 파일로 뺀다(RN: `Foo.tsx` → `Foo.styles.ts`).
 
@@ -135,6 +173,9 @@ frontend/src/
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
+| 공용 계층 아래 도메인 폴더(`components/user/`·`hooks/order/`) | 도메인 최상위 위반 — 그 도메인 폴더로 (0장) | Critical |
+| 사유 주석 없는 `?` 선언 | 안 오는 값인지 안 줘도 되는 값인지 못 읽는다 (11-1장) | Critical |
+| 이름을 되풀이할 뿐인 주석 | 정보 0, 이름 바뀌면 거짓말 (11-2장) | Important |
 | 페이지·컴포넌트에 `useState`/`useEffect` | 페이지 무상태 위반 — 상태는 훅으로 (1·2장) | Critical |
 | 훅·컴포넌트·페이지의 `result.status ===` 분기 | 상태코드 번역은 services 전담 (3·7장) | Critical |
 | 컴포넌트에서 `fetch`/`axios`/서비스 직접 호출 | 참조 방향 위반 — 컴포넌트는 props 만 그린다 (0장) | Critical |
@@ -157,6 +198,8 @@ frontend/src/
 
 - [ ] 페이지가 훅 1개 호출 + JSX 뿐인가 (`useState` 0개)
 
+- [ ] 도메인이 최상위이고, 공용 계층에 도메인 폴더가 없는가
+
 - [ ] 참조가 `pages → hooks → services → api → lib` 한 방향인가
 
 - [ ] JSX 없는 파일이 `.ts` 이고, default export 는 화면뿐인가
@@ -173,7 +216,11 @@ frontend/src/
 
 - [ ] `unknown` 마다 사유 주석이 있고 즉시 좁혀지는가
 
-- [ ] enum 선언이 전부 `src/enums/` 에 있는가
+- [ ] enum 선언이 전부 `enums/` 에 있는가(한 도메인 것은 `<도메인>/enums/`)
+
+- [ ] `?` 마다 사유가 있고, 같은 이유는 묶음 위 한 줄로 모였는가
+
+- [ ] 이름을 되풀이할 뿐인 주석이 없는가
 
 흐름
 

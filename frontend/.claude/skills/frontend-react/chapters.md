@@ -2,31 +2,48 @@
 
 SKILL.md 의 Quick Rules 가 요약이고, 여기가 전문이다. 장 번호는 SKILL.md 의 장 구성과 같다.
 
-## 0. 레이어 6단 — 파일이 놓일 자리
+## 0. 도메인이 최상위, 그 아래가 계층
 
-레퍼런스가 실제로 쓰는 구조다. **이 지도에 없는 위치의 코드는 리뷰에서 잡는다.**
+**도메인이 먼저고 계층이 그 아래다.** 한 도메인의 코드는 한 폴더 안에서 끝나야 한다 — 화면 하나를 고치려고 여섯 폴더를 오가면 구조가 틀린 것이다.
+
+**이 지도에 없는 위치의 코드는 리뷰에서 잡는다.**
 
 ```
 src/
-├── pages/         # 화면 조립만. 훅 1개 호출 + JSX.        (상태 0)
-├── components/    # 표현 컴포넌트 (table/modal/layout/auth)
-├── hooks/         # 화면 상태 + 유스케이스 오케스트레이션   (useState 는 여기에만)
-├── services/      # 업무 규칙 + 상태코드 → 결과/에러 번역   (React 금지)
-├── api/           # 엔드포인트 1:1 요청 함수 + 경로 상수
-├── lib/           # apiClient, 에러 타입, 저장소, notify  (인프라만. DTO 금지)
-├── types/         # 모든 서버 DTO·Row 타입              (DTO 의 유일한 거처)
-└── utils/         # 순수 포맷 함수 (formatDate …)
+├── app/                    # 라우팅·전역 스토어·부트스트랩. 어떤 도메인도 아니다
+├── <도메인>/               # route · share · place · admin … 도메인 이름이 곧 폴더 이름
+│   ├── pages/              # 화면 조립만. 훅 1개 호출 + JSX        (상태 0)  RN 은 screens/
+│   ├── components/         # 이 도메인만 쓰는 표현 컴포넌트
+│   ├── hooks/              # 화면 상태 + 유스케이스 오케스트레이션  (useState 는 여기에만)
+│   ├── services/           # 업무 규칙 + 상태코드 → 결과/에러 번역   (React 금지)
+│   ├── api/                # 엔드포인트 1:1 요청 함수 + 경로 상수
+│   ├── lib/                # 이 도메인의 순수 로직·파생 계산
+│   ├── types/              # 이 도메인의 서버 DTO·Row 타입
+│   └── enums/              # 이 도메인의 메시지·결과·구분 enum
+└── (공용 — 평면 유지)
+    ├── components/<종류>/  # 여러 도메인이 쓰는 표현 컴포넌트. ui · layout · map · modal
+    └── hooks/ services/ api/ lib/ types/ utils/ enums/
 ```
 
-`pages/`·`components/` 는 하위 폴더로 한 번 더 나눈다. **나누는 기준이 서로 다르다:**
+**공용에는 도메인 폴더를 파지 않는다.** 공용에서 하위 폴더로 한 번 더 나누는 것은 `components/<종류>/` 뿐이고 나머지는 평면이다.
 
-- `pages/<도메인>/` — **도메인별**. `pages/member/MemberRecord.tsx`, `pages/admin/AdminsTabPage.tsx`. 라우팅 진입점·404·로딩처럼 도메인이 없는 화면만 `pages/` 바로 아래 둔다.
+`hooks/route/` 는 위반이다 — route 만 쓰면 `route/hooks/` 로 가야 하고, 여럿이 쓰면 `hooks/` 바로 아래다.
 
-- `components/<종류>/` — **종류별**(도메인별 아님). `components/{layout,data_table,modal,auth,routes}/`.
+### 어느 도메인의 것인지 정하는 법
 
-  도메인이 폴더 이름에 오면 안 된다(`components/member/` 는 위반 — `components/data_table/MemberRecordTable.tsx`).
+**쓰는 쪽이 정한다.** 화면을 뿌리로 두고 import 를 거꾸로 따라간다 — 한 도메인만 쓰면 그 도메인이 갖고, 둘 이상이 쓰면 공용 평면에 남는다.
 
-의존 방향은 한 방향이다. **역방향과 건너뛰기를 둘 다 금지한다.**
+손으로 정정하는 예외는 둘뿐이다.
+
+1. **이름이 도메인을 말하는데 다른 도메인도 쓰는 것** — `shareSession` 은 길안내(route)도 부르지만 공유(share)의 것이다. 소유 도메인으로 보낸다.
+
+2. **이름에 도메인이 없고 플랫폼 API 만 다루는 것** — `wakeLock`·`geo`·`localCache` 는 한 도메인만 써도 공용에 남는다.
+
+   `lib`·`utils` 는 어떤 도메인 단어도 몰라야 한다는 규칙이 이긴다.
+
+### 의존 방향
+
+한 방향이다. **역방향과 건너뛰기를 둘 다 금지한다.**
 
 ```
 pages ──▶ hooks ──▶ services ──▶ api ──▶ lib
@@ -37,26 +54,25 @@ pages ──▶ hooks ──▶ services ──▶ api ──▶ lib
 
 - `api` 는 업무 규칙을 모른다. 상태코드로 분기하거나 사용자 메시지를 만들면 `services` 로 내린다.
 
-- `lib` 은 어떤 도메인 단어(`member`, `admin` …)도 모른다. 등장하면 `services`/`api` 로 옮긴다.
+- `lib` 은 어떤 도메인 단어도 모른다. 등장하면 그 도메인의 `services`/`lib` 로 옮긴다.
 
 - 페이지가 `services` 를 직접 부르면 건너뛰기 위반이다. 반드시 훅을 통한다.
 
-### 부엉이 실구조 매핑
+**도메인끼리는 같은 계층만 가로지른다.** 관리자 화면이 보호자 화면을 미리보기로 그리는 식(`admin/pages` → `share/pages`)은 된다. 남의 도메인 훅·서비스 안쪽을 파고드는 것은 안 된다 — 필요하면 그 도메인이 밖으로 내주는 것만 쓴다.
 
-부엉이는 feature-sliced 구조라 폴더 이름이 다르다. **역할 대응은 그대로 유지**한다.
+### 옮길 때
 
-| 이 문서 | 부엉이 실제 경로 |
-|---|---|
-| `api/` | `src/features/<도메인>/api/` — **현재 없음. 신설 대상** (3·14장) |
-| `services/` | `src/features/<도메인>/services/` |
-| `hooks/` | `src/features/<도메인>/hooks/`, 도메인 무관은 `src/hooks/` |
-| `lib/` | `src/utils/{httpClient,apiError,…}.ts` |
-| `components/` | `src/components/` (`ui`·`map`·`figma`) |
-| `types/` | `src/types/` |
+1. import 는 손으로 고치지 않는다. **이동표(옛 경로 → 새 경로)를 만들어 상대 경로를 다시 계산**한다.
 
-서버 상태 라이브러리(React Query 등)는 **미도입**이다. 레퍼런스도 쓰지 않는다.
+   tsc 의 `TS2307` 을 읽어 이름으로 맞추는 방법도 있지만, 같은 이름이 두 계층에 있으면(`geo` 가 `types`·`lib` 에 각각) 틀린 곳을 가리킨다.
 
-서버 데이터는 훅 안의 `useState` + 로더 함수로 관리하고, HTTP 는 중앙 axios 클라이언트 (`src/utils/httpClient.ts`)를 경유한다(CLAUDE.md 6절).
+2. **`tsc` 통과가 끝이 아니다.** 부작용 전용 import(`import "./x"`)는 타입 검사를 빠져나간다 — 웹은 `vitest`, RN 은 `expo export` 로 번들까지 돌려야 드러난다.
+
+3. 폴더 이름이 파일명과 겹치면 `onboarding/onboarding/` 같은 중첩이 생긴다. 옮긴 뒤 평탄화한다.
+
+4. 옮긴 뒤 **빈 폴더를 지운다.** 남아 있으면 다음 사람이 그 계층이 아직 산다고 읽는다.
+
+서버 상태 라이브러리(React Query 등)는 **미도입**이다. 서버 데이터는 훅 안의 `useState` + 로더 함수로 관리하고, HTTP 는 중앙 클라이언트를 경유한다.
 
 ### 0-2. 파일 이름·확장자·export 규칙
 
@@ -67,10 +83,12 @@ pages ──▶ hooks ──▶ services ──▶ api ──▶ lib
 | `pages/` | 화면명 PascalCase — `MemberRecord.tsx` | `.tsx` | **default** (+ 필요 시 named 병행) |
 | `components/` | 컴포넌트명 PascalCase — `MemberRecordTable.tsx` | `.tsx` | **default** |
 | `hooks/` | 훅명 그대로 — `useMemberRecordList.ts` | `.ts` | **named** |
-| `services/` | `<도메인>Service.ts` — `memberRecordService.ts` | `.ts` | **named** |
-| `api/` | `<도메인>.ts` (접미사 없음) — `member.ts` | `.ts` | **named** |
+| `services/` | 하는 일 camelCase — `userService.ts`, `routeCompare.ts` | `.ts` | **named** |
+| `api/` | 부르는 자원 — `user.ts`, `routes.ts` | `.ts` | **named** |
 | `lib/` | 역할명 camelCase — `apiClient.ts`, `notify.ts` | `.ts` | **named** |
-| `types/` | `<도메인>.ts` — `admin.ts` | `.ts` | **named** |
+| `types/` | 담는 것 — `user.ts`, `route.ts` | `.ts` | **named** |
+
+**폴더가 이미 도메인을 말하므로 파일 이름에 도메인을 되풀이하지 않는다.** `route/services/routeService.ts` 는 `route` 를 세 번 말한다.
 
 - **JSX 를 포함하지 않는 파일은 반드시 `.ts`.** 레퍼런스의 `api/member.tsx` 는 JSX 가 없는데 `.tsx` 인 실수다(13장). 따라 하지 않는다.
 
@@ -146,7 +164,7 @@ export function RouteComparison() {
   const [mapBottomInset, setMapBottomInset] = useState(0);
   // … 로드 effect, 취소 처리, 에러 문자열 조립까지 전부 페이지 안에
 }
-// → features/route/hooks/useRouteComparison.ts 로 상태 전량 이동.
+// → route/hooks/useRouteComparison.ts 로 상태 전량 이동.
 //   페이지에는 const {map, sheet, routes} = useRouteComparison() 만 남는다.
 ```
 
@@ -631,19 +649,71 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 
 - **DTO 는 서버 필드명을 그대로 쓴다.** `user_id`, `is_superuser`, `created_at` 을 camelCase 로 바꾸지 않는다. 계약서와 눈으로 대조되어야 한다. 화면용 이름이 필요하면 `services` 에서 화면 모델로 변환한다.
 
-- **nullable 에는 "왜 없음이 가능한지" 주석을 단다.** 레퍼런스 `types/admin.ts` 가 이 규칙의 본보기다:
-
-  ```ts
-  export type AdminRow = {
-      last_login?: string | null;             // 최초 로그인 시, null로 저장.
-      blocked_reason?: string | null;         // 차단되어 있지 않은 경우 null로 저장.
-      blocked_at?: string | null;             // 차단되어 있지 않은 경우 null로 저장.
-  };
-  ```
-
 - **`?` 와 `| null` 을 구분한다.** `?` 는 "필드 자체가 안 올 수 있다", `| null` 은 "필드는 오지만 값이 빌 수 있다"는 뜻이다.
 
-  서버 계약이 항상 보내는 필드에 습관적 `?` 를 붙이지 않는다 — undefined 분기가 온 화면에 퍼진다. 레퍼런스 `AdminRow` 의 `?` 는 답습하지 않는다.
+  서버 계약이 항상 보내는 필드에 습관적 `?` 를 붙이지 않는다 — undefined 분기가 온 화면에 퍼진다.
+
+### 11-1. `?` 를 쓸 거면 왜 없을 수 있는지 적는다 (MUST)
+
+`?` 만 봐서는 **"안 올 수 있는 값"인지 "안 줘도 되는 값"인지** 읽는 사람이 구분할 수 없다. 선언마다 이유를 한 줄로 남긴다.
+
+**사유를 못 적겠으면 `?` 를 지우라는 뜻이다.** 기본값·빈 배열·전용 타입으로 바꾼다.
+
+실제로 쓸 만한 이유는 네 갈래뿐이다. 이 넷에 안 들어가면 대개 습관적 `?` 다.
+
+| 갈래 | 예 |
+|---|---|
+| 외부 규격이 그렇다 | `// 카카오 SDK 규격 — 생략하면 SDK 기본 결과 개수.` |
+| 원천 데이터가 비어 온다 | `// 원천에 이름·주소가 없는 점이 있다.` |
+| 주입점·기본값이다 | `// 주입점 — 생략하면 중앙 httpClient 를 쓴다.` |
+| 화면마다 넘기는 게 다르다 | `// 목적지를 아직 안 고른 화면(홈)에서는 없다.` |
+
+**같은 이유가 연속되면 묶음 위에 한 줄만 적는다.** 필드마다 같은 문장을 되풀이하면 그게 곧 지워야 할 주석이다.
+
+```ts
+// O — 한 이유가 묶음 전체를 설명한다
+export interface MapMarker extends LatLng {
+  // 출발·도착 마커는 이 정보가 전부 없다.
+  type?: MapMarkerType;
+  label?: string;
+  cameraCount?: number;
+}
+
+// X — 같은 말을 세 번 한다
+export interface MapMarker extends LatLng {
+  type?: MapMarkerType;    // 없을 수 있음
+  label?: string;          // 없을 수 있음
+  cameraCount?: number;    // 없을 수 있음
+}
+
+// X — 이유가 아니라 이름을 되풀이한다
+/** 소요 ms. */
+durationMs?: number;
+```
+
+`| null` 도 같다. "왜 빌 수 있는지"를 적는다 — `lastRefreshCount: number | null;` 위의 `// 갱신에 실패했거나 아직 한 번도 안 돌았다.` 가 그것이다.
+
+찾을 때: `?:` 선언을 훑어 **바로 위(또는 묶음 위)에 주석이 없는 줄**을 본다. 그 줄이 곧 위반이다.
+
+### 11-2. 이름을 되풀이하는 주석은 지운다 (MUST)
+
+기본은 무주석이다. 주석은 **코드가 말할 수 없는 것**만 적는다 — 왜 없을 수 있는지(11-1), 외부 규격, 단위·범위, 의도한 규칙 이탈.
+
+이름과 타입이 이미 말한 것을 한국어로 옮겨 적으면 지운다. 정보가 0인데 diff 만 늘리고, 이름이 바뀌면 거짓말이 된다.
+
+```ts
+// X — 지운다. 이름과 타입이 이미 말한다
+/** 소요 ms. */            durationMs: number;
+/** HTTP 상태 코드. */     status: number;
+/** 진행 중 여부. */       isRunning: () => boolean;
+
+// O — 남긴다. 코드가 말할 수 없는 것이다
+/** 0~1. */                                        successRate: number;
+/** 호출수 내림차순. */                            byEndpoint: EndpointTraffic[];
+/** 백엔드 추가 필드(하위호환) — 누락 시 0. */     p95DurationMs?: number;
+```
+
+이름만 되풀이하는데 그 줄에 `?` 가 있으면, 지우지 말고 **`?` 사유로 바꿔 쓴다.**
 
 - `object`·`{}`·`Record<string, unknown>` 을 도메인 데이터에 쓰지 않는다. 필드를 아는 데이터는 필드를 적는다.
 
@@ -653,7 +723,7 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 
 - 닫힌 값 집합은 `enum`. 다만 객체 구조·함수 시그니처·라우팅 파라미터 타입은 enum 대상이 아니다.
 
-- **enum 선언 위치는 `src/enums/` 로 고정한다.** 도메인 enum(메시지·결과·상태)은 `enums/<도메인>.ts` 한 파일에, 인프라 enum 은 각자 파일에. 사용처 파일 안 인라인 선언은 위반이다.
+- **enum 선언 위치는 `enums/` 로 고정한다.** 한 도메인의 enum(메시지·결과·상태)은 `<도메인>/enums/`, 여러 도메인이 쓰는 것과 인프라 enum 은 공용 `src/enums/` 에 각자 파일로. 사용처 파일 안 인라인 선언은 위반이다.
 
 ## 12. 이름 규칙
 
@@ -711,10 +781,11 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 |---|---|---|---|
 | 페이지 상태 | `pages/` 에 `useState` 62 · `useEffect` 27 | 훅으로 전량 이동, 페이지 상태 0 | **높음** |
 | 훅 수 | 6개 (`useRequestOrigin`·`useWakeLock`·`useOffRouteReroute`·`useAdminResource` …) | 화면당 조립 훅 1 + 단일책임 훅 N | **높음** |
-| api 레이어 | 없음 — `services/*.ts` 가 HTTP + 규칙을 겸함 | `features/<d>/api/` 신설, 서비스는 규칙만 | **높음** |
+| api 레이어 | 없음 — `<도메인>/services/*.ts` 가 HTTP + 규칙을 겸함 | `<도메인>/api/` 신설, 서비스는 규칙만 | **높음** |
 | 메시지 enum | 0건, 문장이 호출부 인라인 | `<도메인>ResultMessages` 로 수렴 | 중간 |
 | 결과 표현 | 불리언·`null`·문자열 혼재 | 결과 enum + `ApiError` 2분법 | 중간 |
 | 알림 창구 | 토스트 직접 호출이 8개 파일에 분산 | `src/utils/notify.ts` 단일 창구 | 중간 |
+| 폴더 구조 | 도메인 최상위 + 계층 하위(0장) | **이미 목표 상태.** 유지 | — |
 | 공용 에러 핸들러 | `useAdminResource` 안에만 존재(관리자 전용) | `useServiceErrorHandler` 로 앱 전역화 | 중간 |
 | HTTP 클라이언트 | `src/utils/httpClient.ts` 단일 · 인터셉터 · DI 목 | **이미 목표 상태.** 유지 | — |
 | 에러 타입 | `ApiError`(`userMessage` 보유) | **이미 목표 상태.** `level` 만 보강 | — |
@@ -722,7 +793,7 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 
 이관 방식 — **한 번에 전면 개편하지 않는다.** 손대는 화면 단위로 옮긴다:
 
-1. 그 화면의 페이지에서 `useState`/`useEffect` 를 전부 뽑아 `features/<도메인>/hooks/use<화면>.ts` 로 옮긴다.
+1. 그 화면의 페이지에서 `useState`/`useEffect` 를 전부 뽑아 `<도메인>/hooks/use<화면>.ts` 로 옮긴다.
 
 2. 상태 덩어리가 2개 이상이면 단일책임 훅으로 쪼개고 조립 훅으로 묶는다.
 
@@ -781,12 +852,12 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 
 지적 예시:
 
-- `pages/RouteComparison.tsx:38 — [페이지 무상태] 페이지에 useState 9개·로드 useEffect 존재 → features/route/hooks/useRouteComparison.ts 로 이동, 페이지는 const {map, sheet, routes} = useRouteComparison() 만`
+- `route/pages/RouteComparison.tsx:38 — [페이지 무상태] 페이지에 useState 9개·로드 useEffect 존재 → route/hooks/useRouteComparison.ts 로 이동, 페이지는 const {map, sheet, routes} = useRouteComparison() 만`
 
-- `features/route/services/routeCompare.ts:52 — [레이어 책임] 서비스가 httpClient 를 직접 호출 → features/route/api/routeApi.ts 의 fetchRouteCompare() 로 분리하고 서비스는 결과 번역만`
+- `route/services/routeCompare.ts:52 — [레이어 책임] 서비스가 httpClient 를 직접 호출 → route/api/routes.ts 의 fetchRouteCompare() 로 분리하고 서비스는 결과 번역만`
 
 - `pages/admin/LogsPage.tsx:89 — [메시지] 한국어 문장이 인라인 → services/apiLogs.ts 에 ApiLogsResultMessages.LOAD_ERROR 로 승격`
 
-- `features/share/services/shareSession.ts:120 — [결과 표현] 실패를 null 반환으로 표현 → ShareSessionOutcome enum 반환 + 진짜 실패는 ApiError throw`
+- `share/services/shareSession.ts:120 — [결과 표현] 실패를 null 반환으로 표현 → ShareSessionOutcome enum 반환 + 진짜 실패는 ApiError throw`
 
 지적만 하지 않는다. 각 항목에 "왜 문제인지 한 문장 + 고친 모습"까지 제시해야 리뷰가 끝난 것이다.
