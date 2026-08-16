@@ -56,6 +56,9 @@ class TodoFinder(
   )
   ```
 
+  **storage 쪽에 둘 수도 없다.** 변환 결과(`TodoResult`)가 core 소유라 storage 가 core 를
+  import 하게 된다 — 방향 위반. 갈 수 있는 자리는 구현 레이어 하나뿐이다.
+
 - `@Component` 로 등록하고 생성자 주입만 쓴다.
 
 - `@Transactional` 을 붙이지 않는다. 트랜잭션 경계는 서비스가 소유한다.

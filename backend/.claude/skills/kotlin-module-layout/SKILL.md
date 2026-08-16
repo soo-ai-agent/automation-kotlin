@@ -137,7 +137,16 @@ Controller  →  Domain Service  →  Implement  →  Repository / Client
 
 - 레이어 건너뛰기 금지: 컨트롤러가 리포지토리를, 도메인 서비스가 리포지토리를 직접 부르지 않는다.
 
-- **엔티티는 `storage` 밖으로 나가지 않는다.** 구현 레이어가 엔티티를 도메인 모델로 바꿔 위로 올린다.
+- **엔티티는 구현 레이어 위로 올라가지 않는다.** 구현 레이어가 지역변수로 다루고
+  도메인 모델로 바꿔 올린다. 변환은 구현 레이어 소유의 `internal` 확장 함수다(`kotlin-implement`).
+
+- **변환을 storage 에 둘 수는 없다.** 변환 결과(도메인 모델)가 core 소유라, storage 가
+  core 를 import 하게 되어 방향이 뒤집힌다. 타입을 생산하는 쪽이 소유자다.
+
+- **storage 가 올려다볼 수 있는 것은 `core:core-enum` 하나뿐이다** — 엔티티의 enum 컬럼이
+  공유 enum 일 때다(README 1-3 배선). `core-common` 은 금지다: 저장 모델·엔티티는
+  `ApiException` 을 던질 수 없고, 불변식 위반은 표준 예외(`check`·`require`)로 던진다.
+  도메인 판정(404·409)은 core 가 그것을 받아 자기 예외로 바꾼다.
 
 - 컨트롤러의 요청/응답 DTO 는 도메인 아래로 내려가지 않는다.
 
