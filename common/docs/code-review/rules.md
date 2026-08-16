@@ -26,7 +26,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 - 레이어 방향은 상위 → 하위 단방향이다. 건너뛰기·역참조 금지. 백엔드는 controller → domain service → implement → repository, 프론트는 pages → hooks → services → api → lib 이고, 도메인이 최상위 폴더다(`src/<도메인>/<계층>`, 공용은 `src/common/`).
 
-- 엔티티는 `storage` 모듈 밖으로 나가지 않는다.
+- 엔티티는 **구현 레이어(Finder·Appender 등) 위로 올라가지 않는다.** 구현 레이어가 지역변수로 다루고 도메인 모델로 바꿔 올리는 것까지가 허용이다. 서비스·컨트롤러 시그니처, **도메인 모델의 필드나 변환 파라미터**에 엔티티가 나타나면 차단 사유다 — `Result.from(entity)` 를 도메인 모델에 두면 모델이 storage 를 import 하게 된다. 변환은 구현 레이어 안의 확장 함수로 한다.
 
 - 엔티티나 컬럼을 바꾸면 **같은 변경에 Flyway 마이그레이션이 포함된다.** 운영은 `ddl-auto: validate` 라 없으면 배포가 부팅에 실패한다. 이미 머지된 마이그레이션 파일을 수정·삭제하지 않는다.
 

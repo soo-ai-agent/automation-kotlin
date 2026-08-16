@@ -167,6 +167,6 @@ Controller  →  Domain Service  →  Implement  →  Repository / Client
 
 - [ ] import 방향이 상위 → 하위 단방향인가
 
-- [ ] 엔티티가 `storage` 모듈 밖으로 새지 않았는가
+- [ ] 엔티티가 구현 레이어 위(서비스 시그니처·도메인 모델·컨트롤러)로 새지 않았는가
 
 - [ ] 다른 도메인은 서비스를 통해서만 참조하는가

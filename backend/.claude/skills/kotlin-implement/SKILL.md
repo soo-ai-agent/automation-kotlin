@@ -29,7 +29,7 @@ class TodoFinder(
     private val todoRepository: TodoRepository,
 ) {
     fun listByMember(memberId: Long): List<TodoResult> =
-        todoRepository.findAllByMemberIdOrderByIdDesc(memberId).map(TodoResult::from)
+        todoRepository.findAllByMemberIdOrderByIdDesc(memberId).map { it.toResult() }
 
     fun getOwned(memberId: Long, todoId: Long): Todo {
         val entity: TodoEntity = todoRepository.findByIdAndMemberId(todoId, memberId)
@@ -44,6 +44,17 @@ class TodoFinder(
 - 클래스 하나가 **역할 하나**를 갖는다. `TodoManager` 처럼 뭐든 하는 이름을 만들지 않는다.
 
 - **엔티티 ↔ 도메인 모델 변환은 여기가 유일한 자리다.** 위로는 도메인 모델만 올려보낸다.
+  변환은 구현 레이어 파일의 **최상위 `internal` 확장 함수**로 둔다 — `TodoResult.from(entity)` 를
+  도메인 모델의 companion 에 두면 **모델이 storage 를 import 하게 되어** 경계가 그리로 샌다.
+
+  ```kotlin
+  // domain/service/TodoEntityMapper.kt — 구현 레이어 소유
+  internal fun TodoEntity.toResult(): TodoResult = TodoResult(
+      id = id,
+      title = title,
+      done = done,
+  )
+  ```
 
 - `@Component` 로 등록하고 생성자 주입만 쓴다.
 
