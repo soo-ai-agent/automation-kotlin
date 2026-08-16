@@ -27,7 +27,7 @@ advice 는 종류를 묻지 않고 값만 옮겨 담는다. 새 예외를 추가
 
 ```kotlin
 @ExceptionHandler(ApiException::class)
-fun handleApi(ex: ApiException): ProblemDetail = …   // 이 하나로 끝난다
+fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Any>> = …   // 이 하나로 끝난다
 ```
 
 **프레임워크 예외**(`MethodArgumentNotValidException` 등)는 `ApiException` 을 상속할 수 없어
@@ -101,7 +101,7 @@ fun find(id: Long): Todo {
 
 특히 **"없음"과 "권한 없음"을 구분해 알려주면 남의 데이터 존재 여부가 새어 나간다.** 소유자 스코프가 있는 조회는 둘 다 404 로 응답하는 편이 안전하다.
 
-세부 정보가 필요하면 `ProblemDetail(errorType, data)` 의 `data` 에 담는다 — 검증 실패의 필드별 메시지가 그 예다.
+필드별 사유가 필요하면 `ApiException.fieldErrors` 에 담는다 — 검증 실패가 그 예다.
 
 ## 검증 실패 핸들러
 
@@ -109,18 +109,35 @@ fun find(id: Long): Todo {
 
 없으면 400 이 응답 DTO 형태가 아닌 스프링 기본 응답으로 나가고 **프론트 `apiClient` 가 껍데기를 벗기지 못한다.** 뼈대를 만들 때 넣는다 (`backend/README.md` 2절).
 
+검증 실패도 `ApiException` 하위 예외로 바꿔 던지면, 응답을 만드는 자리가 한 곳으로 유지된다.
+
+```kotlin
+// 공용 모듈 — 프레임워크 검증 실패를 우리 예외로 옮긴다
+class RequestValidationException(fieldErrors: List<ApiFieldError>) :
+    ApiException(
+        status = HttpStatus.BAD_REQUEST,
+        code = "INVALID_REQUEST",
+        detail = "요청 값을 확인해 주세요.",
+        fieldErrors = fieldErrors,
+        message = "요청 검증 실패",
+    )
+```
+
 ```kotlin
 // 포괄 Exception 핸들러보다 위에 둔다
 @ExceptionHandler(MethodArgumentNotValidException::class)
-fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ProblemDetail {
-    val errors: MutableMap<String, String> = mutableMapOf()
+fun handleValidationFailure(e: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Any>> {
+    val fieldErrors: MutableList<ApiFieldError> = mutableListOf()
     for (fieldError in e.bindingResult.fieldErrors) {
-        errors[fieldError.field] = fieldError.defaultMessage ?: "올바르지 않은 값입니다"
+        val message: String = fieldError.defaultMessage ?: "올바르지 않은 값입니다."
+        fieldErrors.add(ApiFieldError(fieldError.field, message))
     }
-    log.warn("Validation failed : {}", errors)
-    return ResponseEntity(ProblemDetail(ApiException.VALIDATION_ERROR, errors), ApiException.VALIDATION_ERROR.status)
+    return respond(RequestValidationException(fieldErrors))
 }
 ```
+
+**`:` 앞에서 줄을 바꾼 것에 이유가 있다.** 클래스 선언 줄이 길어지면 ktlint 가
+`Super type should start on a newline` 으로 막는다. 생성자 인자가 있는 예외는 위 형태로 쓴다.
 
 핸들러는 **좁은 예외부터 위에, 포괄 `Exception` 은 맨 아래**에 둔다. 순서가 바뀌면 좁은 핸들러가 영영 안 걸린다.
 

@@ -47,6 +47,21 @@ support/*/                 로깅·모니터링·범용 함수
 3. `support/error`·`support/response` 는 `core/core-common` 으로 옮긴다.
 4. `settings.gradle.kts` 의 `include` 를 새 모듈 이름으로 고친다.
 
+### 1-3. 모듈을 옮기고 나면 배선 셋이 어긋나 있다
+
+**실제로 이 셋에 다 걸린다.** 컴파일이나 기동이 막히는 지점이라 미리 적어 둔다.
+
+1. **`storage:db-core` 가 `core:core-enum` 을 의존하지 않는다.** 그런데 배치 규칙은 enum 을
+   `core-enum` 에 두라고 한다. 엔티티가 그 enum 을 쓰는 순간 `Unresolved reference` 가 난다.
+   `storage/db-core/build.gradle.kts` 에 `api(project(":core:core-enum"))` 을 더한다.
+
+2. **`api/src/main/resources/application.yml` 이 `client-example.yml` 을 import 한다.**
+   예시 클라이언트 모듈을 의존에서 빼면 기동이 `Config data resource ... does not exist` 로
+   실패한다. 안 쓰는 import 줄을 지운다.
+
+3. **`AsyncExceptionHandler` 가 템플릿 예외(`CoreException`)를 안다.** 예외 베이스를
+   `ApiException` 으로 바꾸면 여기도 함께 고쳐야 컴파일된다.
+
 **도메인이 아직 하나뿐이면 모듈을 미리 쪼개지 않는다.** 두 번째 도메인이 생길 때 나눈다 —
 나눌 값이 있는지는 `kotlin-module-layout` 의 "바깥의 import 수" 로 판단한다.
 

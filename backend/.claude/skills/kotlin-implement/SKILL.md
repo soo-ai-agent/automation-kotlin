@@ -17,7 +17,7 @@ description: 구현 레이어 작성과 리뷰 규칙. domain/service/ 의 Finde
 
 | 이름 | 하는 일 |
 |---|---|
-| `XxxFinder` | 조회. 없으면 `ApiException` 하위 예외 을 던지는 `getXxx`, 목록을 주는 `listXxx` |
+| `XxxFinder` | 조회. 없으면 `ApiException` 하위 예외를 던지는 `getXxx`, 목록을 주는 `listXxx` |
 | `XxxAppender` | 신규 저장 |
 | `XxxUpdater` | 기존 상태 변경 (엔티티 행위 메서드 호출) |
 | `XxxRemover` | 삭제·비활성화 |

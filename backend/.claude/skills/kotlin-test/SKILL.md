@@ -32,7 +32,7 @@ class TodoAppenderTest {
     @Test
     fun `제목이 공백이면 예외를 던진다`() {
         assertThatThrownBy { appender.append(memberId = 1L, command = TodoCreateCommand("  ")) }
-            .isInstanceOf(ApiException 하위 예외 —:class.java)
+            .isInstanceOf(TodoTitleBlankException::class.java)
     }
 }
 ```
