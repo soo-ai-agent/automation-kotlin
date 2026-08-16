@@ -20,6 +20,7 @@ description: 도메인 서비스 작성과 리뷰 규칙. core/domain 의 Servic
 class TodoService(
     private val todoFinder: TodoFinder,
     private val todoAppender: TodoAppender,
+    private val todoUpdater: TodoUpdater,
 ) {
     @Transactional(readOnly = true)
     fun list(memberId: Long): List<TodoResult> = todoFinder.listByMember(memberId)
@@ -29,10 +30,7 @@ class TodoService(
         todoAppender.append(memberId, command)
 
     @Transactional
-    fun toggle(memberId: Long, todoId: Long): TodoResult {
-        val todo: Todo = todoFinder.getOwned(memberId, todoId)
-        return todoAppender.applyToggle(todo)
-    }
+    fun complete(memberId: Long, todoId: Long): TodoResult = todoUpdater.complete(memberId, todoId)
 }
 ```
 
@@ -43,6 +41,19 @@ class TodoService(
 - 구현 레이어(`Finder`/`Appender`/`Sender`)에는 트랜잭션을 걸지 않는다. 경계가 두 곳이 되면 커밋 시점을 알 수 없다.
 
 - 서비스는 리포지토리·엔티티를 직접 만지지 않는다. 구현 레이어만 부른다.
+
+- **찾은 것을 서비스가 들고 있다가 다른 구현 레이어에 넘기지 않는다.** 상태를 바꾸는 구현
+  레이어는 **식별자를 받아 스스로 찾는다.** 서비스가 중간에 들고 있으면 그 변수의 타입이
+  엔티티가 되어(도메인 모델로는 JPA 변경 감지가 걸리지 않는다) 엔티티가 서비스로 새어 나온다.
+
+  ```kotlin
+  // X — 엔티티가 서비스까지 올라온다
+  val entity: TodoEntity = todoFinder.getEntity(todoId)
+  return todoUpdater.rename(entity, command.title)
+
+  // O — 찾기와 바꾸기가 구현 레이어 안에서 끝난다
+  return todoUpdater.rename(todoId, command.title)
+  ```
 
 - 반환은 도메인 모델(`Result`)이다. 엔티티나 응답 DTO 를 반환하지 않는다.
 
