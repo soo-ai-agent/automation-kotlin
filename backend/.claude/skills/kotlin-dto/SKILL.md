@@ -1,6 +1,6 @@
 ---
 name: kotlin-dto
-description: 요청·응답 DTO 작성과 리뷰 규칙. api/request 와 api/response 패키지의 data class, RequestDto·ResponseDto 이름 규약, 검증 애너테이션, 도메인 모델과의 변환 메서드를 다룰 때 사용한다. "요청 DTO 추가", "응답 형태 변경" 요청에도 사용할 것.
+description: 요청·응답 DTO 작성과 리뷰 규칙. api/request 와 api/response 패키지의 data class, Request·Response 이름 규약, 검증 애너테이션, 도메인 모델과의 변환 메서드를 다룰 때 사용한다. "요청 DTO 추가", "응답 형태 변경" 요청에도 사용할 것.
 ---
 
 # Request / Response DTO
@@ -13,20 +13,20 @@ Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)의 규약을 그대로
 
 | 무엇 | 접미사 | 예 | 자리 |
 |---|---|---|---|
-| 컨트롤러 요청 DTO | **`RequestDto`** | `TodoCreateRequestDto` | `api/request/` |
-| 컨트롤러 응답 DTO | **`ResponseDto`** | `TodoResponseDto`, 중첩은 `TodoItemResponseDto` | `api/response/` |
-| 외부 API 어댑터 DTO | **`RequestDto`·`ResponseDto`** | `PayRequestDto` | `clients/client-*/` |
+| 컨트롤러 요청 DTO | **`Request`** | `TodoCreateRequest` | `api/request/` |
+| 컨트롤러 응답 DTO | **`Response`** | `TodoResponse`, 중첩은 `TodoItemResponse` | `api/response/` |
+| 외부 API 어댑터 DTO | **`Request`·`Response`** | `PayApproveResponse` | `clients/client-*/` |
 | 도메인 입력 모델 | `Command` | `TodoCreateCommand` | `<도메인>/domain/model/` |
 | 도메인 결과 모델 | **`Result`** | `TodoResult` | `<도메인>/domain/model/` |
 
-**`Dto` 접미사는 컨트롤러·클라이언트 경계의 타입에만 붙인다.** 도메인 모델에는 붙이지 않는다 — 그 둘이 섞이면 엔티티가 밖으로 새는 것만큼이나 경계가 흐려진다.
+**`Dto` 접미사는 쓰지 않는다.** 경계는 접미사(`Request`·`Response`)와 패키지(`api/request`·`api/response`)가 이미 말한다. 도메인 모델(`Command`·`Result`)과 이름이 겹칠 일도 없다.
 
 파일 하나에 DTO 하나가 원칙이고, 파일명은 타입명과 같다. 응답 안에 중첩되는 항목 타입만 같은 파일에 둔다.
 
 ## 요청 DTO — 검증과 변환을 스스로 한다
 
 ```kotlin
-data class TodoCreateRequestDto(
+data class TodoCreateRequest(
     @field:NotBlank(message = "제목은 필수입니다")
     @field:Size(max = 200, message = "제목은 200자를 넘을 수 없습니다")
     val title: String,
@@ -50,14 +50,14 @@ data class TodoCreateRequestDto(
 ## 응답 DTO — 도메인 결과에서 만든다
 
 ```kotlin
-data class TodoResponseDto(
+data class TodoResponse(
     val id: Long,
     val title: String,
     val done: Boolean,
     val createdAt: LocalDateTime,
 ) {
     companion object {
-        fun from(result: TodoResult): TodoResponseDto = TodoResponseDto(
+        fun from(result: TodoResult): TodoResponse = TodoResponse(
             id = result.id,
             title = result.title,
             done = result.done,
@@ -101,8 +101,8 @@ data class TodoResponseDto(
 | 응답 DTO 가 엔티티를 입력으로 받음 | 저장소 격리 붕괴 | Critical |
 | 비밀번호·해시·내부 필드 노출 | 정보 유출 | Critical |
 | `@field:` 없는 검증 애너테이션 | 검증이 동작하지 않음 | Critical |
-| DTO 이름에 `RequestDto`·`ResponseDto` 접미사 없음 | 템플릿 규약 위반 — 경계가 이름으로 안 보임 | Important |
-| 도메인 모델(`Command`·`Result`)에 `Dto` 접미사 | 컨트롤러 경계 타입과 혼동 | Important |
+| DTO 이름이 `Request`·`Response` 로 끝나지 않음 | 경계가 이름으로 안 보임 | Important |
+| 이름에 `Dto` 접미사 | 접미사·패키지가 이미 말하는 것의 중복 | Important |
 | 변환 로직이 컨트롤러에 흩어짐 | 중복·불일치 | Important |
 | 검증 메시지 없음 | 클라이언트가 원인 모름 | Important |
 | 습관적 nullable 필드 | 계약 불명확 | Important |
@@ -113,7 +113,7 @@ data class TodoResponseDto(
 
 - [ ] 검증 애너테이션에 `@field:` 가 붙었는가
 
-- [ ] 이름이 `RequestDto`·`ResponseDto` 로 끝나는가 (도메인 모델은 `Command`·`Result`)
+- [ ] 이름이 `Request`·`Response` 로 끝나는가 (도메인 모델은 `Command`·`Result`, `Dto` 접미사는 쓰지 않는다)
 
 - [ ] 요청은 `toXxx()`, 응답은 `from(result)` 로 변환하는가
 

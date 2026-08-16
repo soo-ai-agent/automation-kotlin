@@ -33,7 +33,7 @@ class TodoController(
     @PostMapping
     fun create(
         @AuthenticationPrincipal member: MemberPrincipal,
-        @Valid @RequestBody request: TodoCreateRequestDto,
+        @Valid @RequestBody request: TodoCreateRequest,
     ): ApiResponse<TodoResponse> {
         val result: TodoResult = todoService.create(member.id, request.toCommand())
         return ApiResponse.success(TodoResponse.from(result))

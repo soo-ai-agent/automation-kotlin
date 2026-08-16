@@ -65,6 +65,36 @@ class TodoService(
 
 - 메서드명은 유스케이스를 나타낸다: `list`, `create`, `toggle`, `reissueToken`.
 
+## 도메인끼리는 이벤트로만 말한다
+
+도메인이 다른 도메인의 구현을 부르지 않는다. **사건을 발행하고, 받는 쪽이 알아서 한다.**
+"주문이 완료되면 알림을 보낸다"에서 주문 도메인은 알림 수단을 몰라야 한다.
+
+```kotlin
+// X — 주문 도메인이 알림 수단을 안다
+notificationSender.send(memberId, "주문이 완료되었습니다.")
+
+// O — 사건만 낸다. 누가 받아 무엇을 하는지 모른다
+orderEventPublisher.orderCompleted(orderId)
+```
+
+**세 가지를 지킨다.**
+
+1. **발행 전용 서비스를 도메인마다 둔다.** 서비스가 `ApplicationEventPublisher.publishEvent` 를
+   직접 부르지 않는다 — `OrderEventPublisher` 처럼 그 일만 하는 클래스가 맡는다.
+   사건 이름이 도메인 어휘로 드러나고(`orderCompleted`), 테스트가 그 클래스만 가짜로 바꾸면 된다.
+
+2. **사건 타입은 `core-common` 에 둔다.** 발행 도메인에 두면 받는 쪽이 그 도메인을 의존하게 되어
+   "도메인을 넘지 않는다"가 깨진다.
+
+3. **받는 쪽(`@EventListener`)은 그 일을 업으로 하는 도메인이다.** 알림이면 알림 도메인이 받는다.
+   `support` 모듈은 상위(core)를 참조할 수 없으므로 리스너를 거기 두지 않는다.
+
+**`@Async` 를 반사적으로 붙이지 않는다.** 받는 쪽 안에 이미 비동기 계약(자기 executor 로 보내는
+클라이언트 등)이 있으면 리스너까지 비동기로 만들 이유가 없다 — 스레드만 두 번 갈아탄다.
+**이미 비동기인 계약이 있는지 먼저 본다.** 트랜잭션 커밋 후에 받아야 하는 사건이면
+`@TransactionalEventListener(phase = AFTER_COMMIT)` 를 쓴다 — 롤백된 주문의 알림이 나가는 것을 막는다.
+
 ## 적발 신호
 
 | 신호 | 문제 | 심각도 |

@@ -60,6 +60,46 @@ Spring 은 컴포넌트 스캔으로 빈을 찾으므로, 도메인 안쪽 협�
 바깥은 그 이름을 부를 일이 없다. 그러면 경계가 파는 것은 내부 방향 강제뿐이고,
 그건 의존 방향 테스트로 더 싸게 산다. 모듈을 접으면 그 자리에 방향 테스트를 남긴다.
 
+### 나누기 전에 반드시 재는 것
+
+```bash
+# 1) 도메인 간 참조 — 순환이 있으면 나누지 않는다. 리팩토링으로 참조를 줄인 뒤가 시작점이다
+grep -rho "<패키지 루트>\.core\.[a-z]*" <각 도메인 폴더> --include='*.kt' | sort -u
+
+# 2) 웹 테스트 수 — @WebMvcTest·@SpringBootTest 는 부팅 모듈에서만 뜬다. 이만큼이 부팅 모듈로 모인다
+grep -rl "@WebMvcTest\|@SpringBootTest" --include='*.kt' src/test | wc -l
+
+# 3) 모듈을 넘나드는 테스트 헬퍼 — 복사하지 말고 java-test-fixtures 로 정식 노출한다
+```
+
+공용 코드가 갈 곳이 없으면 모듈을 새로 만들기 전에 **이미 있는 공용 모듈의 이름을 넓힌다**
+(`core-error` → `core-common` 처럼).
+
+### 나눈 뒤 반드시 확인하는 것
+
+**`BUILD SUCCESSFUL` 은 아무것도 증명하지 않는다.** 셋 다 한다.
+
+1. **모듈별 테스트 실계수의 합이 이전과 같은가.** 파일이 누락되면 조용히 줄어든다.
+   삭제한 모듈의 낡은 `build/test-results` 가 총계에 섞이므로 `git clean -xfd <모듈>` 로 먼저 치운다.
+2. **`bootJar` 후 실제로 띄운다.** 컴파일은 되는데 빈 배선이 깨져 못 뜨는 경우가 있다
+   (컨트롤러가 다른 모듈로 가면 `@ComponentScan` 범위·`@Conditional` 이 함께 흔들린다).
+3. **주요 엔드포인트를 실제로 호출한다.** 정상 1건 + 에러 계약 1건이면 충분하다.
+   상시 개발 서버가 있다면 그 포트를 쓰지 말고 다른 포트로 띄운다.
+
+### 모듈을 접을 때 — 방향 테스트를 남긴다
+
+바깥의 import 가 0이라 모듈을 패키지로 접으면, 빌드가 강제하던 내부 방향 규칙이 사라진다.
+어겨도 컴파일은 되므로 **소스 파일의 `import` 줄을 읽어 금지 패키지를 찾는 테스트**를 그 자리에 남긴다.
+
+짝으로 "검사 대상 파일이 실제로 존재하는지" 확인하는 테스트를 함께 둔다 — 경로가 바뀌면
+검사가 빈 목록을 훑으며 조용히 통과하기 때문이다.
+
+### 이동 함정 — 리소스는 따라가지 않는다
+
+`git mv` 로 `.kt` 만 옮기고 모듈 폴더를 지우면 **`src/main/resources` 가 함께 사라진다.**
+`application.yml`·정적 파일이 여기서 유실되기 쉽다. 삭제 전에 목록을 뽑아 두고,
+지운 뒤 `git show HEAD:<경로>` 로 되살려 새 모듈에 넣는다.
+
 ## 템플릿과 다른 점 — 여기가 성장형이다
 
 Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)이 동봉한 `ExampleService.kt` 는 `core/domain/` 평면에 있고 구현 레이어도 없다. **그것을 따라 하지 않는다.**
@@ -78,8 +118,8 @@ core/core-<도메인>/.../<도메인>/domain/model/Todo.kt                      
 core/core-<도메인>/.../<도메인>/domain/service/TodoFinder.kt      구현 레이어
 core/core-<도메인>/.../<도메인>/domain/service/TodoAppender.kt
 core/core-<도메인>/.../<도메인>/domain/service/TodoService.kt               도메인 서비스
-core/core-<도메인>/.../<도메인>/api/request/TodoCreateRequestDto.kt
-core/core-<도메인>/.../<도메인>/api/response/TodoResponseDto.kt
+core/core-<도메인>/.../<도메인>/api/request/TodoCreateRequest.kt
+core/core-<도메인>/.../<도메인>/api/response/TodoResponse.kt
 core/core-<도메인>/.../<도메인>/api/controller/TodoController.kt      컨트롤러
 ```
 

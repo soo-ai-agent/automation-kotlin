@@ -16,7 +16,7 @@ description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(A
 | 파일 | 역할 | 공개 범위 |
 |---|---|---|
 | `<이름>ApiSpec.kt` | 엔드포인트·옵션 상수. 외부 규격이 바뀌면 여기만 고친다 | **`internal`** |
-| `<이름>RequestDto.kt`·`<이름>ResponseDto.kt` | 외부가 요구하는·주는 JSON 모양 | **`internal`** |
+| `<이름>Request.kt`·`<이름>Response.kt` | 외부가 요구하는·주는 JSON 모양 | **`internal`** |
 | `<이름>Client.kt` | `RestClient` 로 호출하고 우리 말로 번역한다 | 공개 |
 | `<이름>Client.kt` | 바깥이 부르는 유일한 창구 | `public` |
 | `model/<이름>ClientResult.kt` | 바깥으로 나가는 결과 모델 | `public` |
@@ -37,7 +37,7 @@ HTTP 호출은 **`RestClient`** 로 한다(RestClient 아님). 자동구성된 `
 ```kotlin
 // ❌ 밖에서 보이면 안 되는 것들
 internal interface ExampleApi { ... }
-internal data class ExampleResponseDto(val exampleResponseValue: String) {
+internal data class ExampleResponse(val exampleResponseValue: String) {
     fun toResult(): ExampleClientResult = ExampleClientResult(exampleResponseValue)
 }
 
@@ -47,14 +47,14 @@ class ExampleClient internal constructor(
     private val exampleApi: ExampleApi,
 ) {
     fun example(parameter: String): ExampleClientResult {
-        return exampleApi.example(ExampleRequestDto(parameter)).toResult()
+        return exampleApi.example(ExampleRequest(parameter)).toResult()
     }
 }
 ```
 
 `internal constructor` 를 쓴 이유는, 클래스는 공개하되 **`internal` 타입을 받는 생성자는 감춰야** 하기 때문이다. 스프링은 그대로 주입한다.
 
-변환 메서드(`toResult()`)는 `ResponseDto` 가 갖는다 — DTO 가 자기 변환을 아는 것은 `kotlin-dto` 와 같은 규칙이다.
+변환 메서드(`toResult()`)는 `Response` 가 갖는다 — DTO 가 자기 변환을 아는 것은 `kotlin-dto` 와 같은 규칙이다.
 
 ## 도메인에서 부르는 자리
 
@@ -119,7 +119,7 @@ DB 트랜잭션을 열어 둔 채 외부를 호출하면, 외부가 느린 만�
 | 비멱등 호출(결제·발송)에 재시도 | 중복 처리 | Critical |
 | 코드에 외부 URL 하드코딩 | 환경별 전환 불가 | Important |
 | 도메인 서비스가 `Client` 를 직접 호출 | 구현 레이어 건너뛰기 | Important |
-| `ClientResult` 없이 `ResponseDto` 를 그대로 반환 | 모듈 경계 붕괴 | Important |
+| `ClientResult` 없이 통신 `Response` 를 그대로 반환 | 모듈 경계 붕괴 | Important |
 
 ## 체크리스트
 

@@ -7,6 +7,10 @@ description: Spring REST Docs 로 API 문서를 만드는 규칙. restdocs 태�
 
 **자리:** 테스트는 `core/core-<도메인>/src/test/.../api/controller/XxxControllerTest.kt`, 문서는 `core/core-<도메인>/src/docs/asciidoc/index.adoc`
 
+**배선을 먼저 확인한다.** `RestDocsTest` 는 `tests:api-docs` 모듈에 있다. 도메인 모듈에서 쓰려면
+그 모듈의 `build.gradle.kts` 에 `testImplementation(project(":tests:api-docs"))` 를 더해야 한다 —
+템플릿은 부팅 모듈에만 이 의존이 걸려 있다.
+
 ## 문서를 손으로 쓰지 않는다
 
 REST Docs 는 **테스트를 실제로 돌려서** 요청·응답 조각(스니펫)을 뽑고, 그것을 문서에 끼워 넣는다.
@@ -43,9 +47,9 @@ class TodoControllerTest : RestDocsTest() {
         mockMvc.perform(
             post("/api/v1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper().writeValueAsString(TodoCreateRequestDto("장보기"))),
+                .content(jsonMapper().writeValueAsString(TodoCreateRequest("장보기"))),
         )
-            .andExpect(status().isOk)
+            .andExpect(status().isCreated)   // 생성은 201 — 컨트롤러의 @ResponseStatus 와 맞춘다
             .andDo(
                 document(
                     "todoCreate",
