@@ -1,11 +1,11 @@
 ---
 name: kotlin-dto
-description: 요청·응답 DTO 작성과 리뷰 규칙. controller/v1/request 와 response 패키지의 data class, RequestDto·ResponseDto 이름 규약, 검증 애너테이션, 도메인 모델과의 변환 메서드를 다룰 때 사용한다. "요청 DTO 추가", "응답 형태 변경" 요청에도 사용할 것.
+description: 요청·응답 DTO 작성과 리뷰 규칙. api/request 와 api/response 패키지의 data class, RequestDto·ResponseDto 이름 규약, 검증 애너테이션, 도메인 모델과의 변환 메서드를 다룰 때 사용한다. "요청 DTO 추가", "응답 형태 변경" 요청에도 사용할 것.
 ---
 
 # Request / Response DTO
 
-**자리:** `core/core-<도메인>/.../<도메인>/api/controller/request|response/`
+**자리:** `core/core-<도메인>/.../<도메인>/api/request/ · <도메인>/api/response/`
 
 ## 이름 — 접미사가 자리를 말한다
 
@@ -13,11 +13,11 @@ Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)의 규약을 그대로
 
 | 무엇 | 접미사 | 예 | 자리 |
 |---|---|---|---|
-| 컨트롤러 요청 DTO | **`RequestDto`** | `TodoCreateRequestDto` | `controller/v1/request/` |
-| 컨트롤러 응답 DTO | **`ResponseDto`** | `TodoResponseDto`, 중첩은 `TodoItemResponseDto` | `controller/v1/response/` |
+| 컨트롤러 요청 DTO | **`RequestDto`** | `TodoCreateRequestDto` | `api/request/` |
+| 컨트롤러 응답 DTO | **`ResponseDto`** | `TodoResponseDto`, 중첩은 `TodoItemResponseDto` | `api/response/` |
 | 외부 API 어댑터 DTO | **`RequestDto`·`ResponseDto`** | `PayRequestDto` | `clients/client-*/` |
-| 도메인 입력 모델 | `Command` | `TodoCreateCommand` | `core/domain/<도메인>/` |
-| 도메인 결과 모델 | **`Result`** | `TodoResult` | `core/domain/<도메인>/` |
+| 도메인 입력 모델 | `Command` | `TodoCreateCommand` | `<도메인>/domain/model/` |
+| 도메인 결과 모델 | **`Result`** | `TodoResult` | `<도메인>/domain/model/` |
 
 **`Dto` 접미사는 컨트롤러·클라이언트 경계의 타입에만 붙인다.** 도메인 모델에는 붙이지 않는다 — 그 둘이 섞이면 엔티티가 밖으로 새는 것만큼이나 경계가 흐려진다.
 

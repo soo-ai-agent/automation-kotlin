@@ -1,11 +1,11 @@
 ---
 name: kotlin-implement
-description: 구현 레이어 작성과 리뷰 규칙. domain/<도메인>/implement 의 Finder·Appender·Updater·Remover·Sender 처럼 재사용 단위로 쪼갠 상세 구현, 엔티티와 도메인 모델 변환을 다룰 때 사용한다. "조회 로직 분리", "재사용 컴포넌트" 요청에도 사용할 것.
+description: 구현 레이어 작성과 리뷰 규칙. domain/service/ 의 Finder·Appender·Updater·Remover·Sender 처럼 재사용 단위로 쪼갠 상세 구현, 엔티티와 도메인 모델 변환을 다룰 때 사용한다. "조회 로직 분리", "재사용 컴포넌트" 요청에도 사용할 것.
 ---
 
 # Implement (구현 레이어)
 
-**자리:** `core/core-<도메인>/.../<도메인>/domain/<도메인>/implement/`
+**자리:** `core/core-<도메인>/.../<도메인>/domain/service/`
 
 ## 역할 — 재사용 단위로 쪼갠다
 

@@ -5,7 +5,7 @@ description: Spring REST Docs 로 API 문서를 만드는 규칙. restdocs 태�
 
 # API 문서 테스트 (Spring REST Docs)
 
-**자리:** 테스트는 `core/core-<도메인>/src/test/.../controller/v1/XxxControllerTest.kt`, 문서는 `core/core-<도메인>/src/docs/asciidoc/index.adoc`
+**자리:** 테스트는 `core/core-<도메인>/src/test/.../api/controller/XxxControllerTest.kt`, 문서는 `core/core-<도메인>/src/docs/asciidoc/index.adoc`
 
 ## 문서를 손으로 쓰지 않는다
 

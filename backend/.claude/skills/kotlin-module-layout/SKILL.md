@@ -74,12 +74,12 @@ Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)이 동봉한 `ExampleS
 core/core-enum/.../core/enums/TodoStatus.kt                     enum
 storage/db-core/.../storage/db/core/TodoEntity.kt               엔티티
 storage/db-core/.../storage/db/core/TodoRepository.kt           리포지토리
-core/core-<도메인>/.../<도메인>/domain/todo/Todo.kt                      도메인 모델
-core/core-<도메인>/.../<도메인>/domain/todo/implement/TodoFinder.kt      구현 레이어
-core/core-<도메인>/.../<도메인>/domain/todo/implement/TodoAppender.kt
-core/core-<도메인>/.../<도메인>/domain/todo/TodoService.kt               도메인 서비스
-core/core-<도메인>/.../<도메인>/api/controller/request/TodoCreateRequestDto.kt
-core/core-<도메인>/.../<도메인>/api/controller/response/TodoResponseDto.kt
+core/core-<도메인>/.../<도메인>/domain/model/Todo.kt                      도메인 모델
+core/core-<도메인>/.../<도메인>/domain/service/TodoFinder.kt      구현 레이어
+core/core-<도메인>/.../<도메인>/domain/service/TodoAppender.kt
+core/core-<도메인>/.../<도메인>/domain/service/TodoService.kt               도메인 서비스
+core/core-<도메인>/.../<도메인>/api/request/TodoCreateRequestDto.kt
+core/core-<도메인>/.../<도메인>/api/response/TodoResponseDto.kt
 core/core-<도메인>/.../<도메인>/api/controller/TodoController.kt      컨트롤러
 ```
 

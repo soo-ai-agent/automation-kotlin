@@ -5,7 +5,7 @@ description: 도메인 서비스 작성과 리뷰 규칙. core/domain 의 Servic
 
 # Domain Service
 
-**자리:** `core/core-<도메인>/.../<도메인>/domain/<도메인>/XxxService.kt`
+**자리:** `core/core-<도메인>/.../<도메인>/domain/service/XxxService.kt`
 
 ## 역할 — 흐름과 트랜잭션 경계만
 
