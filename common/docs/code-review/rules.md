@@ -24,7 +24,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 **경계와 방향**
 
-- 레이어 방향은 상위 → 하위 단방향이다. 건너뛰기·역참조 금지. 백엔드는 controller → domain service → implement → repository, 프론트는 pages → hooks → services → api → lib.
+- 레이어 방향은 상위 → 하위 단방향이다. 건너뛰기·역참조 금지. 백엔드는 controller → domain service → implement → repository, 프론트는 pages → hooks → services → api → lib 이고, 도메인이 최상위 폴더다(`src/<도메인>/<계층>`, 공용은 `src/common/`).
 
 - 엔티티는 `storage` 모듈 밖으로 나가지 않는다.
 
@@ -32,7 +32,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 - 도메인 경계를 넘는 직접 참조를 만들지 않는다. 다른 도메인의 구현 레이어·리포지토리를 직접 부르지 않고 그쪽 **서비스**를 통한다. 애그리게이트 경계 밖 연관관계 매핑, 한 트랜잭션에서 두 도메인의 상태 변경은 차단 사유다.
 
-- enum 은 지정 위치에만 선언한다: 백엔드 `core:core-enum`, 프론트 `src/enums/`. 사용처 파일 안 인라인 선언은 차단 사유다.
+- enum 은 지정 위치에만 선언한다: 백엔드 `core:core-enum`, 프론트는 `<도메인>/enums/`(여럿이 쓰면 `src/common/enums/`). 사용처 파일 안 인라인 선언은 차단 사유다.
 
 **트랜잭션과 예외**
 

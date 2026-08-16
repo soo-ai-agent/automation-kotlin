@@ -79,7 +79,7 @@ await page.route("**/api/v1/users", async (route) => {
 
 ## 이 프로젝트의 함정 — alert 과 confirm
 
-`src/lib/notify.ts` 는 지금 `window.alert` 과 `window.confirm` 을 쓴다.
+`src/common/lib/notify.ts` 는 지금 `window.alert` 과 `window.confirm` 을 쓴다.
 
 **Playwright 는 네이티브 다이얼로그를 자동으로 닫아 버린다.** 그래서 아무것도 안 하면 `confirm` 이 항상 "취소"로 처리되어 **삭제 같은 흐름이 조용히 실패한다.**
 

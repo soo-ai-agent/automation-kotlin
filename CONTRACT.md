@@ -13,7 +13,7 @@
 { "result": "ERROR",   "data": null, "error": { "code": "...", "message": "...", "data": null } }
 ```
 
-프론트의 `src/lib/apiClient.ts` 가 이 래퍼를 벗겨 `ApiResult<T>` 로 돌려준다.
+프론트의 `src/common/lib/apiClient.ts` 가 이 래퍼를 벗겨 `ApiResult<T>` 로 돌려준다.
 
 ## 엔드포인트
 

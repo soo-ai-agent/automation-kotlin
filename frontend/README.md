@@ -12,11 +12,11 @@ npm run build    # 타입 검사 + 빌드 — 이게 통과해야 한다
 
 주소·경로는 `frontend/.env` 에 있다. 처음 한 번 `cp .env.example .env` 하고 값을 채운다. 백엔드 기본 포트는 Spring Boot 기본값인 8080 이다.
 
-`src/lib/apiClient.ts` 의 `ApiResponseDTO` 는 백엔드 `ApiResponse<T>`(`core:core-common` 의 `response/ApiResponse.kt`) 와 이미 맞춰져 있다 — `{result, data, error}`.
+`src/common/lib/apiClient.ts` 의 `ApiResponseDTO` 는 백엔드 `ApiResponse<T>`(`core:core-common` 의 `response/ApiResponse.kt`) 와 이미 맞춰져 있다 — `{result, data, error}`.
 
 응답 래퍼를 바꿨다면 고치는 곳은 이 타입 하나다.
 
-알림은 `src/lib/notify.ts` 하나를 거친다. 지금은 `window.alert` 이고, 알림 UI 를 도입하면 이 파일만 바꾼다.
+알림은 `src/common/lib/notify.ts` 하나를 거친다. 지금은 `window.alert` 이고, 알림 UI 를 도입하면 이 파일만 바꾼다.
 
 ## E2E 테스트 (처음 한 번)
 
@@ -41,8 +41,8 @@ npm run e2e
 
 ## 새 화면 만들기
 
-`src/pages/user/User.tsx` 의 사용자 목록 화면이 본보기다. 목록·선택·삭제·상세 모달이 다 들어 있고, 규칙대로 짜여 있다.
+`src/user/pages/User.tsx` 의 사용자 목록 화면이 본보기다. 목록·선택·삭제·상세 모달이 다 들어 있고, 규칙대로 짜여 있다.
 
-새 화면은 user 도메인 파일 13개를 복사해 이름만 바꾸는 것으로 시작한다. 순서는 types → api → services → hooks → components → page.
+새 화면은 `src/user/` 안의 13개 파일을 복사해 도메인 이름만 바꾸는 것으로 시작한다. 순서는 types → api → services → hooks → components → page.
 
-`lib/`, `utils/`, `services/ServiceError` 같은 공통 코드는 도메인과 무관하니 그대로 둔다. 규칙 전문은 `.claude/skills/frontend-react/` 에 있다.
+`src/common/` 아래(`lib/`·`utils/`·`services/ServiceError`)는 여러 도메인이 쓰는 공통 코드라 그대로 둔다. 규칙 전문은 `.claude/skills/frontend-react/` 에 있다.

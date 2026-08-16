@@ -28,7 +28,7 @@ React + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 스택�
 
 글로 된 규칙과 코드가 어긋나면 **코드가 맞다.** 규칙을 그대로 구현해 `tsc --strict` 를 통과한 한 벌이 `frontend/src/` 에 살아 있다.
 
-`src/pages/user/User.tsx` 의 사용자 목록 화면이 본보기다 — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 슬라이스다.
+`src/user/pages/User.tsx` 의 사용자 목록 화면이 본보기다 — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 슬라이스다.
 
 새 화면은 user 도메인 파일 13개를 복사해 이름만 바꾸는 것으로 시작한다. 순서는 types → api → services → hooks → components → page.
 
