@@ -939,7 +939,7 @@ export async function fetchRouteCompare(…) { … }
 |---|---|---|---|
 | 페이지 상태 | `pages/` 에 `useState` 62 · `useEffect` 27 | 훅으로 전량 이동, 페이지 상태 0 | **높음** |
 | 훅 수 | 6개 (`useRequestOrigin`·`useWakeLock`·`useOffRouteReroute`·`useAdminResource` …) | 화면당 조립 훅 1 + 단일책임 훅 N | **높음** |
-| api 레이어 | 없음 — `<도메인>/services/*.ts` 가 HTTP + 규칙을 겸함 | `<도메인>/api/` 신설, 서비스는 규칙만 | **높음** |
+| api 레이어 | `<도메인>/api/` 신설 완료(2026-08-17) — 요청 함수·경로 상수는 api, 검증·해석은 services | **이미 목표 상태.** 유지 | — |
 | 메시지 enum | 0건, 문장이 호출부 인라인 | `<도메인>ResultMessages` 로 수렴 | 중간 |
 | 결과 표현 | 불리언·`null`·문자열 혼재 | 결과 enum + `ApiError` 2분법 | 중간 |
 | 알림 창구 | 토스트 직접 호출이 8개 파일에 분산 | `src/utils/notify.ts` 단일 창구 | 중간 |
