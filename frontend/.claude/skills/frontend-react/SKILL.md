@@ -77,7 +77,7 @@ src/
 | 남의 코드를 리뷰한다 | chapters.md 16장 리뷰 절차 8단계 |
 | 기존 코드를 이 구조로 옮긴다 | chapters.md 14장 이관 절차 |
 
-**장 구성:** 0 도메인·계층·이름 · 1 페이지 무상태 · 2 훅 · 3 services · 4 api · 5 lib · 6 메시지 enum · 7 결과/에러 · 8 알림 · 9 모달 · 10 상태·useEffect · 11 타입 · 12 이름 · 13 따라 하면 안 되는 것 · 14 기존 코드 이관 · 15 구축 순서 · 16 리뷰
+**장 구성:** 0 도메인·계층·이름 · 1 페이지 무상태 · 2 훅 · 3 services · 4 api · 5 lib · 6 메시지 enum · 7 결과/에러 · 8 알림 · 9 모달(9-1 전역 확인 팝업) · 10 상태·useEffect · 11 타입 · 12 이름 · 13 따라 하면 안 되는 것 · 14 기존 코드 이관 · 15 구축 순서 · 16 리뷰
 
 ## 코드 스타일
 
@@ -100,6 +100,8 @@ src/
 - MUST: 상태코드 번역 같은 짧은 분기 뭉치를 공용 헬퍼로 뽑지 않는다. 각 서비스 함수가 자기 분기를 가진다 — 함수 하나가 위에서 아래로 완결되게. 이 정도 중복은 허용하고, 분기가 진짜 커지면(검증 여러 개·부수 로직) 그때 헬퍼로 내린다.
 
 - MUST: 알림은 `notify.*` 한 창구로만. 컴포넌트에서 `alert`/`Swal`/토스트 직접 호출 금지. (8장)
+
+- MUST: **확인은 OS 대화상자(`Alert.alert`·`window.confirm`)가 아니라 `notify.confirm` 의 앱 팝업으로 묻는다.** 버튼 문구는 공용 `ConfirmButtonLabel`, 되돌릴 수 없는 동작은 `destructive: true`. (8·9-1장)
 - MUST: **폴백은 화면을 유지하는 수단이지 실패를 숨기는 수단이 아니다.** 지도·데이터 로드 실패로 폴백을 그릴 때는 반드시 `notify` 로 사용자에게 알린다(세션당 1회로 반복 억제 가능). 조용한 폴백은 사용자가 빠진 데이터를 정상으로 믿게 만든다.
 
 
@@ -171,7 +173,10 @@ frontend/src/
 |---|---|
 | `lib/apiClient.ts` | 단일 HTTP 클라이언트. 공통 응답 래퍼를 벗겨 `ApiResult<T>` 로 돌려준다 |
 | `lib/config.ts` | 주소·키의 유일한 창구 — dev 는 hostUri 파생, 웹은 same-origin, 프로덕션은 app.json extra |
-| `lib/notify.ts` | 알림 단일 창구. 네이티브 `Alert`/웹 `window.alert` 분기도 여기서 끝난다. `confirm` 은 Promise |
+| `lib/notify.ts` | 알림 단일 창구. 네이티브 `Alert`/웹 `window.alert` 분기도 여기서 끝난다. `confirm` 은 앱 팝업 + Promise |
+| `lib/confirmDialog.ts` | 확인 팝업 모듈 브리지 — 훅 밖(서비스)에서도 물어볼 수 있게. React 를 모른다 |
+| `components/modal/ConfirmModal.tsx` | 앱 디자인의 확인 팝업(OS 대화상자 대신). `destructive` 면 확인 버튼이 위험색 |
+| `components/modal/ConfirmDialogHost.tsx` | 그 팝업을 그리는 호스트 — App 루트에 하나만 |
 | `lib/listState.ts` | 3상태(`ListStatus.OK`/`EMPTY`/`ERROR`) 표현형 |
 | `lib/theme.ts` | 색·모서리·간격 토큰. 스타일 파일은 이 값만 쓴다(하드코딩 금지) |
 | `services/ServiceError.ts` | 도메인 실패 + 표시 수준(`ErrorLevel`) |
@@ -219,7 +224,8 @@ frontend/src/
 | 페이지·컴포넌트에 `useState`/`useEffect` | 페이지 무상태 위반 — 상태는 훅으로. 자기 표현 상태 예외(1-1장)에 드는지 먼저 본다 | Critical |
 | 훅·컴포넌트·페이지의 `result.status ===` 분기 | 상태코드 번역은 services 전담 (3·7장) | Critical |
 | 컴포넌트에서 `fetch`/`axios`/서비스 직접 호출 | 참조 방향 위반 — 컴포넌트는 props 만 그린다 (0장) | Critical |
-| `window.alert`/`confirm`/토스트 직접 호출 | 알림 단일 창구(`notify`) 위반 (8장) | Critical |
+| `window.alert`/`confirm`/`Alert.alert` 직접 호출 | 알림 단일 창구(`notify`) 위반 (8장) | Critical |
+| 화면·훅에 `isConfirmOpen` 류 확인 팝업 상태 | 확인은 `notify.confirm` 이 호스트에서 그린다 (9-1장) | Important |
 | `any`, 습관적 `?`, `Record<string, unknown>`, 사유 주석 없는 `unknown` | 자료형 뭉개기 — 데이터 계약 붕괴 (11장) | Critical |
 | DTO 필드를 서버 응답과 다른 이름으로 개명 | 서버 계약서(CONTRACT.md)와 눈으로 대조 불가 (11장) | Critical |
 | services 파일에 React import | 계층 붕괴 — services 는 React 를 모른다 (3장) | Critical |

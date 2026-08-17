@@ -86,29 +86,28 @@ await page.route("**/api/v1/users", async (route) => {
 
 백엔드를 실제로 띄울 수 없는 환경이면 **테스트 코드만 남기고 실행하지 못한 이유를 결과에 적는다.** 돌리지 않은 것을 통과했다고 적지 않는다.
 
-## 이 프로젝트의 함정 — alert 과 confirm
+## 확인 팝업과 알림 — 둘을 다르게 다룬다
 
-`src/common/lib/notify.ts` 는 웹 빌드에서 `window.alert` 과 `window.confirm` 으로 갈린다(네이티브는 `Alert`).
-
-**Playwright 는 네이티브 다이얼로그를 자동으로 닫아 버린다.** 그래서 아무것도 안 하면 `confirm` 이 항상 "취소"로 처리되어 **삭제 같은 흐름이 조용히 실패한다.**
-
-다이얼로그를 쓰는 흐름에서는 반드시 핸들러를 먼저 건다.
+`notify.confirm` 은 **앱 안에서 그리는 팝업**(`ConfirmModal`)이라 평범한 요소로 검증한다.
 
 ```ts
-// 확인 창에서 '확인'을 누른다
-page.once("dialog", (dialog) => dialog.accept());
-await page.getByRole("button", {name: "삭제"}).click();
+await page.getByRole("button", {name: "삭제"}).click();       // 목록의 삭제 버튼
+await page.getByRole("button", {name: "삭제"}).last().click(); // 팝업의 확인 버튼
+await expect(page.getByText("홍길동")).toBeHidden();
+```
 
-// 알림 창의 문구를 확인하고 닫는다
+취소를 검증할 때도 같다 — 팝업의 "취소"를 누르고 목록이 그대로인지 본다.
+
+**반면 `notify.success`·`warning`·`error` 는 아직 OS 대화상자(`window.alert`)다.** Playwright 는 이것을 자동으로 닫아 버리므로, 문구를 확인하려면 핸들러를 먼저 건다.
+
+```ts
 page.once("dialog", (dialog) => {
-    expect(dialog.message()).toContain("삭제했습니다");
+    expect(dialog.message()).toContain("삭제되었습니다");
     return dialog.dismiss();
 });
 ```
 
-`once` 를 쓴다. `on` 으로 걸면 다음 테스트까지 남는다.
-
-알림 UI 를 도입해 `notify.ts` 가 더 이상 네이티브 다이얼로그를 쓰지 않게 되면, 이 절은 필요 없어지고 일반 요소 확인으로 바뀐다.
+`once` 를 쓴다. `on` 으로 걸면 다음 테스트까지 남는다. 알림까지 앱 UI(토스트 등)로 바꾸면 이 절은 필요 없어진다.
 
 ## 무엇으로 요소를 찾나
 
@@ -141,7 +140,7 @@ Playwright 의 `expect` 는 조건이 맞을 때까지 자동으로 재시도한
 | 신호 | 문제 | 심각도 |
 |---|---|---|
 | `waitForTimeout` 으로 대기 | 환경에 따라 깨지는 불안정한 테스트 | Critical |
-| `window.confirm` 을 쓰는 흐름에 `page.on("dialog")` 없음 | 항상 취소로 처리돼 테스트가 조용히 무의미해짐 | Critical |
+| `window.alert` 을 쓰는 흐름(notify.success 등)에 `page.once("dialog")` 없음 | 자동으로 닫혀 검증이 조용히 무의미해짐 | Critical |
 | 가짜 응답에 `ApiResponse` 껍데기(`{result, data, error}`) 누락 | `apiClient` 가 실패로 처리 | Critical |
 | 실행하지 않은 테스트를 통과했다고 보고 | 사실과 다른 보고 | Critical |
 | CSS 클래스·태그 구조 선택자 | 스타일 변경만으로 깨짐 | Important |
@@ -158,7 +157,7 @@ Playwright 의 `expect` 는 조건이 맞을 때까지 자동으로 재시도한
 
 - [ ] `waitForTimeout` 없이 `expect` 의 자동 재시도로 기다리는가
 
-- [ ] 다이얼로그를 쓰는 흐름에 `page.once("dialog", ...)` 를 걸었는가
+- [ ] OS 대화상자(notify.success 등)를 쓰는 흐름에 `page.once("dialog", ...)` 를 걸었는가 (확인 팝업은 일반 요소로 검증)
 
 - [ ] 가짜 응답이 `ApiResponse` 껍데기와 `CONTRACT.md` 의 필드를 지키는가
 

@@ -1,5 +1,6 @@
 import {useCallback, useState} from "react";
 import {notify} from "../../common/lib/notify";
+import {ConfirmButtonLabel} from "../../common/enums/confirm";
 import {deleteUser, deleteUsers} from "../services/userService";
 import {DeleteUserOutcome, UserResultMessages} from "../enums/user";
 import type {ServiceErrorHandler} from "../../common/hooks/useServiceErrorHandler";
@@ -22,7 +23,12 @@ export function useUserDelete({selectedIds, reloadUsers, handleError}: UseUserDe
     }, []);
 
     const deleteOne = useCallback(async (id: number): Promise<void> => {
-        if (!(await notify.confirm(UserResultMessages.DELETE_CONFIRM))) {
+        const confirmed: boolean = await notify.confirm({
+            title: UserResultMessages.DELETE_CONFIRM, body: "",
+            confirmText: ConfirmButtonLabel.DELETE, cancelText: ConfirmButtonLabel.CANCEL,
+            destructive: true,
+        });
+        if (!confirmed) {
             return;
         }
         setIsDeleting(true);
@@ -42,7 +48,12 @@ export function useUserDelete({selectedIds, reloadUsers, handleError}: UseUserDe
             notify.warning(UserResultMessages.BULK_DELETE_NO_SELECTION);
             return;
         }
-        if (!(await notify.confirm(UserResultMessages.BULK_DELETE_CONFIRM))) {
+        const confirmed: boolean = await notify.confirm({
+            title: UserResultMessages.BULK_DELETE_CONFIRM, body: "",
+            confirmText: ConfirmButtonLabel.DELETE, cancelText: ConfirmButtonLabel.CANCEL,
+            destructive: true,
+        });
+        if (!confirmed) {
             return;
         }
         setIsDeleting(true);

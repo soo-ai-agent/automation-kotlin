@@ -4,6 +4,7 @@ import {SafeAreaProvider, initialWindowMetrics} from "react-native-safe-area-con
 import {StatusBar} from "expo-status-bar";
 import {SplashScreen} from "./src/splash/components/SplashScreen";
 import {useSplashGate} from "./src/splash/hooks/useSplashGate";
+import {ConfirmDialogHost} from "./src/common/components/modal/ConfirmDialogHost";
 import {colors} from "./src/common/lib/theme";
 import User from "./src/user/screens/User";
 import MapScreen from "./src/map/screens/Map";
@@ -36,6 +37,8 @@ export default function App() {
                     <Stack.Screen name="Map" component={MapScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
+            {/* 확인 팝업 호스트는 앱 루트에 하나만 — 어느 화면에서 불러도 이 자리에 그려진다. */}
+            <ConfirmDialogHost />
         </SafeAreaProvider>
     );
 }

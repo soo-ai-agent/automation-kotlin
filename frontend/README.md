@@ -26,7 +26,9 @@ dev 에서는 `apiBaseUrl` 을 쓰지 않는다 — 폰이 번들을 받아온 �
 
 응답 래퍼를 바꿨다면 고치는 곳은 이 타입 하나다.
 
-알림은 `src/common/lib/notify.ts` 하나를 거친다. 네이티브는 `Alert`, 웹 빌드는 `window.alert/confirm` 으로 갈리고, 알림 UI 를 도입하면 이 파일만 바꾼다.
+알림은 `src/common/lib/notify.ts` 하나를 거친다. 알림 UI 를 바꾸면 이 파일만 고치고 호출부는 손대지 않는다.
+
+확인(`notify.confirm`)은 OS 대화상자가 아니라 **앱 디자인 팝업**(`common/components/modal/ConfirmModal.tsx`)으로 뜨고 `Promise<boolean>` 을 돌려준다. 그리는 곳은 App 루트에 하나 있는 `ConfirmDialogHost` 라, 화면마다 열림 상태를 만들 필요가 없고 서비스에서도 물어볼 수 있다. 단순 알림(success·warning·error)은 아직 OS 대화상자다.
 
 ## 스플래시와 앱 버전 표기
 

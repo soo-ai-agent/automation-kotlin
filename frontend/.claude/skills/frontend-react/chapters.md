@@ -279,12 +279,11 @@ export function RouteComparison() {
 
 | 무엇 | 왜 통과하나 |
 |---|---|
-| `ImageWithFallback` 의 `didError` | img `onError` 로만 알 수 있는 사실. 부모는 알 방법이 없다 |
-| `SplashScreen` 의 페이드 단계 | 자기 소멸 타이머. 부모는 끝났다는 신호(`onDone`)만 받는다 |
-| `Layout` 의 `splashVisible` | 앱 셸 자신의 표시 단계. 화면 상태가 아니다 |
-| `BottomSheet` 의 열릴 때 높이 되돌리기 | 상태는 `useDraggableSheet` 에 있고 여기는 배선 한 줄 |
-| `NativeAdCard` (웹) | 상태 없이 노출 1회 기록 effect 만 |
-| `NativeAdCard` (모바일)의 `nativeAd` | 광고 SDK 만 만들 수 있는 핸들. 우리 서버 데이터가 아니고 밖으로 안 나간다 |
+| `ConfirmDialogHost` 의 대기 중 요청 (동봉 코드) | 팝업 자신의 표시 단계. 밖으로 안 나가고, 답은 Promise 로 돌아간다 |
+| 이미지 컴포넌트의 `didError` | `onError` 로만 알 수 있는 사실. 부모는 알 방법이 없다 |
+| 스플래시의 페이드 단계 | 자기 소멸 타이머. 부모는 끝났다는 신호만 받는다 |
+| 바텀시트의 열릴 때 높이 되돌리기 | 상태는 제스처 훅에 있고 여기는 배선 한 줄 |
+| 외부 SDK 가 만들어 주는 핸들(광고·지도 인스턴스) | SDK 만 만들 수 있고 우리 서버 데이터가 아니며 밖으로 안 나간다 |
 
 통과 못 하는 것 — **그대로 위반이고 훅으로 뺀다**: 데이터 로딩 · 폼 입력값 · 서버 응답 · 다른 컴포넌트와 나눠 쓰는 값 · 화면 전환에 걸리는 값.
 
@@ -652,13 +651,28 @@ export const notify = {
     success(message: string): void { show(NotifyTitle.SUCCESS, message); },
     warning(message: string): void { show(NotifyTitle.WARNING, message); },
     error(message: string): void { show(NotifyTitle.ERROR, message); },
-    confirm(message: string): Promise<boolean> { /* 네이티브 Alert 버튼 → resolve */ },
+    confirm(options: ConfirmDialogOptions): Promise<boolean> { return requestConfirm(options); },
 };
 ```
 
-`show()` 는 네이티브에서 `Alert.alert`, 웹 빌드에서 `window.alert` 로 갈린다 — 플랫폼 분기도 이 파일 안에서 끝난다. 토스트·모달로 바꿀 때 고치는 파일은 이 하나뿐이고, 호출부는 한 줄도 손대지 않는다 — 그것이 이 창구를 두는 이유다.
+`show()` 는 네이티브에서 `Alert.alert`, 웹 빌드에서 `window.alert` 로 갈린다 — 플랫폼 분기도 이 파일 안에서 끝난다. 토스트·스낵바로 바꿀 때 고치는 파일은 이 하나뿐이고, 호출부는 한 줄도 손대지 않는다 — 그것이 이 창구를 두는 이유다.
 
-- 확인 대화상자도 이 창구를 지난다. 네이티브 `Alert` 가 버튼 콜백으로만 답을 줘서 `confirm` 은 Promise 다: `if (!(await notify.confirm(UserResultMessages.DELETE_CONFIRM))) { return; }`
+- **확인은 OS 대화상자가 아니라 앱 디자인 팝업(`ConfirmModal`)으로 띄운다.** 창구는 똑같이 `notify.confirm` 이고, 답은 Promise 로 돌아온다(9-1장에 그 구조):
+
+  ```ts
+  const confirmed: boolean = await notify.confirm({
+      title: UserResultMessages.DELETE_CONFIRM, body: "",
+      confirmText: ConfirmButtonLabel.DELETE, cancelText: ConfirmButtonLabel.CANCEL,
+      destructive: true,
+  });
+  if (!confirmed) {
+      return;
+  }
+  ```
+
+- 버튼 문구도 사용자 문장이다 — 화면마다 "확인"·"취소"를 적지 말고 공용 `ConfirmButtonLabel` 을 쓴다(6장).
+
+- `destructive: true` 는 되돌릴 수 없는 동작(삭제·종료)에만. 확인 버튼이 위험색으로 바뀐다.
 
 - 컴포넌트·훅이 알림 라이브러리를 직접 import 하면 위반. 알림 UI 교체가 한 파일 수정으로 끝나야 한다.
 
@@ -693,6 +707,24 @@ export default forwardRef(BlockAdminModal);
 - 한 화면에 모달이 여럿이면 ref 들을 `useXxxModalRefs` 훅으로 묶고, 조립 훅이 `modalRefs` 키로 반환한다.
 
 - 열기 함수 이름은 `open<행위>`: `openBlock`, `openSessions`, `openAuthLogs`.
+
+### 9-1. 전역 확인 팝업 — 호스트 + Promise
+
+ref 패턴은 **부모가 아는 모달**에 쓴다. 확인 팝업처럼 **어디서든, 심지어 훅 밖(서비스·비동기 흐름)에서도** 띄워야 하는 것은 부모가 없다 — 그래서 모양이 다르다.
+
+```
+호출부 ──▶ notify.confirm(options) ──▶ lib/confirmDialog (모듈 브리지)
+                                              │  요청 전달
+                     Promise<boolean> ◀── ConfirmDialogHost (앱 루트에 하나) ──▶ ConfirmModal
+```
+
+- **브리지(`lib/confirmDialog.ts`)** 는 React 를 모른다. 호스트를 등록받아 요청을 넘기고, 사용자의 선택을 `resolve` 한다. 호스트가 없으면 거부(`false`)로 귀결시킨다 — 팝업이 안 떴는데 삭제가 진행되면 안 되기 때문이다.
+
+- **호스트(`ConfirmDialogHost`)** 는 앱 루트에 **하나만** 둔다. 대기 중 요청이 없으면 `null` 을 반환한다.
+
+- **호출부는 브리지를 직접 부르지 않는다.** 알림 단일 창구 규칙대로 `notify.confirm` 만 부른다(8장).
+
+이 구조 덕에 화면마다 `isConfirmOpen` 상태를 만들 필요가 없고, 서비스·유틸에서도 사용자에게 물어볼 수 있다.
 
 ## 10. 상태 배치와 useEffect
 
