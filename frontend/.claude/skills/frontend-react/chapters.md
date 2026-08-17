@@ -157,6 +157,42 @@ return {
 
 예외: **항목마다 사유 주석이 붙는 블록(DTO 필드 등)은 세로를 유지한다** — 주석이 항목을 따라가야 한다. prettier 는 이 채워 적기를 세로로 되돌리므로, 포맷터를 돌린 뒤에도 이 형태로 되돌린다.
 
+### 0-4. 람다는 관용구까지 — 판단은 풀어 쓴다
+
+짧은 코드 ≠ 단순한 코드다. 판단(조건)·누적이 람다 안에 숨으면 흐름을 눈으로 따라갈 수 없다.
+
+```ts
+// X — 조건 두 개와 변환이 한 줄 체이닝에 눌려 있다
+const overdueIds = orders.filter((o) => o.status !== "DONE" && isPast(o.dueAt)).map((o) => o.id);
+```
+
+```ts
+// O — 판단이 for 안에 눈으로 보인다
+const overdueIds: number[] = [];
+for (const order of orders) {
+    if (order.status === "DONE") {
+        continue;
+    }
+    if (isPast(order.dueAt)) {
+        overdueIds.push(order.id);
+    }
+}
+```
+
+여러 줄 업무 로직이 익명 화살표에 들어가면 이름 있는 함수로 뺀다 — 이름이 의도를 말하게.
+
+**관용구는 허용한다** — React 가 콜백을 요구하는 자리까지 풀면 오히려 읽기 어려워진다:
+
+- 훅 인자: `useCallback(() => …)`, `useEffect(() => …)`, `useMemo(() => …)`
+
+- JSX 이벤트 핸들러: `onPress={() => openDetail(item.id)}`
+
+- 목록 API: `keyExtractor`, `renderItem`(JSX 반환)
+
+- **한 줄** 변환·비교의 `map`/`filter`: `users.map((u) => u.id)`, `ids.filter((id) => id !== target)`
+
+판정 기준은 하나 — **람다 본문에 판단이나 누적이 들어 있는가.** 들어 있으면 푼다.
+
 ## 1. 페이지 무상태 원칙 — 이 문서에서 가장 중요한 규칙
 
 이 규칙을 지킨 프로젝트와 아닌 프로젝트를 가르는 결정적 차이가 여기다. 실측 두 프로젝트의 수치로 보면:

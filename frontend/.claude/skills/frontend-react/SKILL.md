@@ -139,6 +139,10 @@ src/
 
 - MUST: React 를 모르는 사람이 읽어도 화면 구조가 보이도록 기초 문법에 충실하게 쓴다.
 
+- MUST: **판단·누적이 든 로직을 람다 체이닝으로 압축하지 않는다.** 조건이 든 `filter().map()` 연쇄·`reduce`·`find` 는 `if`/`for` 로 풀어 쓰고, 여러 줄 업무 로직이 익명 화살표에 들어가면 이름 있는 함수로 뺀다. (백엔드 kotlin-common 의 같은 규칙과 짝, 0-4장)
+
+  React 가 콜백을 요구하는 자리는 관용구로 허용한다 — 훅 인자(`useCallback`/`useEffect`/`useMemo`), JSX 이벤트 핸들러, `keyExtractor`·`renderItem`, 한 줄 변환·비교의 `map`/`filter`.
+
 - SHOULD: 상태·종류·구분 코드처럼 닫힌 값 집합은 문자열 리터럴 union 대신 `enum` 으로 선언하고 멤버는 `UPPER_SNAKE_CASE`.
 
 - SHOULD: 파생값은 상태로 만들지 않고 렌더 중에 계산한다.
@@ -224,6 +228,7 @@ frontend/src/
 | hooks·services·api·lib 의 default export | export 규칙 위반 — 화면만 default (0-2장) | Important |
 | `data`·`info`·`temp`·`useStuff` 류 이름 | 무엇인지 없는 이름 (12장) | Important |
 | 사용자 문장 인라인 문자열 | 메시지 enum 위반 (6장) | Important |
+| 판단·누적이 든 람다 체이닝(`reduce`·조건 든 `filter().map()`) | 흐름이 람다 안에 숨는다 — `if`/`for` 로 풀기 (0-4장) | Important |
 | enum 이 `enums/`(`<도메인>/enums/`·`src/common/enums/`) 밖에 선언됨 | enum 분리 규칙 위반 | Important |
 
 ## 체크리스트
@@ -267,6 +272,8 @@ frontend/src/
 흐름
 
 - [ ] 상태코드 분기가 services 에만 있는가
+
+- [ ] 판단·누적이 람다 체이닝이 아니라 `if`/`for` 로 풀려 있는가(훅 콜백·JSX 핸들러 등 관용구 제외)
 
 - [ ] 예상된 비정상은 결과 enum, 진짜 실패는 `ServiceError` throw 인가
 
