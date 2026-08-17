@@ -47,6 +47,28 @@ interface TodoRepository : JpaRepository<TodoEntity, Long> {
 }
 ```
 
+## JPA 가 아닌 저장 기술 — Store 인터페이스로 감춘다
+
+Redis·파일·외부 저장소를 쓸 때는 **storage 모듈 안에 인터페이스를 세우고, 기술별 구현을
+그 뒤에 숨긴다.** core 는 인터페이스만 안다 — 기술을 바꿔도 core 는 한 줄도 안 바뀐다.
+
+```
+storage/db-core/.../share/store/
+  LocationStore.kt            인터페이스 — core 가 아는 유일한 이름
+  RedisLocationStore.kt       구현 1
+  InMemoryLocationStore.kt    구현 2 (Redis 미설정 시 폴백)
+  ShareStoreConfig.kt         @Conditional 로 구현을 고르는 설정
+```
+
+- 인터페이스 메서드도 저장소 명명(`findBy…`·`save`·`deleteBy…`)을 따른다.
+- 반환은 storage 소유의 저장 모델(불변 data class)이다. Redis 직렬화 DTO·Jedis 타입 같은
+  기술 타입을 시그니처에 올리지 않는다.
+- 구현 선택은 `@Conditional`·`@ConditionalOnProperty` 로 설정이 한다. core 나 부팅 모듈이
+  `if (redis 있음)` 분기를 갖지 않는다.
+
+**JPA 는 이 래퍼를 만들지 않는다.** `JpaRepository` 인터페이스가 이미 그 역할이다 —
+쓰지도 않을 교체 가능성을 위해 Store 를 한 겹 더 두는 것은 과잉이다.
+
 ## 적발 신호
 
 | 신호 | 문제 | 심각도 |
