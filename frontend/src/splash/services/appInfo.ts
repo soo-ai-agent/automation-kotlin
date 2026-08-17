@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import {appInfo} from "../api/appInfo";
 import {AppInfoLabel} from "../enums/appInfo";
-import type {ApiResult} from "../lib/apiClient";
+import type {ApiResult} from "../../common/lib/apiClient";
 import type {AppInfo} from "../types/appInfo";
 
 // 앱 버전 — 빌드에 박힌 값(app.json)이라 네트워크 없이 항상 표시할 수 있다.

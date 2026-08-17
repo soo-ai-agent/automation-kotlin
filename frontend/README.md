@@ -30,11 +30,11 @@ dev 에서는 `apiBaseUrl` 을 쓰지 않는다 — 폰이 번들을 받아온 �
 
 ## 스플래시와 앱 버전 표기
 
-앱을 켜면 스플래시(`src/common/components/layout/SplashScreen.tsx`)가 잠깐 뜨고, 하단에 "앱 v1.0.0 · 서버 v0.0.1" 한 줄을 보여 준다.
+앱을 켜면 스플래시(`src/splash/` 도메인)가 잠깐 뜨고, 하단에 "앱 v1.0.0 · 서버 v0.0.1" 한 줄을 보여 준다.
 
 앱 버전은 `app.json` 의 `version`(빌드 내장)이고, 서버 버전은 `GET /api/v1/app-info` 를 1회 조회한다.
 
-백엔드가 이 엔드포인트를 아직 만들지 않았어도 된다 — 실패하면 서버 조각만 조용히 생략된다(스플래시는 관문이 아니다). 만들 때의 응답 모양은 `src/common/types/appInfo.ts` 가 기준이다.
+백엔드가 이 엔드포인트를 아직 만들지 않았어도 된다 — 실패하면 서버 조각만 조용히 생략된다(스플래시는 관문이 아니다). 만들 때의 응답 모양은 `src/splash/types/appInfo.ts` 가 기준이다.
 
 ## 지도 (선택 모듈)
 
@@ -69,4 +69,4 @@ npm run e2e
 
 스타일은 컴포넌트와 같은 폴더의 `이름.styles.ts` 에 두고, 색·간격은 `src/common/lib/theme.ts` 토큰만 쓴다.
 
-`src/common/` 아래(`lib/`·`utils/`·`services/ServiceError`·스플래시)는 여러 도메인이 쓰는 공통 코드라 그대로 둔다. 규칙 전문은 `.claude/skills/frontend-react/` 에 있다.
+`src/common/` 아래(`lib/`·`utils/`·`services/ServiceError`)는 여러 도메인이 쓰는 공통 코드라 그대로 둔다. 규칙 전문은 `.claude/skills/frontend-react/` 에 있다.

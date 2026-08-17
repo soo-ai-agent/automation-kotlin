@@ -177,8 +177,6 @@ frontend/src/
 | `services/ServiceError.ts` | 도메인 실패 + 표시 수준(`ErrorLevel`) |
 | `services/serviceErrorHandler.ts` | 에러 판정 전부(React 없음). 세션 만료는 콜백 주입 |
 | `hooks/useServiceErrorHandler.ts` | 위 함수의 얇은 React 래퍼 |
-| `components/layout/SplashScreen.tsx` | 스플래시 + 앱·서버 버전 한 줄(`useAppInfo` → `GET /api/v1/app-info`, 실패 시 조용히 생략) |
-| `hooks/useSplashGate.ts` | 스플래시 최소 노출 시간 게이트(App.tsx 가 사용) |
 | `utils/formatDate.ts` | 날짜 포맷 |
 
 ### 이름만 바꿔 따라 쓰는 초기 화면 (사용자 목록 전체 — `src/user/`)
@@ -186,6 +184,10 @@ frontend/src/
 `types/user.ts` → `api/user.ts` → `services/userService.ts` → `enums/user.ts` → `hooks/useUser*.ts` 5개 + `hooks/useUsers.ts`(조립) → `components/UserTable.tsx`·`UserToolbar.tsx`·`UserDetailModal.tsx`(+ 각 `.styles.ts`) → `screens/User.tsx`(+ `.styles.ts`)
 
 목록·다중선택·단건/일괄 삭제·상세 모달이 전부 들어 있는 **완결된 수직 슬라이스**다. 새 화면은 이 파일들을 열어 `User` 를 자기 도메인 이름으로 바꾸는 것으로 시작한다.
+
+### 작은 도메인 예시 — 스플래시(`src/splash/`)
+
+스플래시 + 앱·서버 버전 한 줄 표기가 완결된 작은 도메인으로 들어 있다(`useAppInfo` → `GET /api/v1/app-info`, 실패 시 조용히 생략 — 스플래시는 관문이 아니다). 쓰는 곳이 App.tsx 하나뿐이라 common 이 아니라 자기 도메인이다 — **도메인은 이렇게 작아도 된다.** 파일 8개가 user 와 같은 계층(types → api → services → hooks → components)을 그대로 밟는다.
 
 ### 선택 모듈 — 지도(`src/map/`)
 

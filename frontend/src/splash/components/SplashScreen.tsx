@@ -1,5 +1,5 @@
 import {Text, View} from "react-native";
-import {useAppInfo} from "../../hooks/useAppInfo";
+import {useAppInfo} from "../hooks/useAppInfo";
 import {styles} from "./SplashScreen.styles";
 
 export function SplashScreen() {

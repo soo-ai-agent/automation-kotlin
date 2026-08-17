@@ -1,4 +1,4 @@
-import {apiClient, type ApiResult} from "../lib/apiClient";
+import {apiClient, type ApiResult} from "../../common/lib/apiClient";
 import type {AppInfo} from "../types/appInfo";
 
 const APP_INFO = "/api/v1/app-info";
