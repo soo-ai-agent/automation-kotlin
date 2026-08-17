@@ -1,17 +1,18 @@
 ---
 name: frontend-react
 description: >
-  React + TypeScript 프론트엔드 코드 작성·수정·리팩터링·리뷰 기준. '프론트',
-  'React', '컴포넌트', '훅', '화면', 'UI 코드', '프론트 리뷰' 요청 시 반드시
-  사용할 것. 자기완결적 — 규칙을 그대로 구현해 tsc strict 를 통과한
-  frontend/src/ 가 곧 정답 코드다(인프라 7개 + 사용자 목록 화면 13개). 핵심: 도메인 최상위 + 그 아래 계층, 페이지 무상태(useState/useEffect
+  React Native(Expo) + TypeScript 프론트엔드 코드 작성·수정·리팩터링·리뷰 기준. '프론트',
+  'React', 'RN', '컴포넌트', '훅', '화면', 'UI 코드', '프론트 리뷰' 요청 시 반드시
+  사용할 것. 자기완결적 — 규칙을 그대로 구현해 tsc strict 와 expo export 를 통과한
+  frontend/src/ 가 곧 정답 코드다(공통 인프라 + 사용자 목록 화면 + 선택 지도 모듈).
+  핵심: 도메인 최상위 + 그 아래 계층, 화면 무상태(useState/useEffect
   금지), 결과 enum vs ServiceError 2분법, 메시지 enum, notify 단일 창구, 모달
-  forwardRef, `?` 마다 사유 주석. 요약은 Quick Rules, 각 장 전문은 chapters.md. 공통 문서
+  forwardRef, 스타일은 `이름.styles.ts` 분리, `?` 마다 사유 주석. 요약은 Quick Rules, 각 장 전문은 chapters.md. 공통 문서
   (common/docs/code-review/rules.md) 위에 적용하며 충돌 시 이 문서가 우선. 백엔드는
   backend/.claude/skills/kotlin-* 이 담당.
 ---
 
-# 프론트엔드 코딩 스킬 (React + TypeScript)
+# 프론트엔드 코딩 스킬 (React Native/Expo + TypeScript)
 
 > 범용 규칙("얼마나 적게 만들 것인가")은 **ponytail** 이, 언어 무관 공통 규칙은
 
@@ -21,7 +22,9 @@ description: >
 
 ## 책임
 
-공통 문서가 "좋은 코드란 무엇인가"를 말한다면, 이 문서는 "React에서는 그 코드를 **어느 폴더에, 어떤 이름으로, 어떤 모양으로** 쓰는가"를 말한다.
+공통 문서가 "좋은 코드란 무엇인가"를 말한다면, 이 문서는 "React(Native)에서는 그 코드를 **어느 폴더에, 어떤 이름으로, 어떤 모양으로** 쓰는가"를 말한다.
+
+이 저장소의 앱은 **Expo(React Native)** 다 — 한 코드가 iOS·Android 네이티브와 웹(react-native-web)으로 나간다. 규칙 본문은 React 공통이고, RN 에서만 다른 것(화면 폴더명 screens, `이름.styles.ts`, notify 의 플랫폼 분기, `.web.tsx` 파일 분기)은 자리마다 적어 두었다.
 
 공통 규칙(타입 명시, guard clause, 과한 설계 금지, 주석, 에러 처리 원칙)은 반복하지 않는다. 두 문서가 충돌하면 이 문서가 우선한다. 단 CLAUDE.md·README 와 충돌하면 그쪽이 우선한다.
 
@@ -37,7 +40,7 @@ description: >
 src/
   app/                라우팅·전역 스토어·부트스트랩. 어떤 도메인도 아니다
   <도메인>/           user · order · admin …
-    pages/            화면(RN 은 screens/)  ·  components/  ·  hooks/
+    screens/          화면(웹 프로젝트는 pages/)  ·  components/  ·  hooks/
     services/  api/  lib/  types/  enums/
   common/             여러 도메인이 쓰는 것만 모은다
     components/<종류>/   ui · layout · modal · data_table
@@ -90,7 +93,7 @@ src/
 
 - MUST: 사용자에게 보이는 문장은 전부 `export enum XxxResultMessages` 에 모은다. 호출부 인라인 문자열 금지. (6장)
 
-- MUST: **enum 선언은 `enums/` 에만 둔다.** 한 도메인의 enum 은 `<도메인>/enums/`, 여럿이 쓰는 것과 인프라 enum 은 공용 `src/enums/`. services·hooks·lib 파일 안 인라인 선언 금지.
+- MUST: **enum 선언은 `enums/` 에만 둔다.** 한 도메인의 enum 은 `<도메인>/enums/`, 여럿이 쓰는 것과 인프라 enum 은 공용 `src/common/enums/`. services·hooks·lib 파일 안 인라인 선언 금지.
 
 - MUST: 예상된 비정상 분기는 **결과 enum 반환**, 진짜 실패는 **`ServiceError` throw**. 불리언 반환 금지. (7장)
 
@@ -100,7 +103,7 @@ src/
 - MUST: **폴백은 화면을 유지하는 수단이지 실패를 숨기는 수단이 아니다.** 지도·데이터 로드 실패로 폴백을 그릴 때는 반드시 `notify` 로 사용자에게 알린다(세션당 1회로 반복 억제 가능). 조용한 폴백은 사용자가 빠진 데이터를 정상으로 믿게 만든다.
 
 
-- MUST: 참조는 `pages → hooks → services → api → lib` 한 방향. 역방향·건너뛰기 금지. (0장)
+- MUST: 참조는 `screens(pages) → hooks → services → api → lib` 한 방향. 역방향·건너뛰기 금지. (0장)
 
 - MUST: **서버 DTO(요청 본문·응답 페이로드·행)는 `<도메인>/types/` 에만 둔다.** 서비스 파일 안에 선언하지 않는다.
 
@@ -156,27 +159,33 @@ src/
 frontend/src/
 ```
 
-`tsc --strict --noUnusedLocals --noUnusedParameters` 를 통과한 20파일 744줄이다. 글로 된 규칙과 코드가 어긋나면 **코드가 맞다.**
+`tsc --strict --noUnusedLocals --noUnusedParameters` 와 `expo export`(웹·네이티브 번들)를 통과한 54파일 1,522줄이다. 글로 된 규칙과 코드가 어긋나면 **코드가 맞다.**
 
-### 이미 제자리에 있는 인프라 7개 (그대로 둔다)
+### 이미 제자리에 있는 공통 인프라 — `src/common/` (그대로 둔다)
 
 | 파일 | 역할 |
 |---|---|
 | `lib/apiClient.ts` | 단일 HTTP 클라이언트. 공통 응답 래퍼를 벗겨 `ApiResult<T>` 로 돌려준다 |
-| `lib/notify.ts` | 알림 단일 창구. 알림 UI 교체 시 **이 파일만** 고친다 |
+| `lib/config.ts` | 주소·키의 유일한 창구 — dev 는 hostUri 파생, 웹은 same-origin, 프로덕션은 app.json extra |
+| `lib/notify.ts` | 알림 단일 창구. 네이티브 `Alert`/웹 `window.alert` 분기도 여기서 끝난다. `confirm` 은 Promise |
 | `lib/listState.ts` | 3상태(`ListStatus.OK`/`EMPTY`/`ERROR`) 표현형 |
+| `lib/theme.ts` | 색·모서리·간격 토큰. 스타일 파일은 이 값만 쓴다(하드코딩 금지) |
 | `services/ServiceError.ts` | 도메인 실패 + 표시 수준(`ErrorLevel`) |
 | `services/serviceErrorHandler.ts` | 에러 판정 전부(React 없음). 세션 만료는 콜백 주입 |
 | `hooks/useServiceErrorHandler.ts` | 위 함수의 얇은 React 래퍼 |
+| `components/layout/SplashScreen.tsx` | 스플래시 + 앱·서버 버전 한 줄(`useAppInfo` → `GET /api/v1/app-info`, 실패 시 조용히 생략) |
+| `hooks/useSplashGate.ts` | 스플래시 최소 노출 시간 게이트(App.tsx 가 사용) |
 | `utils/formatDate.ts` | 날짜 포맷 |
 
-### 이름만 바꿔 따라 쓰는 초기 화면 13개 (사용자 목록 전체)
+### 이름만 바꿔 따라 쓰는 초기 화면 (사용자 목록 전체 — `src/user/`)
 
-`types/user.ts` → `api/user.ts` → `services/userService.ts` → `hooks/useUser*.ts` 5개 + `hooks/useUsers.ts`(조립) → `components/data_table/UserTable.tsx`·`UserToolbar.tsx` → `components/modal/UserDetailModal.tsx` → `pages/user/User.tsx`
+`types/user.ts` → `api/user.ts` → `services/userService.ts` → `enums/user.ts` → `hooks/useUser*.ts` 5개 + `hooks/useUsers.ts`(조립) → `components/UserTable.tsx`·`UserToolbar.tsx`·`UserDetailModal.tsx`(+ 각 `.styles.ts`) → `screens/User.tsx`(+ `.styles.ts`)
 
-목록·다중선택·단건/일괄 삭제·상세 모달이 전부 들어 있는 **완결된 수직 슬라이스**다. 새 화면은 이 13개를 열어 `User` 를 자기 도메인 이름으로 바꾸는 것으로 시작한다.
+목록·다중선택·단건/일괄 삭제·상세 모달이 전부 들어 있는 **완결된 수직 슬라이스**다. 새 화면은 이 파일들을 열어 `User` 를 자기 도메인 이름으로 바꾸는 것으로 시작한다.
 
-예제 컴포넌트에는 `className` 이 없다. 구조만 보여 주려는 것이고, 실제 화면은 프로젝트의 기존 공용 컴포넌트·토큰으로 입힌다(CLAUDE.md 6절 "틀 준수").
+### 선택 모듈 — 지도(`src/map/`)
+
+카카오 지도 WebView 가 자기완결 모듈로 들어 있다. 플랫폼별 구현이 갈리면 이 모듈처럼 **파일 분기**(`KakaoMapView.tsx` 네이티브 / `KakaoMapView.web.tsx` 웹)로 푼다 — 호출부는 구분을 모른다. 지도를 안 쓰는 앱에서 들어내는 절차는 `src/map/README.md` 에 있다.
 
 > 참고: 이 규칙들은 실제 운영 프로젝트 `member-info-collect-frontend-main` 에서 도출했다.
 
@@ -215,7 +224,7 @@ frontend/src/
 | hooks·services·api·lib 의 default export | export 규칙 위반 — 화면만 default (0-2장) | Important |
 | `data`·`info`·`temp`·`useStuff` 류 이름 | 무엇인지 없는 이름 (12장) | Important |
 | 사용자 문장 인라인 문자열 | 메시지 enum 위반 (6장) | Important |
-| enum 이 `src/enums/` 밖에 선언됨 | enum 분리 규칙 위반 | Important |
+| enum 이 `enums/`(`<도메인>/enums/`·`src/common/enums/`) 밖에 선언됨 | enum 분리 규칙 위반 | Important |
 
 ## 체크리스트
 

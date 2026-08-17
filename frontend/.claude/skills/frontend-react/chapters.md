@@ -100,15 +100,13 @@ pages ──▶ hooks ──▶ services ──▶ api ──▶ lib
 
   named 로 통일해야 자동완성·일괄 치환이 듣는다.
 
-- 한 파일에 하나의 주역만 둔다. 서비스 파일의 메시지 enum·결과 enum 은 그 서비스의 일부이므로 같은 파일에 둔다.
+- 한 파일에 하나의 주역만 둔다. 메시지 enum·결과 enum 은 `<도메인>/enums/` 의 제 파일에 둔다(SKILL.md MUST).
 
 - 파일 이름과 그 안의 주역 이름은 **정확히 같은 철자**여야 한다. `useMemberRecordList.ts` 안의 훅은 `useMemberRecordList` 다. 다르면 검색이 끊긴다.
 
-**스타일 파일은 만들지 않는다(웹).** 부엉이 웹은 Tailwind 유틸리티 클래스를 JSX 에 직접 쓴다. `UserTable.css` 같은 **컴포넌트별 CSS 파일을 새로 만들지 않는다.**
+**스타일은 컴포넌트와 나란한 `이름.styles.ts` 에 둔다(React Native).** `StyleSheet.create` 를 컴포넌트 파일 안에 두지 않고, 색·간격은 `src/common/lib/theme.ts` 토큰만 쓴다(하드코딩 금지).
 
-전역 토큰·폰트·리셋만 `src/styles/` 에 있고, 그 목록은 이미 고정돼 있다. 색·간격은 기존 토큰만 쓴다(CLAUDE.md 6절 "틀 준수").
-
-React Native(`mobile/`)는 예외로 `Foo.tsx` → `Foo.styles.ts` 분리 규칙을 따른다.
+웹(React DOM) 프로젝트라면 그 프로젝트의 방식(Tailwind 등)을 따르되, 마찬가지로 색·간격 하드코딩과 컴포넌트별 CSS 파일 신설을 금한다.
 
 ### 0-3. 줄 길이 — 100자 자제, import 만 120자 한 줄
 
@@ -161,9 +159,9 @@ return {
 
 ## 1. 페이지 무상태 원칙 — 이 문서에서 가장 중요한 규칙
 
-레퍼런스와 부엉이를 가르는 결정적 차이가 여기다. 수치로 보면:
+이 규칙을 지킨 프로젝트와 아닌 프로젝트를 가르는 결정적 차이가 여기다. 실측 두 프로젝트의 수치로 보면:
 
-| | 레퍼런스 | 부엉이 현행 |
+| | 레퍼런스(지킴) | 규칙 도입 전 프로젝트 |
 |---|---|---|
 | 페이지 평균 길이 | 45~83줄 | 180~609줄 |
 | 페이지의 `useState` 총합 | **0** | **62** |
@@ -173,7 +171,7 @@ return {
 **페이지는 상태를 갖지 않는다.** 페이지가 하는 일은 딱 셋이다: 훅 1개 호출 → 받은 값을 컴포넌트에 배분 → JSX 반환.
 
 ```tsx
-// O — 실제 운영 프로젝트의 페이지 (전문, 45줄).  동봉 대응: frontend/src/pages/user/User.tsx
+// O — 실제 운영 프로젝트의 페이지 (전문, 45줄).  동봉 대응: frontend/src/user/screens/User.tsx
 const MemberRecords = ({toggleSidebar}: ContentProps) => {
     const {table, detailModal} = useMemberRecords();   // 훅 1개. 이게 전부다.
 
@@ -206,7 +204,7 @@ const MemberRecords = ({toggleSidebar}: ContentProps) => {
 ```
 
 ```tsx
-// X — 부엉이 src/pages/RouteComparison.tsx (262줄, useState 9 · useEffect 3)
+// X — 규칙 도입 전 프로젝트의 화면 (262줄, useState 9 · useEffect 3)
 export function RouteComparison() {
   const [routeOptions, setRouteOptions] = useState<RouteOption[]>([]);
   const [routeOptionsLoading, setRouteOptionsLoading] = useState(false);
@@ -241,7 +239,7 @@ export function RouteComparison() {
 
 3. **서버 데이터도 업무 규칙도 아니다.**
 
-통과하는 것(부엉이에서 실제로 판정한 전부):
+통과하는 것(실제 프로젝트에서 판정했던 예):
 
 | 무엇 | 왜 통과하나 |
 |---|---|
@@ -263,7 +261,7 @@ export function RouteComparison() {
 훅 하나 = 유스케이스 하나. 목록 로딩·선택·삭제·상세는 **각각 다른 훅**이다.
 
 ```ts
-// O — 로딩 하나만 책임지는 훅.  동봉 대응: frontend/src/hooks/useUserList.ts
+// O — 로딩 하나만 책임지는 훅.  동봉 대응: frontend/src/user/hooks/useUserList.ts
 export function useMemberRecordList(handleAuthRequired: AuthRequiredHandler) {
     const [records, setRecords] = useState<MemberRecord[]>([]);
     const [loading, setLoading] = useState(false);
@@ -310,7 +308,7 @@ export function useMemberRecordList(handleAuthRequired: AuthRequiredHandler) {
 화면이 훅 여러 개를 필요로 하면, **페이지가 훅을 여러 개 부르는 게 아니라** 조립 훅 하나가 하위 훅들을 모아 **소비 컴포넌트별로 그룹지어** 반환한다.
 
 ```ts
-// O — 조립 훅.  동봉 대응: frontend/src/hooks/useUsers.ts
+// O — 조립 훅.  동봉 대응: frontend/src/user/hooks/useUsers.ts
 export const useMemberRecords = () => {
     const {checkAuth} = useAuthRequired();
     const {records, loading, listState, loadRecordList} = useMemberRecordList(checkAuth);
@@ -355,7 +353,7 @@ export const useMemberRecords = () => {
 CLAUDE.md 6절이 요구하는 로딩·에러·빈 상태를 훅마다 다른 모양으로 만들면 화면 코드가 제각각이 된다. **목록/상세를 다루는 훅은 `loading` 플래그와 함께 상태 객체 하나를 노출한다.**
 
 ```ts
-// O — 동봉 frontend/src/lib/listState.ts (전문)
+// O — 동봉 frontend/src/common/lib/listState.ts (전문)
 export enum ListStatus {
     OK = "OK",
     EMPTY = "EMPTY",
@@ -369,7 +367,7 @@ export type ListState = {
 ```
 
 ```ts
-// O — 동봉 frontend/src/hooks/useUserList.ts 에서 상태를 세팅하는 부분
+// O — 동봉 frontend/src/user/hooks/useUserList.ts 에서 상태를 세팅하는 부분
 if (loadedUsers.length === 0) {
     setListState({status: ListStatus.EMPTY, message: UserResultMessages.LIST_EMPTY});
 } else {
@@ -381,14 +379,12 @@ if (loadedUsers.length === 0) {
 
 - `status` 는 닫힌 값 집합이므로 문자열 union 이 아니라 `enum` 이다(Quick Rules).
 
-- 부엉이에는 이미 같은 역할의 `AdminResourceStatus`(`'loading' | 'error' | 'ready'`)가 있다. **새 타입을 만들지 말고 이것을 enum 으로 승격해 재사용한다.**
-
 ## 3. services — 업무 규칙과 결과 번역
 
 서비스는 **React 를 모르는 순수 TS 모듈**이다. 하는 일은 둘: ① `api/` 호출, ② 그 결과(상태코드·본문)를 **도메인 결과 또는 ServiceError 로 번역**.
 
 ```ts
-// O — 상태코드를 번역하는 서비스.  동봉 대응: frontend/src/services/userService.ts
+// O — 상태코드를 번역하는 서비스.  동봉 대응: frontend/src/user/services/userService.ts
 export enum BlockAdminResultMessages {
     SUCCESS         = "차단되었습니다. (활성 세션도 즉시 폐기됩니다)",
     SESSION_EXPIRED = "세션이 만료되었습니다.",
@@ -433,7 +429,7 @@ export async function blockAdminAccount(adminId: number, reason: string): Promis
 경로 상수 + 요청 함수. **그 이상 아무것도 하지 않는다.**
 
 ```ts
-// O — api 계층 전문.  동봉 대응: frontend/src/api/user.ts
+// O — api 계층 전문.  동봉 대응: frontend/src/user/api/user.ts
 const MEMBER_RECORDS = "/api/v1/member-records";
 
 export const member = {
@@ -467,7 +463,7 @@ export const member = {
 
 HTTP 클라이언트는 **앱에 하나**다. 인증 헤더·CSRF·baseURL·공통 에러 매핑을 여기서만 설정한다.
 
-**전문은 동봉 `frontend/src/lib/apiClient.ts` 에 있다. 그 파일을 복사해 쓴다.** 핵심 두 가지만 옮기면:
+**전문은 동봉 `frontend/src/common/lib/apiClient.ts` 에 있다. 그 파일을 복사해 쓴다.** 핵심 두 가지만 옮기면:
 
 ```ts
 // 1) 비2xx 도 예외로 던지지 않고 상태코드를 그대로 넘긴다 — 판정은 services 의 몫이다.
@@ -498,14 +494,14 @@ export const apiClient = {
 
 - 인증 헤더·CSRF·baseURL 이 필요하면 `send()` 안에 한 번만 더한다. 호출부는 영향받지 않는다.
 
-- 부엉이에서는 `src/utils/httpClient.ts` 가 이 자리다. **새 클라이언트를 만들지 않는다.** 테스트는 `createHttpClient({adapter})` 로 목 인스턴스를 주입한다(`src/testing/mockHttpClient.ts`).
+- 이 저장소에서는 `src/common/lib/apiClient.ts` 가 이 자리다. **새 클라이언트를 만들지 않는다.**
 
 ## 6. 사용자 메시지는 enum 으로 모은다
 
-문자열 리터럴을 호출부에 흩뿌리지 않는다. **서비스 파일 상단에 메시지 enum 을 선언**하고, 훅·컴포넌트는 그 멤버만 참조한다.
+문자열 리터럴을 호출부에 흩뿌리지 않는다. **`<도메인>/enums/` 에 메시지 enum 을 선언**하고, 훅·컴포넌트는 그 멤버만 참조한다.
 
 ```ts
-// O — 메시지 enum.  동봉 대응: frontend/src/services/userService.ts
+// O — 메시지 enum.  동봉 대응: frontend/src/user/enums/user.ts
 export enum MemberRecordResultMessages {
     DELETE_SUCCESS             = "삭제되었습니다.",
     DELETE_ALREADY_MISSING     = "이미 삭제되었거나 존재하지 않는 레코드입니다.",
@@ -516,7 +512,7 @@ export enum MemberRecordResultMessages {
 ```
 
 ```ts
-// X — 부엉이 현행: 같은 성격의 문장이 페이지마다 인라인으로 흩어져 있다
+// X — 규칙 도입 전 프로젝트: 같은 성격의 문장이 페이지마다 인라인으로 흩어져 있다
 const logs = useAdminResource(loadLogs, EMPTY_LOGS, '요청 로그를 불러오지 못했어요.');
 setErrorMessage(error instanceof ApiError ? error.userMessage : '접속 내역을 불러오지 못했어요.');
 ```
@@ -524,8 +520,6 @@ setErrorMessage(error instanceof ApiError ? error.userMessage : '접속 내역�
 - 이름은 `<도메인><용도>Messages`: `MemberRecordResultMessages`, `LoginResultMessages`, `MemberRecordDetailMessages`.
 
 - 멤버는 `UPPER_SNAKE_CASE`, 값은 완성된 한국어 문장(마침표 포함).
-
-- 부엉이 현행 `export enum` 은 **0건**이다. 신규 코드부터 이 규칙을 적용하고, 손대는 파일은 함께 정리한다.
 
 ## 7. 결과 enum vs ServiceError — 2분법
 
@@ -559,7 +553,7 @@ export async function deleteMemberRecord(id: number): Promise<DeleteRecordOutcom
 `ServiceError` 는 **표시 수준(level)** 을 함께 들고 다닌다. 이것이 알림 종류를 결정한다.
 
 ```ts
-// O — 동봉 frontend/src/services/ServiceError.ts (전문)
+// O — 동봉 frontend/src/common/services/ServiceError.ts (전문)
 export enum ErrorLevel {
     WARNING = "WARNING",
     ERROR = "ERROR",
@@ -578,7 +572,7 @@ export class ServiceError extends Error {
 ```
 
 ```ts
-// O — 동봉 frontend/src/services/serviceErrorHandler.ts (전문). catch 는 이 한 함수로 수렴한다.
+// O — 동봉 frontend/src/common/services/serviceErrorHandler.ts (전문). catch 는 이 한 함수로 수렴한다.
 export enum SessionResultMessages {
     EXPIRED = "세션이 만료되었습니다. 다시 로그인해 주세요.",
 }
@@ -614,47 +608,30 @@ export function handleServiceError(
 
 401 은 이 경로 하나로만 처리한다. 개별 훅이 각자 로그인 페이지로 보내면 안 된다.
 
-부엉이에는 이미 `ApiError`(`src/utils/apiError.ts`, `userMessage` 보유)가 있다. **새 에러 클래스를 만들지 말고** `ApiError` 에 이 역할을 맡긴다.
-
-`level` 개념이 필요하면 `ApiError` 에 필드를 더한다.
-
 ## 8. 알림은 단일 창구
 
 ```ts
-// O — 동봉 frontend/src/lib/notify.ts (전문). 알림 UI 를 아는 유일한 파일이다.
+// O — 동봉 frontend/src/common/lib/notify.ts (요지). 알림 UI 를 아는 유일한 파일이다.
 export const notify = {
-    success(message: string): void {
-        window.alert(message);
-    },
-
-    warning(message: string): void {
-        window.alert(message);
-    },
-
-    error(message: string): void {
-        window.alert(message);
-    },
-
-    confirm(message: string): boolean {
-        return window.confirm(message);
-    },
+    success(message: string): void { show(NotifyTitle.SUCCESS, message); },
+    warning(message: string): void { show(NotifyTitle.WARNING, message); },
+    error(message: string): void { show(NotifyTitle.ERROR, message); },
+    confirm(message: string): Promise<boolean> { /* 네이티브 Alert 버튼 → resolve */ },
 };
 ```
 
-`window.alert` 은 **자리표시자**다. 프로젝트의 토스트·모달로 바꿀 때 고치는 파일은 이 하나뿐이다. 호출부는 한 줄도 손대지 않는다 — 그것이 이 창구를 두는 이유다.
+`show()` 는 네이티브에서 `Alert.alert`, 웹 빌드에서 `window.alert` 로 갈린다 — 플랫폼 분기도 이 파일 안에서 끝난다. 토스트·모달로 바꿀 때 고치는 파일은 이 하나뿐이고, 호출부는 한 줄도 손대지 않는다 — 그것이 이 창구를 두는 이유다.
 
-- 확인 대화상자도 이 창구를 지난다: `if (!notify.confirm(UserResultMessages.DELETE_CONFIRM)) { return; }`
+- 확인 대화상자도 이 창구를 지난다. 네이티브 `Alert` 가 버튼 콜백으로만 답을 줘서 `confirm` 은 Promise 다: `if (!(await notify.confirm(UserResultMessages.DELETE_CONFIRM))) { return; }`
 
 - 컴포넌트·훅이 알림 라이브러리를 직접 import 하면 위반. 알림 UI 교체가 한 파일 수정으로 끝나야 한다.
-
-- 부엉이는 토스트를 쓴다. `src/utils/notify.ts` 를 만들어 **토스트 호출을 이 창구 뒤로 숨긴다.**
 
 ## 9. 모달 — forwardRef + useImperativeHandle
 
 모달은 자기 열림 상태를 스스로 갖고, **부모는 ref 로 연다.** 부모에 `isXxxOpen` 상태를 만들지 않는다.
 
 ```tsx
-// O — 모달 ref 패턴 (요지).  동봉 전문: frontend/src/components/modal/UserDetailModal.tsx
+// O — 모달 ref 패턴 (요지).  동봉 전문: frontend/src/user/components/UserDetailModal.tsx
 export interface BlockAdminModalRef {
     openBlock: (row: AdminRow) => void;
 }
@@ -820,7 +797,7 @@ durationMs?: number;
 
 - 닫힌 값 집합은 `enum`. 다만 객체 구조·함수 시그니처·라우팅 파라미터 타입은 enum 대상이 아니다.
 
-- **enum 선언 위치는 `enums/` 로 고정한다.** 한 도메인의 enum(메시지·결과·상태)은 `<도메인>/enums/`, 여러 도메인이 쓰는 것과 인프라 enum 은 공용 `src/enums/` 에 각자 파일로. 사용처 파일 안 인라인 선언은 위반이다.
+- **enum 선언 위치는 `enums/` 로 고정한다.** 한 도메인의 enum(메시지·결과·상태)은 `<도메인>/enums/`, 여러 도메인이 쓰는 것과 인프라 enum 은 공용 `src/common/enums/` 에 각자 파일로. 사용처 파일 안 인라인 선언은 위반이다.
 
 ### 11-3. 서버 DTO 는 `types/` 에만 산다 (MUST)
 
@@ -920,36 +897,20 @@ export async function fetchRouteCompare(…) { … }
 
 레퍼런스도 완벽하지 않다. 아래는 **규칙이 아니라 그 프로젝트의 부채**다. 따라 하지 않는다.
 
-| 레퍼런스의 실제 상태 | 왜 베끼면 안 되는가 | 부엉이에서는 |
+| 레퍼런스의 실제 상태 | 왜 베끼면 안 되는가 | 이 저장소에서는 |
 |---|---|---|
-| **테스트 0건** (`*.test.*` 없음, vitest 미설치) | CLAUDE.md 7절 DoD 가 테스트 통과를 요구한다. 최소주의(ponytail)로도 생략 불가 | 현행 106개 테스트 유지. 신규 훅·서비스에 테스트 동반 |
-| **HTTP 클라이언트 2개 공존** (`lib/api.ts` 의 `restfulApiClient` + `lib/apiClient.ts` 의 `apiClient`) | 인증 헤더·에러 처리가 두 갈래로 갈라져 있다. 5장의 "단일 창구" 원칙을 스스로 위반 | `src/utils/httpClient.ts` **하나만** 쓴다 |
+| **테스트 0건** (`*.test.*` 없음, vitest 미설치) | CLAUDE.md 7절 DoD 가 테스트 통과를 요구한다. 최소주의(ponytail)로도 생략 불가 | 신규 훅·서비스에 테스트를 동반한다(CLAUDE.md 5절 — 정상 1 + 에러 2 이상) |
+| **HTTP 클라이언트 2개 공존** (`lib/api.ts` 의 `restfulApiClient` + `lib/apiClient.ts` 의 `apiClient`) | 인증 헤더·에러 처리가 두 갈래로 갈라져 있다. 5장의 "단일 창구" 원칙을 스스로 위반 | `src/common/lib/apiClient.ts` **하나만** 쓴다 |
 | `send()` 에서 `throw result` — **Error 가 아닌 평범한 객체를 throw** | `instanceof` 로 못 걸러지고 스택도 없다 | 항상 `Error` 하위 타입(`ApiError`)을 throw |
 | `restfulApiClient.get()` 등 **반환 타입 미선언** | 추론이 `AxiosResponse \| undefined` 로 새어 호출부가 옵셔널 체이닝 범벅이 된다 | api 함수에 반환 타입 명시(4장) |
 | `api/*.tsx` — JSX 가 없는데 `.tsx` 확장자 | 확장자로 레이어를 판별할 수 없게 된다 | JSX 없으면 `.ts` (0-2장) |
 | `apiClient.ts` 의 `// @TODO API Client 는 Data만 다루는 부분일텐데.. UI를???` | 미해결 설계 의문이 코드에 남아 있는 상태 | 레이어 경계를 지켜 애초에 발생시키지 않는다 |
 | `README.md` 가 Vite 템플릿 기본값 | 규약이 문서화돼 있지 않아 코드를 읽어야만 알 수 있다 | 이 스킬 문서가 그 역할을 한다 |
-| Bootstrap·SweetAlert2·DataTables 조합 | 그 프로젝트의 스택 선택일 뿐 보편 규칙이 아니다 | 부엉이 기존 공용 컴포넌트를 쓴다(CLAUDE.md 6절 "틀 준수") |
+| Bootstrap·SweetAlert2·DataTables 조합 | 그 프로젝트의 스택 선택일 뿐 보편 규칙이 아니다 | 이 저장소의 theme 토큰·공용 컴포넌트를 쓴다 |
 
-## 14. 부엉이 현행 코드 → 목표 구조 이관 지도
+## 14. 기존 코드를 이 구조로 옮길 때
 
-부엉이는 이미 상당 부분이 정렬돼 있다. **없는 것과 어긋난 것만** 표로 고정한다.
-
-| 항목 | 부엉이 현행 | 목표 | 우선순위 |
-|---|---|---|---|
-| 페이지 상태 | `pages/` 에 `useState` 62 · `useEffect` 27 | 훅으로 전량 이동, 페이지 상태 0 | **높음** |
-| 훅 수 | 6개 (`useRequestOrigin`·`useWakeLock`·`useOffRouteReroute`·`useAdminResource` …) | 화면당 조립 훅 1 + 단일책임 훅 N | **높음** |
-| api 레이어 | `<도메인>/api/` 신설 완료(2026-08-17) — 요청 함수·경로 상수는 api, 검증·해석은 services | **이미 목표 상태.** 유지 | — |
-| 메시지 enum | 0건, 문장이 호출부 인라인 | `<도메인>ResultMessages` 로 수렴 | 중간 |
-| 결과 표현 | 불리언·`null`·문자열 혼재 | 결과 enum + `ApiError` 2분법 | 중간 |
-| 알림 창구 | 토스트 직접 호출이 8개 파일에 분산 | `src/utils/notify.ts` 단일 창구 | 중간 |
-| 폴더 구조 | 도메인 최상위 + 계층 하위(0장) | **이미 목표 상태.** 유지 | — |
-| 공용 에러 핸들러 | `useAdminResource` 안에만 존재(관리자 전용) | `useServiceErrorHandler` 로 앱 전역화 | 중간 |
-| HTTP 클라이언트 | `src/utils/httpClient.ts` 단일 · 인터셉터 · DI 목 | **이미 목표 상태.** 유지 | — |
-| 에러 타입 | `ApiError`(`userMessage` 보유) | **이미 목표 상태.** `level` 만 보강 | — |
-| 테스트 | 106개 | **이미 목표 이상.** 유지 | — |
-
-이관 방식 — **한 번에 전면 개편하지 않는다.** 손대는 화면 단위로 옮긴다:
+이미 굴러가는 프로젝트를 **한 번에 전면 개편하지 않는다.** 손대는 화면 단위로 옮긴다:
 
 1. 그 화면의 페이지에서 `useState`/`useEffect` 를 전부 뽑아 `<도메인>/hooks/use<화면>.ts` 로 옮긴다.
 
@@ -957,9 +918,9 @@ export async function fetchRouteCompare(…) { … }
 
 3. 그 화면이 쓰는 서비스에서 HTTP 호출부를 `api/` 로 분리한다.
 
-4. 그 화면의 사용자 메시지를 서비스의 enum 으로 모은다.
+4. 그 화면의 사용자 메시지를 `<도메인>/enums/` 의 메시지 enum 으로 모은다.
 
-5. 기존 테스트가 그대로 통과하는지 확인한다. DOM·API 계약은 불변이어야 한다(ADR 0001).
+5. 기존 테스트가 그대로 통과하는지 확인한다. 화면 출력·API 계약은 불변이어야 한다.
 
 ## 15. 새 화면을 만들 때 — 순서
 
@@ -969,15 +930,15 @@ export async function fetchRouteCompare(…) { … }
 
 | 순서 | 파일 | 내용 |
 |---|---|---|
-| 1 | `types/notice.ts` | 서버 DTO 를 서버 필드명 그대로. nullable 에 사유 주석 |
-| 2 | `api/notice.ts` | `const NOTICES = "/api/v1/notices"` + `export const notice = {...}`. 반환 타입 명시, 상태코드 분기 없음 |
+| 1 | `types/user.ts` | 서버 DTO 를 서버 필드명 그대로. nullable 에 사유 주석 |
+| 2 | `api/user.ts` | `const USERS = "/api/v1/users"` + `export const user = {...}`. 반환 타입 명시, 상태코드 분기 없음 |
 | 2.5 | `enums/user.ts` | `UserResultMessages`·`DeleteUserOutcome`·`DetailStatus` — 도메인 enum 전부 여기 |
 | 3 | `services/userService.ts` | `export function` 들. 상태코드를 결과/`ApiError` 로 번역 (enum 은 import) |
 | 4 | `hooks/useUserList.ts`<br>`hooks/useUserSelection.ts`<br>`hooks/useUserDelete.ts` | 단일책임 훅. `useState` 는 전부 여기. 각 액션은 `useCallback` |
 | 5 | `hooks/useUsers.ts` | 조립 훅. 하위 훅을 모아 `{table: {...}, detailModal: {...}}` 로 반환. 최초 로드 `useEffect` 하나 |
-| 6 | `components/data_table/UserTable.tsx` | props 로 받은 값만 그린다. default export |
-| 7 | `components/modal/UserDetailModal.tsx` | `forwardRef` + `useImperativeHandle`, `UserDetailModalRef` 인터페이스 |
-| 8 | `pages/user/User.tsx` | `const {table, detailModal} = useUsers()` + JSX. **상태 0** |
+| 6 | `components/UserTable.tsx` + `UserTable.styles.ts` | props 로 받은 값만 그린다. default export. 스타일은 나란한 styles 파일에 |
+| 7 | `components/UserDetailModal.tsx` + `.styles.ts` | `forwardRef` + `useImperativeHandle`, `UserDetailModalRef` 인터페이스 |
+| 8 | `screens/User.tsx` + `User.styles.ts` | `const {table, modalRefs} = useUsers()` + JSX. **상태 0** |
 | 9 | `*.test.ts` | 서비스는 상태코드별 분기(정상 1 + 에러 2 이상), 훅은 로딩→성공/실패 전이 |
 
 마지막으로 **3상태 확인**: 로딩·에러(재시도)·빈 상태가 화면에 다 있는가(CLAUDE.md 6절 의무).
@@ -1010,7 +971,7 @@ export async function fetchRouteCompare(…) { … }
 
 지적 예시:
 
-- `route/pages/RouteComparison.tsx:38 — [페이지 무상태] 페이지에 useState 9개·로드 useEffect 존재 → route/hooks/useRouteComparison.ts 로 이동, 페이지는 const {map, sheet, routes} = useRouteComparison() 만`
+- `route/screens/RouteComparison.tsx:38 — [페이지 무상태] 페이지에 useState 9개·로드 useEffect 존재 → route/hooks/useRouteComparison.ts 로 이동, 화면은 const {map, sheet, routes} = useRouteComparison() 만`
 
 - `route/services/routeCompare.ts:52 — [레이어 책임] 서비스가 httpClient 를 직접 호출 → route/api/routes.ts 의 fetchRouteCompare() 로 분리하고 서비스는 결과 번역만`
 

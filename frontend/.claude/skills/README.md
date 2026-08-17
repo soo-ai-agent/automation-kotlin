@@ -2,7 +2,7 @@
 
 > **이 폴더는 에이전트가 읽습니다.** `frontend/` 아래 파일을 고칠 때 자동으로 적용됩니다.
 
-React + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
+React Native(Expo) + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 한 코드가 iOS·Android 네이티브와 웹(react-native-web)으로 나간다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
 
 | 파일 | 무엇이 들어 있나 | 언제 |
 |---|---|---|
@@ -14,7 +14,7 @@ React + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 스택�
 
 전문을 읽기 전에 이것만 알아도 절반은 맞는다.
 
-- 참조는 `pages → hooks → services → api → lib` **한 방향**이다. 역방향·건너뛰기 금지
+- 참조는 `screens → hooks → services → api → lib` **한 방향**이다. 역방향·건너뛰기 금지
 
 - **페이지·컴포넌트에 `useState`/`useEffect` 를 두지 않는다.** 화면 상태는 전부 훅에 있고, 페이지는 훅 하나를 부르고 JSX 만 반환한다
 
@@ -22,15 +22,15 @@ React + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 스택�
 
 - 예상된 비정상은 **결과 enum 반환**, 진짜 실패는 **`ServiceError` throw**. 불리언 반환 금지
 
-- 사용자에게 보이는 문장은 전부 `enums/` 의 메시지 enum 에, 알림은 `lib/notify.ts` 한 창구로
+- 사용자에게 보이는 문장은 전부 `enums/` 의 메시지 enum 에, 알림은 `common/lib/notify.ts` 한 창구로
 
 ## 정답 코드가 동봉되어 있다
 
 글로 된 규칙과 코드가 어긋나면 **코드가 맞다.** 규칙을 그대로 구현해 `tsc --strict` 를 통과한 한 벌이 `frontend/src/` 에 살아 있다.
 
-`src/user/pages/User.tsx` 의 사용자 목록 화면이 본보기다 — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 슬라이스다.
+`src/user/screens/User.tsx` 의 사용자 목록 화면이 본보기다 — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 슬라이스다.
 
-새 화면은 user 도메인 파일 13개를 복사해 이름만 바꾸는 것으로 시작한다. 순서는 types → api → services → hooks → components → page.
+새 화면은 user 도메인 파일들을 복사해 이름만 바꾸는 것으로 시작한다. 순서는 types → api → services → hooks → components → screen 이고, 스타일은 `이름.styles.ts` 로 나란히 둔다.
 
 ## 백엔드와의 계약
 

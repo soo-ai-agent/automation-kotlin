@@ -38,19 +38,28 @@ import {defineConfig} from "@playwright/test";
 export default defineConfig({
     testDir: "./e2e",
     use: {
-        baseURL: "http://localhost:5173",
+        baseURL: "http://localhost:8081",
         trace: "on-first-retry",   // 실패했을 때만 추적 파일을 남긴다
     },
-    // 테스트를 돌리면 개발 서버를 알아서 띄우고, 끝나면 내린다
+    // 테스트를 돌리면 웹 개발 서버(react-native-web)를 알아서 띄우고, 끝나면 내린다
     webServer: {
-        command: "npm run dev",
-        url: "http://localhost:5173",
+        command: "npm run web",
+        url: "http://localhost:8081",
         reuseExistingServer: true,
+        timeout: 120000,   // 첫 실행은 Metro 번들링 때문에 기본 60초를 넘길 수 있다
     },
 });
 ```
 
 `.gitignore` 에 `frontend/test-results/`, `frontend/playwright-report/` 를 넣는다.
+
+## 이 앱은 RN 을 웹으로 띄운 것이다
+
+앱은 Expo(React Native)이고, E2E 는 같은 코드를 react-native-web 으로 브라우저에 띄워 검증한다. 그래서 둘만 다르다.
+
+- 요소 지정: JSX 의 `accessibilityRole`/`accessibilityLabel` 이 브라우저 role/name 으로 렌더된다 — `getByRole` 이 그대로 통한다. testid 가 필요하면 RN 의 `testID` prop 을 쓴다(웹에서 `data-testid` 로 렌더).
+
+- 첫 화면 앞에 스플래시가 잠깐(약 1.2초) 떠 있다 — `expect` 의 자동 재시도가 알아서 넘기므로 임의 대기를 넣지 않는다.
 
 ## 백엔드를 띄울까, 가짜 응답을 줄까
 
@@ -79,7 +88,7 @@ await page.route("**/api/v1/users", async (route) => {
 
 ## 이 프로젝트의 함정 — alert 과 confirm
 
-`src/common/lib/notify.ts` 는 지금 `window.alert` 과 `window.confirm` 을 쓴다.
+`src/common/lib/notify.ts` 는 웹 빌드에서 `window.alert` 과 `window.confirm` 으로 갈린다(네이티브는 `Alert`).
 
 **Playwright 는 네이티브 다이얼로그를 자동으로 닫아 버린다.** 그래서 아무것도 안 하면 `confirm` 이 항상 "취소"로 처리되어 **삭제 같은 흐름이 조용히 실패한다.**
 
@@ -110,7 +119,7 @@ page.once("dialog", (dialog) => {
 | 1 | 역할과 이름 | `page.getByRole("button", {name: "삭제"})` |
 | 2 | 라벨·플레이스홀더 | `page.getByLabel("이메일")` |
 | 3 | 보이는 텍스트 | `page.getByText("등록된 사용자가 없습니다")` |
-| 4 | 위 셋으로 안 될 때만 | `page.getByTestId("user-row")` + JSX 에 `data-testid` |
+| 4 | 위 셋으로 안 될 때만 | `page.getByTestId("user-row")` + JSX 에 `testID`(웹에서 `data-testid` 로 렌더) |
 
 **CSS 클래스·태그 구조로 찾지 않는다.** `page.locator(".btn-danger > span")` 같은 선택자는 스타일만 바꿔도 깨진다.
 
