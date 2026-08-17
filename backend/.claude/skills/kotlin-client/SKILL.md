@@ -9,6 +9,10 @@ description: 외부 시스템 연동 규칙. clients/client-* 모듈의 구조(A
 
 ## 모듈 하나가 외부 시스템 하나
 
+**외부와 통신하는 코드는 예외 없이 이 `clients` 모듈에 둔다.** HTTP 든 SDK 든 소켓이든,
+도메인(core)·storage·support 모듈 안에서 외부를 직접 부르는 코드가 보이면 그 자리에서
+`clients/client-<이름>` 으로 옮긴다 — "작은 호출이라 그냥 뒀다"는 예외를 만들지 않는다.
+
 결제, 알림, 지도처럼 붙일 외부 시스템마다 모듈을 만든다. `settings.gradle.kts` 에 `clients:client-<이름>` 을 등록하고, 그 외부 시스템을 부르는 도메인 모듈이 `implementation` 으로 가져다 쓴다.
 
 한 모듈 안의 파일은 넷이다. **역할이 겹치지 않게 나뉘어 있고, 그중 밖으로 나가는 것은 둘뿐이다.**
@@ -118,6 +122,7 @@ DB 트랜잭션을 열어 둔 채 외부를 호출하면, 외부가 느린 만�
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
+| 도메인(core)·storage·support 모듈 안의 외부 호출 코드 | 외부 연동은 clients 전용 — 즉시 이동 | Critical |
 | `@Transactional` 안에서 외부 호출 | 외부 장애가 DB 커넥션 고갈로 전파 | Critical |
 | RestClient 호출부·DTO 가 `public` | 외부 JSON 규격이 도메인으로 샘 | Critical |
 | 타임아웃 미설정 | 응답 없는 외부에 스레드가 묶임 | Critical |

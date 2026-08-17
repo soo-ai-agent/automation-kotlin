@@ -167,6 +167,7 @@ Controller  →  Domain Service  →  Implement  →  Repository / Client
 | 도메인 서비스가 리포지토리를 직접 호출 | 구현 레이어 우회 | Critical |
 | 하위 레이어가 상위 타입을 import | 역방향 의존 | Critical |
 | 다른 도메인의 구현 레이어 직접 호출 | 도메인 경계 침범 | Critical |
+| core·storage·support 모듈 안의 외부 호출(RestClient·SDK) | 외부 연동은 clients 모듈 전용 | Critical |
 | 도메인 모델에 JPA·Web 애너테이션 | 프레임워크 침투 | Important |
 | 도메인 디렉터리 없이 `core/domain` 평면에 파일 누적 (템플릿 동봉 `Example*` 은 제외) | 경계 흐려짐 | Important |
 
