@@ -1,3 +1,4 @@
+import {useEffect} from "react";
 import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {SafeAreaProvider, initialWindowMetrics} from "react-native-safe-area-context";
@@ -5,6 +6,7 @@ import {StatusBar} from "expo-status-bar";
 import {SplashScreen} from "./src/splash/components/SplashScreen";
 import {useSplashGate} from "./src/splash/hooks/useSplashGate";
 import {ConfirmDialogHost} from "./src/common/components/modal/ConfirmDialogHost";
+import {initializeAds} from "./src/ads/lib/admob";
 import {colors} from "./src/common/lib/theme";
 import User from "./src/user/screens/User";
 import MapScreen from "./src/map/screens/Map";
@@ -14,6 +16,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
     const {isSplashVisible} = useSplashGate();
+
+    // 광고 SDK 초기화는 앱당 한 번 — 이 줄이 없으면 지면이 영영 비어 있다 (src/ads/README.md).
+    useEffect(initializeAds, []);
 
     if (isSplashVisible) {
         return (

@@ -194,9 +194,18 @@ frontend/src/
 
 스플래시 + 앱·서버 버전 한 줄 표기가 완결된 작은 도메인으로 들어 있다(`useAppInfo` → `GET /api/v1/app-info`, 실패 시 조용히 생략 — 스플래시는 관문이 아니다). 쓰는 곳이 App.tsx 하나뿐이라 common 이 아니라 자기 도메인이다 — **도메인은 이렇게 작아도 된다.** 파일 8개가 user 와 같은 계층(types → api → services → hooks → components)을 그대로 밟는다.
 
-### 선택 모듈 — 지도(`src/map/`)
+### 선택 모듈 — 지도(`src/map/`) · 광고(`src/ads/`)
 
-카카오 지도 WebView 가 자기완결 모듈로 들어 있다. 플랫폼별 구현이 갈리면 이 모듈처럼 **파일 분기**(`KakaoMapView.tsx` 네이티브 / `KakaoMapView.web.tsx` 웹)로 푼다 — 호출부는 구분을 모른다. 지도를 안 쓰는 앱에서 들어내는 절차는 `src/map/README.md` 에 있다.
+둘 다 **자기완결 모듈 + 제거 절차 README** 라는 같은 모양이다. 프로젝트에 따라 통째로 들어내는 것을 전제로 만들면, 쓰는 앱에서는 바로 동작하고 안 쓰는 앱에서는 흔적이 남지 않는다.
+
+플랫폼별로 구현이 갈리면 이 두 모듈처럼 **파일 분기**로 푼다 — 호출부는 구분을 모른다.
+
+| 모듈 | 네이티브 | 웹 | 왜 갈리나 |
+|---|---|---|---|
+| 지도 | `KakaoMapView.tsx` | `KakaoMapView.web.tsx` | react-native-webview 가 웹 미지원 |
+| 광고 | `lib/admob.ts` | `lib/admob.web.ts` | **Metro 는 `require` 를 정적으로 해석해 try/catch 안이라도 웹 번들에 넣는다.** 실행 시점 분기로는 못 막고, 파일을 갈라야 웹 번들에서 빠진다 |
+
+SDK 타입만 필요한 곳은 `types/` 의 `typeof import(...)` 를 쓴다 — 타입 자리는 번들에 남지 않는다.
 
 > 참고: 이 규칙들은 실제 운영 프로젝트 `member-info-collect-frontend-main` 에서 도출했다.
 

@@ -42,6 +42,14 @@ dev 에서는 `apiBaseUrl` 을 쓰지 않는다 — 폰이 번들을 받아온 �
 
 카카오 지도 화면이 `src/map/` 에 들어 있다. 쓰는 법과 **지도를 안 쓰는 앱에서 통째로 들어내는 절차**는 [src/map/README.md](src/map/README.md) 에 있다.
 
+## 광고 (선택 모듈)
+
+AdMob 배너·전면 광고가 `src/ads/` 에 들어 있다. 단위 ID 가 비어 있어 **배포 빌드에서는 아무것도 뜨지 않는 상태**이고, 개발 빌드에서만 구글 테스트 광고가 보인다.
+
+쓰는 법과 **광고를 안 쓰는 앱에서 통째로 들어내는 절차**는 [src/ads/README.md](src/ads/README.md) 에, 넣을지 말지 판단과 스토어 준비물은 [docs/ads.md](../docs/ads.md) 에 있다.
+
+광고 SDK 는 네이티브 전용이라 웹 빌드에서는 자동으로 빠진다(`lib/admob.web.ts`).
+
 ## E2E 테스트 (처음 한 번)
 
 `e2e` 노드가 사용자 흐름 테스트를 `frontend/e2e/` 에 쓴다. 웹 빌드(react-native-web)를 브라우저로 띄워 검증하므로 Playwright 를 한 번만 설치해 두면 된다.

@@ -156,6 +156,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 일 시키기 — 이슈 쓰는 법, 라벨 고르기 | [docs/issue-guide.md](docs/issue-guide.md) |
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |
+| 광고를 넣을지 정하기 (스토어 체크리스트) | [docs/ads.md](docs/ads.md) |
 | 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |

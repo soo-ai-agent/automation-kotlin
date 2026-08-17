@@ -32,3 +32,6 @@ export const API_BASE_URL = resolveApiBaseUrl();
 export const KAKAO_JS_KEY = extra.kakaoJsKey;
 /** 지도 WebView 문서의 출처 — Kakao 콘솔의 "웹 플랫폼 도메인"에 등록된 주소여야 SDK 가 동작한다. */
 export const KAKAO_WEB_BASE_URL = extra.kakaoWebBaseUrl;
+/** 광고 단위 ID — 비우면 개발 빌드에서만 테스트 광고가 뜬다 (src/ads/README.md). */
+export const ADMOB_BANNER_ID = extra.admobBannerId;
+export const ADMOB_INTERSTITIAL_ID = extra.admobInterstitialId;

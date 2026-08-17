@@ -4,6 +4,7 @@ import type {NativeStackScreenProps} from "@react-navigation/native-stack";
 import UserTable from "../components/UserTable";
 import UserToolbar from "../components/UserToolbar";
 import UserDetailModal from "../components/UserDetailModal";
+import {AdBanner} from "../../ads/components/AdBanner";
 import {useUsers} from "../hooks/useUsers";
 import {styles} from "./User.styles";
 import type {RootStackParamList} from "../../common/types/navigation";
@@ -50,6 +51,9 @@ const User = ({navigation}: UserProps) => {
             />
 
             <UserDetailModal ref={modalRefs.detailModalRef} />
+
+            {/* 광고를 안 쓰는 앱이면 이 줄을 지운다 (src/ads/README.md) */}
+            <AdBanner />
         </SafeAreaView>
     );
 };
