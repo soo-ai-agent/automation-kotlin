@@ -105,6 +105,7 @@ src/
   서비스에 남는 것은 클라이언트 옵션(`*Options`·`*Query`)과 결과 표현(`*Result`·`*Outcome`)뿐이다. (11-3장)
 
 - MUST: 파일 이름·확장자·export 는 0-2장 표를 따른다. **화면만 default export**, hooks·services·api·lib·types 는 named. JSX 없으면 `.ts`.
+- MUST: 한 줄 100자 자제. **import 는 120자까지 한 줄**로 쓰고, 넘으면 3줄 래핑(지정자를 몰아 적은 한 줄 — 세로 나열 금지). (0-3장)
 
 - MUST: `any` 금지. API 요청/응답에는 명시적 타입을 붙이고, 지역 변수에도 타입을 적는다. (11장)
 

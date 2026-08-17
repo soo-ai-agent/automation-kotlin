@@ -110,6 +110,35 @@ pages ──▶ hooks ──▶ services ──▶ api ──▶ lib
 
 React Native(`mobile/`)는 예외로 `Foo.tsx` → `Foo.styles.ts` 분리 규칙을 따른다.
 
+### 0-3. 줄 길이 — 100자 자제, import 만 120자 한 줄
+
+**일반 코드는 한 줄 100자를 넘지 않게 자제한다.** 하드 상한은 prettier `printWidth`(120)다.
+
+**import 는 예외다 — 120자까지는 반드시 한 줄로 쓴다.** 100자를 조금 넘는다고 쪼개지 않는다.
+
+```ts
+// O — 118자. 한 줄 유지
+import { addContact, loadContacts, MAX_CONTACTS, removeContact, type EmergencyContact } from "../../common/lib/storage";
+```
+
+**120자를 넘는 import 는 딱 3줄로 래핑한다** — 여는 줄, 지정자 전부를 몰아 적은 한 줄(들여쓰기 2), `} from` 줄.
+
+```ts
+// O — 120자 초과라 3줄 래핑
+import {
+  createShare, endShare, getShareWatching, isShareApiConfigured, isShareExpired, postShareRoute
+} from "../../share/services/shareSession";
+
+// X — 지정자를 한 줄에 하나씩 세로로 펼친 것(포맷터 기본 동작). 화면만 길어진다
+import {
+  createShare,
+  endShare,
+  getShareWatching,
+} from "../../share/services/shareSession";
+```
+
+지정자 줄이 그래도 100자를 크게 넘으면 100자 근처에서 끊어 이어 적는다 — 세로 나열로 돌아가지 않는다. 포맷터가 세로로 펼쳐 놓았어도 이 형태로 되돌린다.
+
 ## 1. 페이지 무상태 원칙 — 이 문서에서 가장 중요한 규칙
 
 레퍼런스와 부엉이를 가르는 결정적 차이가 여기다. 수치로 보면:
