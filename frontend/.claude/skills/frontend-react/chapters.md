@@ -139,24 +139,25 @@ import {
 
 지정자 줄이 그래도 100자를 크게 넘으면 100자 근처에서 끊어 이어 적는다 — 세로 나열로 돌아가지 않는다. 포맷터가 세로로 펼쳐 놓았어도 이 형태로 되돌린다.
 
-**몰아 적기는 import 만이다.** 여러 줄이 된 객체 리터럴·return 객체·구조분해·인자 목록은 **한 줄에 하나씩** 적는다(prettier 100컬럼 결과 그대로).
+**여러 줄 객체·구조분해도 같은 채워 적기다.** 한 줄에 안 들어가는 객체 리터럴·return 객체·구조분해는 항목을 한 줄에 하나씩 세로로 펼치지 않고, **100자 근처까지 채워 적고 넘치면 다음 줄로 잇는다.**
 
 ```ts
-// O — 여러 줄 return 객체는 프로퍼티를 한 줄에 하나씩
+// O — 100자 근처까지 채우고 넘치는 항목만 다음 줄로
+return {
+  keyword, trimmed, changeKeyword, placeholder: buildPlaceholder(asOrigin, saveLabel), saveLabel,
+  results, recents, searching, problem, retry, selectPlace
+};
+
+// X — 한 줄에 하나씩 세로 나열(포맷터 기본 동작). 화면만 길어진다
 return {
   keyword,
   trimmed,
   changeKeyword,
-  placeholder: buildPlaceholder(asOrigin, saveLabel),
-  saveLabel,
-};
-
-// X — 프로퍼티를 몰아 적은 것. 어디서 무엇이 바뀌었는지 diff 로 읽을 수 없다
-return {
-  keyword, trimmed, changeKeyword, placeholder: buildPlaceholder(asOrigin, saveLabel),
-  saveLabel, results, recents, searching, problem, retry, selectPlace
+  ...
 };
 ```
+
+예외: **항목마다 사유 주석이 붙는 블록(DTO 필드 등)은 세로를 유지한다** — 주석이 항목을 따라가야 한다. prettier 는 이 채워 적기를 세로로 되돌리므로, 포맷터를 돌린 뒤에도 이 형태로 되돌린다.
 
 ## 1. 페이지 무상태 원칙 — 이 문서에서 가장 중요한 규칙
 
