@@ -26,3 +26,6 @@ frontend/.env
 # 에이전트가 만들고 지우는 임시 파일 — 커밋되면 안 된다
 .claude-spec.md
 .claude-split/
+
+# expo (frontend)
+frontend/.expo/

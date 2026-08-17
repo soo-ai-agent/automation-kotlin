@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "frontend",
+    "slug": "frontend",
+    "scheme": "frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#ffffff",
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "extra": {
+      "apiBaseUrl": "http://localhost:8080",
+      "kakaoJsKey": "",
+      "kakaoWebBaseUrl": "http://localhost"
+    }
+  }
+}

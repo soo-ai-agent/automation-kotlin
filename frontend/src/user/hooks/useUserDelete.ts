@@ -22,7 +22,7 @@ export function useUserDelete({selectedIds, reloadUsers, handleError}: UseUserDe
     }, []);
 
     const deleteOne = useCallback(async (id: number): Promise<void> => {
-        if (!notify.confirm(UserResultMessages.DELETE_CONFIRM)) {
+        if (!(await notify.confirm(UserResultMessages.DELETE_CONFIRM))) {
             return;
         }
         setIsDeleting(true);
@@ -42,7 +42,7 @@ export function useUserDelete({selectedIds, reloadUsers, handleError}: UseUserDe
             notify.warning(UserResultMessages.BULK_DELETE_NO_SELECTION);
             return;
         }
-        if (!notify.confirm(UserResultMessages.BULK_DELETE_CONFIRM)) {
+        if (!(await notify.confirm(UserResultMessages.BULK_DELETE_CONFIRM))) {
             return;
         }
         setIsDeleting(true);

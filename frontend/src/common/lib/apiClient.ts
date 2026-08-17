@@ -1,5 +1,6 @@
 import {HttpMethod} from "../enums/httpMethod";
 import {ResultType} from "../enums/resultType";
+import {API_BASE_URL} from "./config";
 import axios, {type AxiosInstance, type AxiosResponse} from "axios";
 
 /**
@@ -11,7 +12,7 @@ export type ApiResult<T> =
     | {ok: false; status: number};
 
 /**
- * 백엔드 `ApiResponse<T>` 그대로다 (core-api 의 support/response/ApiResponse.kt).
+ * 백엔드 `ApiResponse<T>` 그대로다 (core:core-common 의 response/ApiResponse.kt).
  * 서버 응답 모양이 바뀌면 고치는 곳은 이 타입 하나다.
  */
 type ApiResponseDTO<T> = {
@@ -34,12 +35,13 @@ type BodyOptions = {
 };
 
 const axiosClient: AxiosInstance = axios.create({
+    baseURL: API_BASE_URL,
     withCredentials: true,
     validateStatus: () => true,
     headers: {Accept: "application/json"},
 });
 
-// body: unknown — 위 ApiClientOptions.body 와 같은 직렬화 경계 사유.
+// body: unknown — 위 BodyOptions.body 와 같은 직렬화 경계 사유.
 async function send<T>(method: HttpMethod, path: string, body: unknown): Promise<ApiResult<T>> {
     const response: AxiosResponse<ApiResponseDTO<T> | undefined> = await axiosClient.request({
         method: method,

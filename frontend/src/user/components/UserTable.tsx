@@ -1,8 +1,9 @@
-import type {MouseEvent} from "react";
+import {FlatList, Pressable, Text, View} from "react-native";
 import {type ListState} from "../../common/lib/listState";
 import {ListStatus} from "../../common/enums/listStatus";
 import type {User} from "../types/user";
 import {formatDateTime, formatOptionalDateTime} from "../../common/utils/formatDate";
+import {styles} from "./UserTable.styles";
 
 type UserTableProps = {
     users: User[];
@@ -31,89 +32,91 @@ function UserTable({
     reloadUsers,
     deleteOne,
 }: UserTableProps) {
-    function stopRowClick(event: MouseEvent<HTMLElement>): void {
-        event.stopPropagation();
-    }
-
     if (isLoading) {
-        return <p>사용자 목록을 불러오는 중입니다.</p>;
+        return <Text style={styles.stateText}>사용자 목록을 불러오는 중입니다.</Text>;
     }
 
     if (listState.status === ListStatus.ERROR) {
         return (
-            <div>
-                <p>{listState.message}</p>
-                <button type="button" onClick={() => void reloadUsers()}>
-                    다시 시도
-                </button>
-            </div>
+            <View style={styles.stateBox}>
+                <Text style={styles.stateText}>{listState.message}</Text>
+                <Pressable
+                    accessibilityRole="button"
+                    style={styles.retryButton}
+                    onPress={() => void reloadUsers()}
+                >
+                    <Text style={styles.retryLabel}>다시 시도</Text>
+                </Pressable>
+            </View>
         );
     }
 
     if (listState.status === ListStatus.EMPTY) {
-        return <p>{listState.message}</p>;
+        return <Text style={styles.stateText}>{listState.message}</Text>;
     }
 
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">
-                        <input
-                            type="checkbox"
-                            aria-label="전체 선택"
-                            checked={isAllSelected}
-                            onChange={toggleSelectAll}
-                        />
-                    </th>
-                    <th scope="col">이름</th>
-                    <th scope="col">이메일</th>
-                    <th scope="col">가입일</th>
-                    <th scope="col">마지막 로그인</th>
-                    <th scope="col">관리</th>
-                </tr>
-            </thead>
-            <tbody>
-                {users.map((eachUser: User) => (
-                    <tr key={eachUser.id} onClick={() => openDetail(eachUser.id)}>
-                        <td onClick={stopRowClick}>
-                            <input
-                                type="checkbox"
-                                aria-label={`${eachUser.name} 선택`}
-                                checked={selectedIds.includes(eachUser.id)}
-                                onChange={() => toggleSelect(eachUser.id)}
-                            />
-                        </td>
-                        <td>
-                            <button
-                                type="button"
-                                onClick={(event) => {
-                                    stopRowClick(event);
-                                    openDetail(eachUser.id);
-                                }}
-                            >
-                                {eachUser.name}
-                            </button>
-                        </td>
-                        <td>{eachUser.email}</td>
-                        <td>{formatDateTime(eachUser.createdAt)}</td>
-                        <td>{formatOptionalDateTime(eachUser.lastLoginAt)}</td>
-                        <td>
-                            <button
-                                type="button"
-                                disabled={isDeleting}
-                                onClick={(event) => {
-                                    stopRowClick(event);
-                                    void deleteOne(eachUser.id);
-                                }}
-                            >
-                                삭제
-                            </button>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <FlatList
+            data={users}
+            keyExtractor={(eachUser: User) => String(eachUser.id)}
+            contentContainerStyle={styles.list}
+            ListHeaderComponent={
+                <View style={styles.headerRow}>
+                    <SelectBox label="전체 선택" checked={isAllSelected} onToggle={toggleSelectAll} />
+                    <Text style={styles.headerLabel}>전체 선택</Text>
+                </View>
+            }
+            renderItem={({item}) => (
+                <Pressable
+                    accessibilityRole="button"
+                    style={styles.row}
+                    onPress={() => openDetail(item.id)}
+                >
+                    <SelectBox
+                        label={`${item.name} 선택`}
+                        checked={selectedIds.includes(item.id)}
+                        onToggle={() => toggleSelect(item.id)}
+                    />
+                    <View style={styles.rowBody}>
+                        <Text style={styles.name}>{item.name}</Text>
+                        <Text style={styles.email}>{item.email}</Text>
+                        <Text style={styles.dates}>
+                            가입 {formatDateTime(item.createdAt)} · 마지막 로그인{" "}
+                            {formatOptionalDateTime(item.lastLoginAt)}
+                        </Text>
+                    </View>
+                    <Pressable
+                        accessibilityRole="button"
+                        style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
+                        disabled={isDeleting}
+                        onPress={() => void deleteOne(item.id)}
+                    >
+                        <Text style={styles.deleteLabel}>삭제</Text>
+                    </Pressable>
+                </Pressable>
+            )}
+        />
+    );
+}
+
+type SelectBoxProps = {
+    label: string;
+    checked: boolean;
+    onToggle: () => void;
+};
+
+/** RN 에는 체크박스가 없어 Pressable 로 만든다 — 접근성 role/state 로 체크박스임을 알린다. */
+function SelectBox({label, checked, onToggle}: SelectBoxProps) {
+    return (
+        <Pressable
+            accessibilityRole="checkbox"
+            accessibilityLabel={label}
+            accessibilityState={{checked}}
+            style={[styles.selectBox, checked && styles.selectBoxChecked]}
+            onPress={onToggle}
+        >
+            {checked && <Text style={styles.selectBoxMark}>✓</Text>}
+        </Pressable>
     );
 }
 
