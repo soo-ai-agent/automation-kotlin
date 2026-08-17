@@ -151,7 +151,7 @@ git push
 ./gradlew :api:bootRun
 ```
 
-기본 포트는 8080 이다. 프론트엔드는 `frontend/.env` 로 이 주소를 가리킨다 — 서로 읽지 않는다.
+기본 포트는 8080 이다. 프론트엔드는 `frontend/app.json` 의 `extra.apiBaseUrl` 로 이 주소를 가리킨다 — 서로 읽지 않는다.
 
 ## 7. 새 도메인을 추가할 때
 

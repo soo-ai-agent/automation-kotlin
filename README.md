@@ -1,4 +1,4 @@
-# Claude 코딩 에이전트 템플릿 (Kotlin + Spring Boot / React)
+# Claude 코딩 에이전트 템플릿 (Kotlin + Spring Boot / React Native)
 
 > **이 문서는 사람이 읽습니다.** 에이전트가 읽는 규칙은 [CLAUDE.md](CLAUDE.md)·[AGENTS.md](AGENTS.md) 입니다.
 
@@ -14,7 +14,7 @@
 
 - **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 15종 (백엔드 9 · 프론트 1 · 공통 5)
 
-- **앱 뼈대** — 바로 실행되는 React 프론트엔드와, Spring 멀티모듈을 채워 넣을 백엔드 자리
+- **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, Spring 멀티모듈을 채워 넣을 백엔드 자리
 
 사람이 하는 일은 둘뿐이다 — **무엇을 만들지 쓰기**, 그리고 **완성된 PR 을 머지할지 결정하기.**
 
@@ -39,7 +39,7 @@
 |---|---|
 | GitHub 저장소 | 비어 있어도 된다. 이 템플릿을 올릴 곳 |
 | [gh CLI](https://cli.github.com) | 설치하고 `gh auth login` 까지 끝나 있어야 한다 |
-| Node.js 18 이상 | 토큰 발급 도구와 프론트엔드 실행에 쓴다 |
+| Node.js 20 이상 | 토큰 발급 도구와 프론트엔드(Expo) 실행에 쓴다 |
 | Claude 구독 (Pro 또는 Max) | 에이전트가 Claude 를 실행하는 데 쓴다 |
 | JDK 25 | 백엔드를 **로컬에서** 돌릴 때만 필요하다. 나중에 준비해도 된다 |
 
@@ -68,7 +68,7 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 **4. 프론트엔드 확인** — 완성된 앱이 동봉돼 있어 바로 뜬다.
 
 ```bash
-cd frontend && cp .env.example .env && npm install && npm run dev
+cd frontend && npm install && npm run web    # 브라우저로 확인 (폰으로 보려면 npm start 후 Expo Go 로 QR)
 ```
 
 **5. 첫 구축 지시** — 이슈 대신 [TASK.md](TASK.md) 양식에 만들 것을 적고 커밋한 뒤, 한 번 호출한다.

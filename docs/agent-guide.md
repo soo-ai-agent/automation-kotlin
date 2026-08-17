@@ -163,7 +163,7 @@ flowchart TD
 
 - 백엔드 뼈대: [backend/README.md](../backend/README.md)
 
-- 프론트 설정: `cd frontend && cp .env.example .env`
+- 프론트 설정: 없음 — 주소·키는 `frontend/app.json` 의 `extra` 에 있다
 
 **2. TASK.md 를 채운다** — 양식이다. 각 절의 `>` 안내를 보고 빈자리를 채우면 된다. 필수는 네 절(개요·도메인·기능·완료 기준)이고, 아래쪽 (선택) 절은 쓰지 않으면 통째로 지운다. 채우고 커밋한다.
 

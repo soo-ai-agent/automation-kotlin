@@ -6,7 +6,7 @@
 
 - `frontend/.claude/skills/frontend-react` 순서를 따른다: types → api → services → hooks → components → page.
 
-  `src/user/` 아래 13개 파일이 그대로 따라 쓸 본보기다. 도메인이 최상위 폴더이고 그 아래가 계층이다 — 새 도메인은 `src/<도메인>/{types,api,services,hooks,components,pages}` 로 만든다.
+  `src/user/` 아래 파일들이 그대로 따라 쓸 본보기다. 도메인이 최상위 폴더이고 그 아래가 계층이다 — 새 도메인은 `src/<도메인>/{types,api,services,hooks,components,screens}` 로 만들고, 스타일은 `이름.styles.ts` 로 나란히 둔다.
 
 - `cd frontend && npm ci && npm run build` 가 통과해야 끝난 것이다.
 
