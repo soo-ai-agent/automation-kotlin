@@ -732,7 +732,7 @@ const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
 |---|---|
 | 외부 규격이 그렇다 | `// 카카오 SDK 규격 — 생략하면 SDK 기본 결과 개수.` |
 | 원천 데이터가 비어 온다 | `// 원천에 이름·주소가 없는 점이 있다.` |
-| 주입점·기본값이다 | `// 주입점 — 생략하면 중앙 httpClient 를 쓴다.` |
+| 주입점·기본값이다 | `// 주입점 — 생략하면 중앙 apiClient 를 쓴다.` |
 | 화면마다 넘기는 게 다르다 | `// 목적지를 아직 안 고른 화면(홈)에서는 없다.` |
 
 **사유는 필드마다 그 자리에 적는다.** 묶음 위에 한 줄로 몰아 적으면 어느 필드 이야기인지 흐려진다(`coding-style.md` MUST — 이 규칙이 "되풀이 주석 금지"보다 우선한다).
@@ -901,7 +901,7 @@ export async function fetchRouteCompare(…) { … }
 |---|---|---|
 | **테스트 0건** (`*.test.*` 없음, vitest 미설치) | CLAUDE.md 7절 DoD 가 테스트 통과를 요구한다. 최소주의(ponytail)로도 생략 불가 | 신규 훅·서비스에 테스트를 동반한다(CLAUDE.md 5절 — 정상 1 + 에러 2 이상) |
 | **HTTP 클라이언트 2개 공존** (`lib/api.ts` 의 `restfulApiClient` + `lib/apiClient.ts` 의 `apiClient`) | 인증 헤더·에러 처리가 두 갈래로 갈라져 있다. 5장의 "단일 창구" 원칙을 스스로 위반 | `src/common/lib/apiClient.ts` **하나만** 쓴다 |
-| `send()` 에서 `throw result` — **Error 가 아닌 평범한 객체를 throw** | `instanceof` 로 못 걸러지고 스택도 없다 | 항상 `Error` 하위 타입(`ApiError`)을 throw |
+| `send()` 에서 `throw result` — **Error 가 아닌 평범한 객체를 throw** | `instanceof` 로 못 걸러지고 스택도 없다 | 항상 `Error` 하위 타입(`ServiceError`)을 throw |
 | `restfulApiClient.get()` 등 **반환 타입 미선언** | 추론이 `AxiosResponse \| undefined` 로 새어 호출부가 옵셔널 체이닝 범벅이 된다 | api 함수에 반환 타입 명시(4장) |
 | `api/*.tsx` — JSX 가 없는데 `.tsx` 확장자 | 확장자로 레이어를 판별할 수 없게 된다 | JSX 없으면 `.ts` (0-2장) |
 | `apiClient.ts` 의 `// @TODO API Client 는 Data만 다루는 부분일텐데.. UI를???` | 미해결 설계 의문이 코드에 남아 있는 상태 | 레이어 경계를 지켜 애초에 발생시키지 않는다 |
@@ -933,7 +933,7 @@ export async function fetchRouteCompare(…) { … }
 | 1 | `types/user.ts` | 서버 DTO 를 서버 필드명 그대로. nullable 에 사유 주석 |
 | 2 | `api/user.ts` | `const USERS = "/api/v1/users"` + `export const user = {...}`. 반환 타입 명시, 상태코드 분기 없음 |
 | 2.5 | `enums/user.ts` | `UserResultMessages`·`DeleteUserOutcome`·`DetailStatus` — 도메인 enum 전부 여기 |
-| 3 | `services/userService.ts` | `export function` 들. 상태코드를 결과/`ApiError` 로 번역 (enum 은 import) |
+| 3 | `services/userService.ts` | `export function` 들. 상태코드를 결과/`ServiceError` 로 번역 (enum 은 import) |
 | 4 | `hooks/useUserList.ts`<br>`hooks/useUserSelection.ts`<br>`hooks/useUserDelete.ts` | 단일책임 훅. `useState` 는 전부 여기. 각 액션은 `useCallback` |
 | 5 | `hooks/useUsers.ts` | 조립 훅. 하위 훅을 모아 `{table: {...}, detailModal: {...}}` 로 반환. 최초 로드 `useEffect` 하나 |
 | 6 | `components/UserTable.tsx` + `UserTable.styles.ts` | props 로 받은 값만 그린다. default export. 스타일은 나란한 styles 파일에 |
@@ -973,10 +973,10 @@ export async function fetchRouteCompare(…) { … }
 
 - `route/screens/RouteComparison.tsx:38 — [페이지 무상태] 페이지에 useState 9개·로드 useEffect 존재 → route/hooks/useRouteComparison.ts 로 이동, 화면은 const {map, sheet, routes} = useRouteComparison() 만`
 
-- `route/services/routeCompare.ts:52 — [레이어 책임] 서비스가 httpClient 를 직접 호출 → route/api/routes.ts 의 fetchRouteCompare() 로 분리하고 서비스는 결과 번역만`
+- `route/services/routeCompare.ts:52 — [레이어 책임] 서비스가 apiClient 를 직접 호출 → route/api/routes.ts 의 fetchRouteCompare() 로 분리하고 서비스는 결과 번역만`
 
 - `pages/admin/LogsPage.tsx:89 — [메시지] 한국어 문장이 인라인 → services/apiLogs.ts 에 ApiLogsResultMessages.LOAD_ERROR 로 승격`
 
-- `share/services/shareSession.ts:120 — [결과 표현] 실패를 null 반환으로 표현 → ShareSessionOutcome enum 반환 + 진짜 실패는 ApiError throw`
+- `share/services/shareSession.ts:120 — [결과 표현] 실패를 null 반환으로 표현 → ShareSessionOutcome enum 반환 + 진짜 실패는 ServiceError throw`
 
 지적만 하지 않는다. 각 항목에 "왜 문제인지 한 문장 + 고친 모습"까지 제시해야 리뷰가 끝난 것이다.
