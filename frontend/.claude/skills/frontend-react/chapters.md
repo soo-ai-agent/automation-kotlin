@@ -139,6 +139,25 @@ import {
 
 지정자 줄이 그래도 100자를 크게 넘으면 100자 근처에서 끊어 이어 적는다 — 세로 나열로 돌아가지 않는다. 포맷터가 세로로 펼쳐 놓았어도 이 형태로 되돌린다.
 
+**몰아 적기는 import 만이다.** 여러 줄이 된 객체 리터럴·return 객체·구조분해·인자 목록은 **한 줄에 하나씩** 적는다(prettier 100컬럼 결과 그대로).
+
+```ts
+// O — 여러 줄 return 객체는 프로퍼티를 한 줄에 하나씩
+return {
+  keyword,
+  trimmed,
+  changeKeyword,
+  placeholder: buildPlaceholder(asOrigin, saveLabel),
+  saveLabel,
+};
+
+// X — 프로퍼티를 몰아 적은 것. 어디서 무엇이 바뀌었는지 diff 로 읽을 수 없다
+return {
+  keyword, trimmed, changeKeyword, placeholder: buildPlaceholder(asOrigin, saveLabel),
+  saveLabel, results, recents, searching, problem, retry, selectPlace
+};
+```
+
 ## 1. 페이지 무상태 원칙 — 이 문서에서 가장 중요한 규칙
 
 레퍼런스와 부엉이를 가르는 결정적 차이가 여기다. 수치로 보면:
