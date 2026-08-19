@@ -34,7 +34,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 |---|---|
 | [kotlin-error](kotlin-error/SKILL.md) | 실패 분기를 만들 때 — 예외의 `code`·예외가 스스로 가진 status·code·`ApiException` 하위 예외, 상태코드·로그 레벨 |
 | [kotlin-auth](kotlin-auth/SKILL.md) | 로그인·권한·"내 것만 조회" — 소유자 스코프, 401·403·404 구분 |
-| [kotlin-client](kotlin-client/SKILL.md) | 외부 API 연동 — `clients/client-*`, `internal` 캡슐화, 타임아웃 |
+| [kotlin-client](kotlin-client/SKILL.md) | 외부 API 연동 — 처음 붙일 때 실응답부터 확인하는 법, `clients/client-*`, `internal` 캡슐화, 타임아웃, 쿼터·폴백 |
 | [kotlin-config](kotlin-config/SKILL.md) | 설정값·접속 정보·API 키 — 모듈별 yml, 프로파일 5종, 비밀값 주입 |
 | [kotlin-logging](kotlin-logging/SKILL.md) | 로그를 남길 때 — 레벨 기준, `{}` 치환, 넣으면 안 되는 것 |
 | [kotlin-api-docs](kotlin-api-docs/SKILL.md) | 외부가 쓰는 API 를 문서화할 때 — REST Docs, `index.adoc` |

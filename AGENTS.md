@@ -13,14 +13,14 @@
 | 모든 코딩 | `.claude/skills/ponytail/SKILL.md` |
 | 설계 판단 (책임 배치·다형성·상속) | `.claude/skills/oop-responsibility-design/SKILL.md` |
 | 백엔드 공통 | `backend/.claude/skills/kotlin-common/SKILL.md` |
-| 파일을 어디 둘지 판단 | `backend/.claude/skills/kotlin-module-layout/SKILL.md` |
+| 파일을 어디 둘지 판단, 새 기능의 소유 도메인 정하기 | `backend/.claude/skills/kotlin-module-layout/SKILL.md` |
 | 엔드포인트 추가 | `backend/.claude/skills/kotlin-controller`, `kotlin-dto` |
 | 업무 흐름·트랜잭션 | `backend/.claude/skills/kotlin-domain-service` |
 | 조회·저장 상세 구현 | `backend/.claude/skills/kotlin-implement` |
 | 테이블·상태 변경 | `backend/.claude/skills/kotlin-entity` + `kotlin-migration` |
 | 실패·예외 설계 | `backend/.claude/skills/kotlin-error` |
 | 로그인·권한·소유자 스코프 | `backend/.claude/skills/kotlin-auth` |
-| 외부 API 연동 | `backend/.claude/skills/kotlin-client` |
+| 외부 API 연동 | `backend/.claude/skills/kotlin-client` + `docs/external-apis.md`(붙였으면 한 줄 추가) |
 | 설정값·비밀값 | `backend/.claude/skills/kotlin-config` |
 | 로그 남기기 | `backend/.claude/skills/kotlin-logging` |
 | API 문서(REST Docs) | `backend/.claude/skills/kotlin-api-docs` |
