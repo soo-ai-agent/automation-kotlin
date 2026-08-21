@@ -10,7 +10,7 @@
 
 | # | 문서 | 언제 읽나 |
 |---|---|---|
-| 1 | [setup.md](setup.md) | 처음 켤 때 — 토큰 발급, 스크립트 한 번 (15분) |
+| 1 | [setup.md](setup.md) | 처음 켤 때 — 토큰 발급, 스크립트 한 번 |
 | 2 | [issue-guide.md](issue-guide.md) | 일 시킬 때 — 라벨 고르기, 이슈 쓰는 법, 중간 개입 |
 | 3 | [agent-guide.md](agent-guide.md) | 동작을 바꾸고 싶을 때 — 그래프·리뷰 루프·설정 위치 |
 | 4 | [deploy.md](deploy.md) | 서버 배포를 붙일 때 |
