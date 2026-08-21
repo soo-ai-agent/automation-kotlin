@@ -186,7 +186,7 @@
 
 ### 요구사항
 
-- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design), 백엔드 `backend/.claude/skills/`(kotlin-* 9종), 프론트 `frontend/.claude/skills/`(frontend-react).
+- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·algorithm-implementation·md-doc), 백엔드 `backend/.claude/skills/`(kotlin-* 16종), 프론트 `frontend/.claude/skills/`(frontend-react·frontend-e2e).
 
   적용 규칙은 고치는 파일의 위치가 정한다 (디렉터리 스코프 스킬).
 

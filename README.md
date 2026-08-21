@@ -122,8 +122,8 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
     CLAUDE.md · AGENTS.md   에이전트 작업 규칙 진입점
     .claude/                공통 코딩 규칙 (ponytail, 객체지향 설계)
-    backend/.claude/        백엔드 규칙 (kotlin-* 계층 스킬 9종)
-    frontend/.claude/       프론트엔드 규칙 (frontend-react)
+    backend/.claude/        백엔드 규칙 (kotlin-* 계층 스킬 16종)
+    frontend/.claude/       프론트엔드 규칙 (frontend-react, frontend-e2e)
     CONTRACT.md             백엔드가 기록하는 API 계약 (프론트가 읽는다)
     .github/workflows/      자동화 본체 — 기능을 개조할 때만 연다 ([안내](.github/README.md))
 
