@@ -8,6 +8,12 @@
 
 `.github/agent/setup-speckit.sh` 가 이 폴더를 `specify preset add --dev` 로 등록하면, spec-kit 이 `.specify/presets/korean/` 에 설치한다. 손으로 옮길 일은 없다.
 
+**이 폴더를 고쳤으면 설치 스크립트를 다시 돌려야 반영된다.** 등록은 복사라서, 원본만 고치고 커밋하면 실제로 쓰이는 것은 예전 번역이다.
+
+```bash
+bash .github/agent/setup-speckit.sh
+```
+
 ## 번역 범위 — 사람이 읽는 것만
 
 | 대상 | 번역 | 이유 |
