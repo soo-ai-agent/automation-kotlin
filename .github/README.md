@@ -22,9 +22,11 @@
 | 파일 | 용도 |
 |---|---|
 | [agent/setup-agent.sh](agent/setup-agent.sh) | 라벨·시크릿·워크플로 권한·브랜치 보호 일괄 세팅 |
+| [agent/setup-speckit.sh](agent/setup-speckit.sh) | **(선택)** 스펙 먼저 쓰기 켜기 — spec-kit 설치와 한국어 템플릿 등록 ([안내](../docs/sdd-guide.md)) |
 
 ```bash
 CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-agent.sh
+bash .github/agent/setup-speckit.sh   # 선택
 ```
 
 ## 건드리지 않는 파일 (기능 자체를 개조할 때만)

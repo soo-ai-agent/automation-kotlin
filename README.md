@@ -98,6 +98,8 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 **맡기지 않을 영역은 라벨을 붙이지 않으면 된다.** 디스패처는 라벨이 붙은 이슈만 집어간다.
 
+**이슈 대신 스펙을 먼저 쓰고 싶다면** 선택 기능이 하나 있다. 큰 기능을 여럿이 나눠 만들 때 요구사항을 글로 먼저 고정하는 방식이고, 켜는 법은 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다. 켜지 않으면 위 흐름 그대로다.
+
 main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md](docs/deploy.md)).
 
 ## 폴더와 파일 — 어디를 보면 되나
@@ -108,11 +110,13 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     docs/        사용 설명서 — 읽는 순서는 docs/README.md
     TASK.md      첫 구축 명세 양식 (빈칸을 채워 쓴다)
 
-**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳은 이 셋이 전부다
+**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳은 이 셋이다
 
     .github/agent/settings.env       그래프 모양·재수정 횟수·런타임·리뷰 기준
     .github/agent/nodes/             노드별 역할 지시문 (노드 하나당 파일 하나)
     common/docs/code-review/rules.md 리뷰 규칙 (MUST 를 어기면 머지가 막힌다)
+
+스펙 먼저 쓰기(선택)를 켰다면 `common/speckit-ko/` 가 하나 더해진다 ([안내](docs/sdd-guide.md)).
 
 **에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다
 
@@ -157,6 +161,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |
 | 광고를 넣을지 정하기 (스토어 체크리스트) | [docs/ads.md](docs/ads.md) |
+| 이슈 대신 스펙을 먼저 쓰기 (선택) | [docs/sdd-guide.md](docs/sdd-guide.md) |
 | 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |
