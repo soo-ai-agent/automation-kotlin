@@ -88,6 +88,40 @@ for (member in members) {
 val firstActive: Member? = members.firstOrNull { it.isActive }
 ```
 
+## 파일 하나에 최상위 선언 하나
+
+최상위 `class`·`interface`·`object`·`enum class`·`data class`·`annotation class` 는 **각자 자기 파일**에 둔다. 파일 이름은 그 선언 이름과 **정확히 같다** — `TodoFinder.kt` 안에는 `TodoFinder` 하나뿐이다.
+
+왜 — 찾을 때 파일 이름으로 바로 가고, git 이력이 타입 단위로 남고, 리뷰 diff 가 그 타입에서 끝난다.
+여러 타입을 모아 둔 파일은 관련 없는 변경이 계속 쌓이며 모두가 같은 파일을 고치는 충돌 지점이 된다.
+
+**같은 파일에 둬도 되는 것은 셋뿐이다.**
+
+| 같이 둬도 되는 것 | 왜 |
+|---|---|
+| 중첩 타입(`nested`·`inner`)과 `companion object` | 바깥 타입 없이는 뜻이 없다 |
+| `sealed` 계층의 하위 타입 | 경우의 수를 한눈에 봐야 뜻이 통한다. 하위가 많아 파일이 길어지면 그때 나눈다 |
+| 그 타입 전용 `internal` 확장 함수 | 변환 함수처럼 소유자가 분명하고 모듈 밖에서 안 쓰는 것 |
+
+**이런 파일을 만들지 않는다** — `Dtos.kt`·`Models.kt`·`Enums.kt`·`Constants.kt`·`Common.kt` 처럼 여러 타입을 담은 파일, 복수형 이름 파일.
+
+값만 모으고 싶어도 마찬가지다. 상수는 파일이 아니라 **쓰는 클래스의 `companion`** 이 갖는다(아래 "object 를 언제 걷고 언제 남기나").
+
+**대상은 타입 선언이다.** 한 관심사의 최상위 함수를 모은 파일(`KoreanCharsets.kt` 의 인코딩 함수들처럼)은 이 규칙의 대상이 아니다 — 그때 파일 이름은 함수 하나가 아니라 **그 관심사**를 가리킨다.
+
+```kotlin
+// X — 한 파일에 셋. 어느 것을 고쳐도 같은 파일이 바뀐다
+// TodoDtos.kt
+data class TodoCreateRequest(val title: String)
+data class TodoResponse(val id: Long, val title: String)
+enum class TodoStatus { TODO, DONE }
+```
+
+```kotlin
+// O — 파일 셋. 이름으로 바로 찾고, 이력도 따로 남는다
+// TodoCreateRequest.kt · TodoResponse.kt · TodoStatus.kt
+```
+
 ## 이름
 
 - 클래스명은 **대상(도메인/역할/책임)** 을 나타낸다: `TodoService`, `TodoFinder`, `TodoEntity`.
@@ -238,6 +272,9 @@ class LocationView private constructor(…) {
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
+| 한 파일에 최상위 선언이 둘 이상 (중첩·sealed 하위 제외) | 이름으로 못 찾고 이력이 섞인다 | Important |
+| 파일 이름과 그 안의 선언 이름이 다름 | 검색이 끊긴다 | Important |
+| `Dtos.kt`·`Models.kt`·`Enums.kt` 류 모음 파일 | 계속 자라는 충돌 지점 | Important |
 | 도메인 모델·DTO 에 `var` | 예측 불가능한 상태 변경 | Critical |
 | `!!` 사용 | 런타임 NPE 위험 | Critical |
 | `Any`·`Map<String, Any>` 로 도메인 데이터 전달 | 자료형 뭉개기 | Critical |
@@ -252,6 +289,8 @@ class LocationView private constructor(…) {
 | 구현이 하나뿐인데 신설한 인터페이스·추상 클래스·설정 옵션 (확장 지점 미리 두기) | 요청받지 않은 추상화 — 제1원칙(core-principles) 위반 | Critical |
 
 ## 체크리스트
+
+- [ ] 최상위 선언이 파일마다 하나이고, 파일 이름이 그 이름과 같은가
 
 - [ ] 공개 API 의 타입이 전부 명시됐는가
 
