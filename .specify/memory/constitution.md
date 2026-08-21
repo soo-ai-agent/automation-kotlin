@@ -114,4 +114,4 @@ Sync Impact Report
 
 **준수 확인.** 모든 PR 은 위 원칙을 지켰는지 확인받는다. 원칙을 어겨야만 하는 사정이 있으면 `plan.md` 의 Complexity Tracking 에 어긴 항목·필요한 이유·더 단순한 방법을 버린 이유를 적는다. 적지 않은 위반은 되돌린다.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-14 | **Last Amended**: 2026-08-21
+**Version**: 1.0.0 | **Ratified**: 2026-08-21 | **Last Amended**: 2026-08-21

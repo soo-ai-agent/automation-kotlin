@@ -28,7 +28,7 @@
 | **디스패처** | 10분마다 이슈 목록을 훑어보고, 라벨이 붙은 이슈를 찾아 일꾼을 부르는 워크플로 |
 | **일꾼** | 실제로 브랜치를 만들어 코드를 쓰고, 커밋·push 하고, PR 을 여는 워크플로 |
 | **리뷰어** | 열린 PR 의 변경 내용을 읽고 통과인지 수정 필요인지 판정하는 워크플로 |
-| **노드** | 일꾼이 맡는 역할 하나. `code`(구현) · `test`(검증) · `api`(백엔드) · `web`(프론트) 처럼 이름이 붙어 있다 |
+| **노드** | 일꾼이 맡는 역할 하나. 8종이 있다 — `code`(구현) · `test`(검증) · `api`(백엔드) · `web`(프론트) · `e2e`(사용자 흐름 테스트) · `plan`(계획) · `split`(이슈 쪼개기) · `fix`(수습) |
 | **그래프** | 노드를 어떤 순서로 이을지 정한 것. `plan>code>test` 처럼 쓴다 |
 
 즉 **디스패처가 일을 발견해 일꾼에게 넘기고, 일꾼이 그래프에 적힌 노드 순서대로 코드를 만들고, 리뷰어가 그 결과를 판정한다.**
@@ -71,9 +71,10 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 cd frontend && npm install && npm run web    # 브라우저로 확인 (폰으로 보려면 npm start 후 Expo Go 로 QR)
 ```
 
-**5. 첫 구축 지시** — 이슈 대신 [TASK.md](TASK.md) 양식에 만들 것을 적고 커밋한 뒤, 한 번 호출한다.
+**5. 첫 구축 지시** — 이슈 대신 [TASK.md](TASK.md) 양식에 만들 것을 적고, **커밋해서 push 한 뒤** 한 번 호출한다. 워크플로는 GitHub 에 올라간 파일을 읽으므로 push 하지 않으면 빈 양식으로 돈다.
 
 ```bash
+git add TASK.md && git commit -m "docs:구축 명세 작성" && git push
 gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 ```
 
@@ -116,7 +117,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     .github/agent/nodes/             노드별 역할 지시문 (노드 하나당 파일 하나)
     common/docs/code-review/rules.md 리뷰 규칙 (MUST 를 어기면 머지가 막힌다)
 
-스펙 먼저 쓰기(선택)를 켰다면 `common/speckit-ko/` 가 하나 더해진다 ([안내](docs/sdd-guide.md)).
+스펙 먼저 쓰기(선택)를 쓴다면 `common/speckit-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법)도 사람이 고치는 자리다 ([안내](docs/sdd-guide.md)).
 
 **에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다
 

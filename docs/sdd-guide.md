@@ -31,7 +31,8 @@ bash .github/agent/setup-speckit.sh
 |---|---|---|
 | `specs/` | 만든 스펙·계획·작업 목록 | **한다** — 이게 결과물이다 |
 | `common/speckit-ko/speckit-version.txt` | 이 프로젝트가 쓰는 spec-kit 버전 | **한다** |
-| `.specify/` | spec-kit 설치물 | 안 한다 (`.gitignore`) |
+| `.specify/memory/constitution.md` | 프로젝트 헌법 — `/speckit-constitution` 이 만든다 | **한다** — 우리가 쓴 규칙이다 |
+| `.specify/` 의 나머지 | spec-kit 설치물 | 안 한다 (`.gitignore`) |
 | `.claude/skills/speckit-*/` | `/speckit-*` 명령 10종 | 안 한다 (`.gitignore`) |
 
 `speckit-*` 스킬은 **우리 규칙 스킬과 같은 폴더**에 깔린다. 이름 앞자리로 구분되고 커밋되지 않지만, 스킬 목록을 보면 섞여 보인다.
@@ -47,6 +48,8 @@ bash .github/agent/setup-speckit.sh
 | `/speckit-tasks` | 계획이 섰을 때 | `tasks.md` — 스토리별 작업 목록 |
 | `/speckit-analyze` | 구현 직전 (선택) | 스펙·계획·작업이 서로 어긋나는지 검사 |
 | `/speckit-implement` | 마지막 | 작업 목록대로 구현 |
+
+나머지 셋은 필요할 때만 쓴다 — `/speckit-checklist` 는 요구사항 품질 검토 체크리스트를 만들고, `/speckit-converge` 는 이미 짜인 코드와 스펙을 대조해 남은 작업을 `tasks.md` 에 덧붙이며, `/speckit-taskstoissues` 는 작업 목록을 GitHub 이슈로 바꾼다.
 
 `/speckit-constitution` 은 **규칙을 새로 쓰는 자리가 아니다.**
 
@@ -112,9 +115,14 @@ SPECKIT_VERSION=latest bash .github/agent/setup-speckit.sh
 
 ## 끄기
 
+**`.specify/` 를 통째로 지우면 커밋해 둔 헌법까지 사라진다.** 헌법을 남기려면 그것만 빼고 지운다.
+
 ```bash
-rm -rf .specify .claude/skills/speckit-*
+find .specify -mindepth 1 -maxdepth 1 ! -name memory -exec rm -rf {} +
+rm -rf .specify/memory/.constitution-template.json .claude/skills/speckit-*
 uv tool uninstall specify-cli
 ```
 
-`specs/` 와 `common/speckit-ko/` 는 남는다. 지우려면 직접 지운다. 기존 이슈 흐름은 영향받지 않는다.
+헌법도 버릴 거라면 `rm -rf .specify .claude/skills/speckit-*` 로 한 번에 지운다. 커밋에서도 빠지므로 되돌리려면 git 으로 되살려야 한다.
+
+`specs/` 와 `common/speckit-ko/` 는 어느 쪽이든 남는다. 지우려면 직접 지운다. 기존 이슈 흐름은 영향받지 않는다.

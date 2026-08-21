@@ -18,9 +18,9 @@
 
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 
-- **[SKILL.md](oop-responsibility-design/SKILL.md)** (151줄) — 규칙 요약. 코드 작성·리뷰 판단에는 이것만으로 충분하다.
+- **[SKILL.md](oop-responsibility-design/SKILL.md)** — 규칙 요약. 코드 작성·리뷰 판단에는 이것만으로 충분하다.
 
-- **[reference.md](oop-responsibility-design/reference.md)** (787줄) — 영화 예매 도메인 코틀린 예제로 절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 설계 근거를 설명하거나 개념을 배울 때 읽는다.
+- **[reference.md](oop-responsibility-design/reference.md)** — 영화 예매 도메인 코틀린 예제로 절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 분량이 SKILL.md 의 네 배가 넘으니, 설계 근거를 설명하거나 개념을 배울 때만 읽는다.
 
 ## 이 폴더에 `speckit-*` 이 보인다면
 

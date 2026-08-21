@@ -14,7 +14,7 @@
 
 - [ ] [gh CLI](https://cli.github.com) 설치 후 `gh auth login` 까지 완료 — `gh repo view` 가 이 저장소를 보여주면 된다
 
-- [ ] Node.js 18 이상 — `node -v` 로 확인. 토큰 발급 도구를 npm 으로 설치한다
+- [ ] Node.js 20 이상 — `node -v` 로 확인. 토큰 발급 도구와 프론트엔드(Expo) 실행에 쓴다
 
 - [ ] 저장소가 GitHub 에 올라가 있다 — 에이전트는 push 된 코드만 본다
 
@@ -82,10 +82,18 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 
 이슈를 하나 만들어 `claude` 라벨을 붙여 본다. 예: "사용자 목록에 총 인원 수 표시".
 
-10분 안에 PR 과 리뷰 코멘트가 달리면 설정이 끝난 것이다. 기다리기 싫으면 이슈 훑기를 바로 돌린다.
+**이슈에 `claude-sent` 라벨이 자동으로 붙으면 설정이 끝난 것이다.** 디스패처가 그 이슈를 집어 갔다는 뜻이다.
+
+디스패처는 10분마다 돌므로 그때까지 기다리거나, 바로 돌린다.
 
 ```bash
 gh workflow run claude-dispatch.yml
+```
+
+착수한 뒤 코드를 쓰고 PR 을 열고 리뷰까지 하는 데는 시간이 더 걸린다. 지금 무엇이 도는지는 아래로 본다.
+
+```bash
+gh run list --limit 5
 ```
 
 이슈 잘 쓰는 법과 라벨 고르는 기준은 [issue-guide.md](issue-guide.md).
@@ -130,7 +138,7 @@ bash .github/agent/setup-speckit.sh
 |---|---|
 | Settings → Secrets and variables → Actions | 토큰 2개(필수) · 배포 시크릿 · `DEPLOY_ENABLED` 변수 |
 | Actions → claude-dispatch | 이슈 자동 착수 끄기·켜기(워크플로 비활성화), 즉시 실행 |
-| Issues → Labels | `claude` = 에이전트에게 맡김, `claude-split` = 쪼개서 맡김, `claude-sent` 를 떼면 처음부터 다시 |
+| Issues → Labels | `claude` = 에이전트에게 맡김, `claude-split` = 쪼개서 맡김, `claude-sent` 를 떼면 재착수 (브랜치는 `claude/issue-N` 그대로라 이어서 작업한다) |
 | PR 머지 버튼 | 사람이 올린 이슈의 PR 은 사람 몫 — 에이전트가 쪼갠 하위 이슈는 리뷰 통과 시 자동 머지 |
 
 ### 💻 저장소 파일 (로컬에서 고쳐 커밋)

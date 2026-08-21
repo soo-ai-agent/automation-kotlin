@@ -12,6 +12,9 @@
 |---|---|
 | 모든 코딩 | `.claude/skills/ponytail/SKILL.md` |
 | 설계 판단 (책임 배치·다형성·상속) | `.claude/skills/oop-responsibility-design/SKILL.md` |
+| 돈 계산·매칭·상태 기계 등 복잡한 로직 | `.claude/skills/algorithm-implementation/SKILL.md` |
+| 이슈 분석·기술 문서(md) 작성 | `.claude/skills/md-doc/SKILL.md` |
+| 오버엔지니어링 점검 | `.claude/skills/ponytail-review` — **리뷰할 때 함께 본다.** 저장소 전체 감사는 `ponytail-audit`, 미뤄 둔 것 장부는 `ponytail-debt` |
 | 백엔드 공통 | `backend/.claude/skills/kotlin-common/SKILL.md` |
 | 파일을 어디 둘지 판단, 새 기능의 소유 도메인 정하기 | `backend/.claude/skills/kotlin-module-layout/SKILL.md` |
 | 엔드포인트 추가 | `backend/.claude/skills/kotlin-controller`, `kotlin-dto` |
@@ -28,7 +31,7 @@
 | 테스트 (모든 기능 작업에 동반) | `backend/.claude/skills/kotlin-test` |
 | 프론트엔드 | `frontend/.claude/skills/frontend-react/SKILL.md` + `chapters.md` 해당 장, `frontend/README.md` |
 | E2E 테스트 | `frontend/.claude/skills/frontend-e2e/SKILL.md` |
-| 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) |
+| 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
 | CI 자동화 수정 | `common/docs/automation-spec.md` (명세·구현 위치·불변 조건) |
 | 백엔드 뼈대 만들기 | `backend/README.md` |
 | 작업 지시에 `specs/...` 경로가 있을 때 | 그 스펙 문서(`spec.md`·`plan.md`·`tasks.md`)를 먼저 읽는다 — 스펙이 기준이다 |

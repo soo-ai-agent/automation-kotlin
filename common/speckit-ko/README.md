@@ -85,7 +85,7 @@ git log <위 표의 기준 커밋>..<올릴 태그> -- templates/spec-template.m
 | `speckit-version.txt` | 이 프로젝트가 쓰는 spec-kit 버전 | 첫 설치 때 스크립트가 그 시점 최신으로 적는다 — **커밋한다** |
 | `translated-against.txt` | 위 번역이 기준 삼은 릴리스 | 번역을 갱신한 사람이 고친다 |
 
-`speckit-version.txt` 는 이 저장소에 없다. 첫 설치 때 생기고, 커밋하면 그다음부터 clone 한 사람은 모두 같은 버전을 받는다.
+`speckit-version.txt` 는 첫 설치 때 생기는 파일이다. 커밋하면 그다음부터 clone 한 사람은 모두 같은 버전을 받는다.
 
 ```bash
 bash .github/agent/setup-speckit.sh                           # 처음: 최신을 찾아 고정
