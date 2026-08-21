@@ -1,0 +1,14 @@
+# expect: CHANGES_REQUESTED
+--- a/backend/storage/db-core/src/main/kotlin/.../storage/db/core/CouponEntity.kt
++++ b/backend/storage/db-core/src/main/kotlin/.../storage/db/core/CouponEntity.kt
+@@ -18,4 +18,11 @@ class CouponEntity(
+     var discountRate: Double = discountRate
+         protected set
++
++    fun applyTo(orderAmount: Double): Double {
++        if (orderAmount >= 10000.0) {
++            return orderAmount * 0.9
++        }
++        return orderAmount - discountRate
++    }
+ }

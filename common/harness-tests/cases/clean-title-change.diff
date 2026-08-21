@@ -1,0 +1,11 @@
+# expect: PASS
+--- a/frontend/src/todo/pages/TodoPage.tsx
++++ b/frontend/src/todo/pages/TodoPage.tsx
+@@ -12,7 +12,7 @@ export default function TodoPage() {
+   return (
+     <main>
+-      <h1>Todo</h1>
++      <h1>할 일 관리</h1>
+       <TodoList />
+     </main>
+   );

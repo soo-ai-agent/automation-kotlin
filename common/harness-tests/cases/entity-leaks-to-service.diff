@@ -1,0 +1,16 @@
+# expect: CHANGES_REQUESTED
+--- a/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderService.kt
++++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderService.kt
+@@ -12,6 +12,14 @@ class OrderService(
+     private val orderFinder: OrderFinder,
++    private val memberRepository: MemberRepository,
++    private val mailSender: MailSender,
+ ) {
++    @Transactional
++    fun create(memberId: Long, productId: Long, qty: Int): OrderEntity {
++        val member = memberRepository.findById(memberId).orElseThrow()
++        val entity = orderRepository.save(OrderEntity(memberId, productId, qty))
++        mailSender.send(member.email, "주문 접수")
++        return entity
++    }
+ }
