@@ -34,4 +34,6 @@
 
 [LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail*` 스킬 4종에만** 적용된다 — 각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
 
+원본은 <https://github.com/DietrichGebert/ponytail> 이고, 무엇을 가져왔는지는 [docs/upstream.md](../../docs/upstream.md) 에 정리돼 있다.
+
 `oop-responsibility-design` 은 이 저장소의 자체 문서이며 LICENSE 적용 대상이 아니다.

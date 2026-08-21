@@ -2,7 +2,9 @@
 
 > **이 폴더는 사람과 에이전트가 함께 읽습니다.** 설치물이 아니라 **우리 자산**이라서 저장소에 커밋합니다.
 
-[spec-kit](https://github.com/github/spec-kit) 이 만드는 산출물(`spec.md`·`plan.md`·`tasks.md`·체크리스트)의 템플릿을 한국어로 바꾼 것이다.
+[spec-kit](https://github.com/github/spec-kit)(MIT, © GitHub, Inc.) 이 만드는 산출물(`spec.md`·`plan.md`·`tasks.md`·체크리스트)의 템플릿을 한국어로 바꾼 것이다.
+
+원본에서 무엇을 가져와 무엇을 바꿨는지는 [docs/upstream.md](../../docs/upstream.md) 에 정리돼 있다.
 
 **쓰는 법은 [docs/sdd-guide.md](../../docs/sdd-guide.md) 에 있다.** 이 문서는 그 아래에서 번역이 어떻게 유지되는지를 다룬다.
 

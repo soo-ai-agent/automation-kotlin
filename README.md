@@ -180,4 +180,5 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |
+| 빌려온 것의 원본·라이선스 | [docs/upstream.md](docs/upstream.md) |
 | 팀 리뷰 규칙 추가 | `common/docs/code-review/rules.md` 에 MUST 로 적는다 |
