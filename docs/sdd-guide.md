@@ -43,6 +43,10 @@ cp common/speckit-ko/templates/plan-template.md specs/001-주문취소/plan.md
 
 채운 뒤 커밋하고, 이슈 본문에 `specs/001-주문취소/spec.md` 를 적으면 이후 흐름은 똑같다.
 
+복사한 파일에 `__SPECKIT_COMMAND_PLAN__` 같은 대문자 토큰이 보이면 **지우면 된다.** 그 자리는 원래 명령 이름(`/speckit-plan`)으로 바뀌는 자리인데, 손으로 쓸 때는 그 명령을 쓰지 않으므로 남길 이유가 없다.
+
+`spec.md` 에는 이 토큰이 없고, `plan.md` 에 7개·`checklist.md` 에 4개 있다. 대부분 "이 파일은 어느 명령이 만든다"는 안내라 지워도 내용이 빠지지 않는다.
+
 잃는 것은 `/speckit-*` 명령의 도움뿐이다 — 번호를 자동으로 매기고, 모호한 곳을 질문으로 뽑아 주고(`/speckit-clarify`), 문서끼리 어긋나는지 검사해 주는(`/speckit-analyze`) 편의가 사라지므로 그만큼 사람이 챙긴다.
 
 `uv` 대신 `pipx` 나 `pip` 로 `specify-cli` 를 설치하는 길도 있지만, 이 저장소의 설치 스크립트는 `uv` 만 다룬다. 그 경로로 갈 거면 버전 고정(`speckit-version.txt`)을 손으로 맞춰야 한다.
