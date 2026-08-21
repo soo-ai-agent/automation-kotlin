@@ -14,6 +14,7 @@
 | [ponytail-debt](ponytail-debt/SKILL.md) | `ponytail:` 주석을 모아 만든 부채 장부 | "미뤄둔 게 뭐야?" |
 | [oop-responsibility-design](oop-responsibility-design/SKILL.md) | 책임주도 설계 — 책임 배치, 다형성, 캡슐화, GRASP | "이 로직을 어느 클래스에 두나" |
 | [algorithm-implementation](algorithm-implementation/SKILL.md) | 이해를 입출력 표로 고정하고, 표를 테스트로 1:1 변환 | 돈 계산·매칭·상태 기계 등 복잡한 로직 구현 전 |
+| [md-doc](md-doc/SKILL.md) | 이슈 분석·기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선 | md 문서를 쓰거나 고칠 때 |
 
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 
