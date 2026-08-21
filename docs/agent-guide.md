@@ -191,6 +191,7 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | 노드 역할 정의 | `.github/agent/nodes/<이름>.md` |
 | 공통 스위치 | `.github/agent/settings.env` |
 | 배포 | `.github/workflows/deploy.yml` ([deploy.md](deploy.md)) |
+| 스펙 먼저 쓰기 (선택) | `.github/agent/setup-speckit.sh` ([sdd-guide.md](sdd-guide.md)) — CI 밖에서 돈다 |
 
 전체 지도는 [.github/README.md](../.github/README.md).
 
@@ -210,6 +211,8 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 노드를 새로 만들려면 `.github/agent/nodes/<이름>.md` 를 추가하고 `CLAUDE_GRAPH` 에 이름을 잇는다.
 
 **설정은 항상 기본 브랜치의 것이 쓰인다.** 작업 브랜치에서 고쳐도 그 작업에는 반영되지 않는다.
+
+스펙 먼저 쓰기(선택)를 켰다면 사람이 관리하는 설정이 하나 더 있다 — `common/speckit-ko/speckit-version.txt` 가 이 프로젝트의 spec-kit 버전을 고정한다. 노드는 이 값을 읽지 않는다.
 
 ## 어디까지 자동인가
 
