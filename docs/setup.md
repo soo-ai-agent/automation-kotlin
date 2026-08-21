@@ -74,7 +74,8 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 |---|---|
 | 토큰 발급 자체 | 1단계 — 대화형 로그인이라 자동화할 수 없다 |
 | 백엔드 뼈대 | [backend/README.md](../backend/README.md) 대로 Spring 멀티모듈을 채워 커밋 |
-| 프론트 설정 | 없음 — 주소·키는 `frontend/app.json` 의 `extra` 에 있고 기본값으로 바로 뜬다 |
+| 프론트 설정 | 기본값으로 바로 뜬다. 주소·키는 `frontend/app.json` 의 `extra` 한 곳에 있다 ([frontend/README.md](../frontend/README.md)) |
+| 지도·광고를 쓸 때 | 그때만 키를 채운다 — 지도는 `kakaoJsKey`([map/README](../frontend/src/map/README.md)), 광고는 `admob*`([ads/README](../frontend/src/ads/README.md)·[ads.md](ads.md)). 비워 두면 그 모듈만 안 뜨고 나머지는 정상이다 |
 | 토큰 교체(로테이션) | 스크립트는 기존 값을 덮지 않는다 — 웹에서 해당 시크릿을 지운 뒤 다시 실행 |
 | 배포 | 레지스트리·서버가 준비된 뒤 Variables 에 `DEPLOY_ENABLED=true` ([deploy.md](deploy.md)) |
 
