@@ -27,5 +27,12 @@ frontend/.env
 .claude-spec.md
 .claude-split/
 
+# spec-kit 설치물 — .github/agent/setup-speckit.sh 가 깐다. 다시 돌리면 다시 생긴다.
+# 한국어 번역 원본은 common/speckit-ko/ 에 있고 그쪽은 커밋한다.
+# 산출물(specs/)은 프로젝트 내용이므로 무시하지 않는다.
+# speckit-* 스킬 10종이 우리 스킬과 같은 폴더에 깔리므로 이름으로 갈라 무시한다.
+.specify/
+.claude/skills/speckit-*/
+
 # expo (frontend)
 frontend/.expo/

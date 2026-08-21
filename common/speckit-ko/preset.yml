@@ -1,0 +1,43 @@
+schema_version: "1.0"
+
+preset:
+  id: "korean"
+  name: "한국어 산출물 템플릿"
+  version: "1.0.0"
+  description: "spec-kit 산출물(spec/plan/tasks/checklist) 템플릿의 한국어판. 명령 프롬프트는 상류 원본을 그대로 쓴다."
+  author: "automation-kotlin"
+  repository: "https://github.com/github/spec-kit"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  templates:
+    - type: "template"
+      name: "spec-template"
+      file: "templates/spec-template.md"
+      description: "기능 명세 — 사용자 시나리오·요구사항·성공 기준"
+      replaces: "spec-template"
+
+    - type: "template"
+      name: "plan-template"
+      file: "templates/plan-template.md"
+      description: "구현 계획 — 기술 맥락·헌법 점검·구조 결정"
+      replaces: "plan-template"
+
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      description: "작업 목록 — 사용자 스토리별로 묶은 단계와 의존 순서"
+      replaces: "tasks-template"
+
+    - type: "template"
+      name: "checklist-template"
+      file: "templates/checklist-template.md"
+      description: "요구사항 품질 검토 체크리스트"
+      replaces: "checklist-template"
+
+tags:
+  - "korean"
+  - "localization"
