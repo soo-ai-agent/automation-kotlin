@@ -24,7 +24,7 @@
 
 ## 이 폴더에 `speckit-*` 이 보인다면
 
-선택 기능인 스펙 먼저 쓰기([docs/sdd-guide.md](../../docs/sdd-guide.md))를 켜면 `speckit-analyze`·`speckit-specify` 같은 스킬 10종이 **이 폴더에 함께 깔린다.**
+스펙 먼저 쓰기([docs/sdd-guide.md](../../docs/sdd-guide.md))를 켜면 `speckit-analyze`·`speckit-specify` 같은 스킬 10종이 **이 폴더에 함께 깔린다.**
 
 그것들은 우리 규칙이 아니라 spec-kit 이 설치한 명령이다. `.gitignore` 가 `speckit-*` 이름으로 걸러 내므로 커밋되지 않고, 위 표에도 넣지 않는다.
 

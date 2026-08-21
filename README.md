@@ -4,13 +4,15 @@
 
 ## 이게 무엇인가
 
-**GitHub 이슈에 "무엇을 만들지" 적어 두면, Claude 가 코드를 짜고 스스로 리뷰까지 마친 PR 을 열어 주는 저장소 템플릿**이다.
+**만들 것을 글로 적어 두면, Claude 가 코드를 짜고 스스로 리뷰까지 마친 PR 을 열어 주는 저장소 템플릿**이다.
 
-빈 저장소에 이 템플릿을 올리고 한 번만 설정하면, 그다음부터는 이슈만 써서 개발할 수 있다.
+빈 저장소에 이 템플릿을 올리고 한 번만 설정하면, 그다음부터는 글만 써서 개발할 수 있다.
 
-들어 있는 것은 셋이다.
+들어 있는 것은 넷이다.
 
 - **자동화** — 이슈를 발견해 코드를 짜고, PR 을 열고, 리뷰하고, 지적을 스스로 고치는 GitHub Actions 워크플로 5개
+
+- **스펙 먼저 쓰기(SDD)** — 새 기능은 `specs/` 에 스펙을 먼저 쓰고 그 스펙으로 구현한다. 산출물은 한국어로 나온다
 
 - **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 25종 (백엔드 16 · 프론트 2 · 공통 7)
 
@@ -41,6 +43,7 @@
 | [gh CLI](https://cli.github.com) | 설치하고 `gh auth login` 까지 끝나 있어야 한다 |
 | Node.js 20 이상 | 토큰 발급 도구와 프론트엔드(Expo) 실행에 쓴다 |
 | Claude 구독 (Pro 또는 Max) | 에이전트가 Claude 를 실행하는 데 쓴다 |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | 스펙 먼저 쓰기 도구를 까는 데 쓴다 (5단계) |
 | JDK 25 | 백엔드를 **로컬에서** 돌릴 때만 필요하다. 나중에 준비해도 된다 |
 
 ## 시작하기 (처음 한 번)
@@ -71,7 +74,16 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 cd frontend && npm install && npm run web    # 브라우저로 확인 (폰으로 보려면 npm start 후 Expo Go 로 QR)
 ```
 
-**5. 첫 구축 지시** — 이슈 대신 [TASK.md](TASK.md) 양식에 만들 것을 적고, **커밋해서 push 한 뒤** 한 번 호출한다. 워크플로는 GitHub 에 올라간 파일을 읽으므로 push 하지 않으면 빈 양식으로 돈다.
+**5. 스펙 먼저 쓰기 켜기** — 새 기능을 만들 때 쓸 도구다. [uv](https://docs.astral.sh/uv/getting-started/installation/) 가 필요하고, 없으면 스크립트가 알려준다.
+
+```bash
+bash .github/agent/setup-speckit.sh
+git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
+```
+
+무엇이 깔리고 어떻게 쓰는지는 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다.
+
+**6. 첫 구축 지시** — 첫 구축만은 스펙 대신 [TASK.md](TASK.md) 양식을 쓴다. 만들 것을 적고 **커밋해서 push 한 뒤** 한 번 호출한다. 워크플로는 GitHub 에 올라간 파일을 읽으므로 push 하지 않으면 빈 양식으로 돈다.
 
 ```bash
 git add TASK.md && git commit -m "docs:구축 명세 작성" && git push
@@ -99,7 +111,11 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 **맡기지 않을 영역은 라벨을 붙이지 않으면 된다.** 디스패처는 라벨이 붙은 이슈만 집어간다.
 
-**이슈 대신 스펙을 먼저 쓰고 싶다면** 선택 기능이 하나 있다. 큰 기능을 여럿이 나눠 만들 때 요구사항을 글로 먼저 고정하는 방식이고, 켜는 법은 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다. 켜지 않으면 위 흐름 그대로다.
+**새 기능은 스펙을 먼저 쓴다.** `/speckit-specify` 로 만들 것을 `specs/` 에 적어 커밋한 뒤, 이슈 본문에 그 경로를 적는다. 에이전트가 그 문서를 기준으로 구현한다.
+
+요구사항을 글로 먼저 고정해 "만들고 보니 원하던 게 아니었다"를 구현 전에 잡는 방식이다. 절차는 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다.
+
+**버그 수정과 작은 변경은 스펙 없이 이슈 한 줄로 간다.** 무엇을 만들지에 이견이 생길 일이 없으면 스펙은 비용만 늘린다.
 
 main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md](docs/deploy.md)).
 
@@ -117,7 +133,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     .github/agent/nodes/             노드별 역할 지시문 (노드 하나당 파일 하나)
     common/docs/code-review/rules.md 리뷰 규칙 (MUST 를 어기면 머지가 막힌다)
 
-스펙 먼저 쓰기(선택)를 쓴다면 `common/speckit-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법)도 사람이 고치는 자리다 ([안내](docs/sdd-guide.md)).
+스펙 먼저 쓰기 쪽도 사람이 고치는 자리가 둘 있다 — `common/speckit-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법) ([안내](docs/sdd-guide.md)).
 
 **에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다
 
@@ -162,7 +178,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |
 | 광고를 넣을지 정하기 (스토어 체크리스트) | [docs/ads.md](docs/ads.md) |
-| 이슈 대신 스펙을 먼저 쓰기 (선택) | [docs/sdd-guide.md](docs/sdd-guide.md) |
+| 새 기능의 스펙 쓰기 | [docs/sdd-guide.md](docs/sdd-guide.md) |
 | 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |
