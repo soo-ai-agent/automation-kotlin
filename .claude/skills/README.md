@@ -22,6 +22,14 @@
 
 - **[reference.md](oop-responsibility-design/reference.md)** (787줄) — 영화 예매 도메인 코틀린 예제로 절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 설계 근거를 설명하거나 개념을 배울 때 읽는다.
 
+## 이 폴더에 `speckit-*` 이 보인다면
+
+선택 기능인 스펙 먼저 쓰기([docs/sdd-guide.md](../../docs/sdd-guide.md))를 켜면 `speckit-analyze`·`speckit-specify` 같은 스킬 10종이 **이 폴더에 함께 깔린다.**
+
+그것들은 우리 규칙이 아니라 spec-kit 이 설치한 명령이다. `.gitignore` 가 `speckit-*` 이름으로 걸러 내므로 커밋되지 않고, 위 표에도 넣지 않는다.
+
+지우려면 `rm -rf .claude/skills/speckit-*` 하면 되고, 설치 스크립트를 다시 돌리면 다시 생긴다.
+
 ## 라이선스
 
 [LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail*` 스킬 4종에만** 적용된다 — 각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
