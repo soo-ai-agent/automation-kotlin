@@ -43,7 +43,7 @@
 | [gh CLI](https://cli.github.com) | 설치하고 `gh auth login` 까지 끝나 있어야 한다 |
 | Node.js 20 이상 | 토큰 발급 도구와 프론트엔드(Expo) 실행에 쓴다 |
 | Claude 구독 (Pro 또는 Max) | 에이전트가 Claude 를 실행하는 데 쓴다 |
-| [uv](https://docs.astral.sh/uv/getting-started/installation/) | 스펙 먼저 쓰기 도구를 까는 데 쓴다 (5단계) |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | 스펙 먼저 쓰기 도구를 까는 데 쓴다 (5단계). 깔 수 없으면 스펙을 손으로 쓰는 길이 있다 ([안내](docs/sdd-guide.md#uv-를-깔-수-없는-환경이라면)) |
 | JDK 25 | 백엔드를 **로컬에서** 돌릴 때만 필요하다. 나중에 준비해도 된다 |
 
 ## 시작하기 (처음 한 번)
@@ -94,14 +94,18 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 
 세 단계가 차례로 돌고 PR 이 하나 열린다. 리뷰 통과를 확인하고 머지하면 끝이다.
 
-## 그다음부터 — 이슈만 쓰면 된다
+## 그다음부터 — 스펙을 쓰고 이슈로 넘긴다
 
-이슈를 쓰고 `claude` 라벨을 붙인다. 그게 전부다.
+**새 기능은 스펙을 먼저 쓴다.** `/speckit-specify` 로 만들 것을 `specs/` 에 적어 커밋하고, 이슈 본문에 그 경로를 적은 뒤 `claude` 라벨을 붙인다.
 
-    이슈 + claude 라벨
-      → 에이전트가 코딩 → PR → 에이전트가 리뷰
+    스펙(specs/) → 이슈 + claude 라벨
+      → 에이전트가 스펙을 읽고 코딩 → PR → 에이전트가 리뷰
       → 지적이 있으면 스스로 수정 (최대 3회)
       → 사람이 확인 후 머지
+
+요구사항을 글로 먼저 고정해 "만들고 보니 원하던 게 아니었다"를 구현 전에 잡는 방식이다. 절차는 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다.
+
+**버그 수정과 작은 변경은 스펙 없이 이슈 한 줄로 간다.** 무엇을 만들지에 이견이 생길 일이 없으면 스펙은 비용만 늘린다.
 
 한 번에 하기엔 큰 작업이면 `claude` 대신 **`claude-split`** 라벨을 붙인다. 에이전트가 이슈를 독립적인 하위 이슈 2~6개로 쪼개서 각각 진행한다.
 
@@ -110,12 +114,6 @@ gh workflow run claude-agent.yml -f prompt="@TASK.md" -f graph="api>web>e2e"
 이슈를 잘 쓰는 법과 두 라벨을 고르는 기준은 [docs/issue-guide.md](docs/issue-guide.md) 에 있다.
 
 **맡기지 않을 영역은 라벨을 붙이지 않으면 된다.** 디스패처는 라벨이 붙은 이슈만 집어간다.
-
-**새 기능은 스펙을 먼저 쓴다.** `/speckit-specify` 로 만들 것을 `specs/` 에 적어 커밋한 뒤, 이슈 본문에 그 경로를 적는다. 에이전트가 그 문서를 기준으로 구현한다.
-
-요구사항을 글로 먼저 고정해 "만들고 보니 원하던 게 아니었다"를 구현 전에 잡는 방식이다. 절차는 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다.
-
-**버그 수정과 작은 변경은 스펙 없이 이슈 한 줄로 간다.** 무엇을 만들지에 이견이 생길 일이 없으면 스펙은 비용만 늘린다.
 
 main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md](docs/deploy.md)).
 

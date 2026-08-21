@@ -20,7 +20,8 @@
 
 - [ ] Claude 구독(Pro 또는 Max) — 에이전트가 Claude 를 실행하는 데 쓴다
 
-- [ ] [uv](https://docs.astral.sh/uv/getting-started/installation/) — 4단계에서 스펙 도구를 까는 데 쓴다. 없으면 스크립트가 설치 방법을 알려주고 멈춘다
+- [ ] [uv](https://docs.astral.sh/uv/getting-started/installation/) — 4단계에서 스펙 도구를 까는 데 쓴다. 없으면 스크립트가 설치 방법을 알려주고 멈춘다.
+  깔 수 없는 환경이면 4단계를 건너뛰고 [sdd-guide 의 "uv 를 깔 수 없는 환경이라면"](sdd-guide.md#uv-를-깔-수-없는-환경이라면) 대로 스펙을 손으로 쓴다
 
 ## 1단계 — 토큰 두 개 발급
 
@@ -101,6 +102,17 @@ gh run list --limit 5
 
 이슈 잘 쓰는 법과 라벨 고르는 기준은 [issue-guide.md](issue-guide.md).
 
+## 4단계 — 💻 스펙 먼저 쓰기 켜기
+
+새 기능을 만들 때 쓸 도구를 깐다. 이 저장소는 스펙을 먼저 쓰고 그 스펙으로 구현한다.
+
+```bash
+bash .github/agent/setup-speckit.sh
+git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
+```
+
+버전 파일을 커밋해야 나중에 clone 한 사람도 같은 버전을 받는다. 무엇이 깔리고 어떻게 쓰는지는 [sdd-guide.md](sdd-guide.md) 에 있다.
+
 ## 안 될 때
 
 **처음 켤 때 주로 겪는 것**
@@ -121,16 +133,6 @@ gh run list --limit 5
 | 그래프의 다음 단계가 안 돈다 | 앞 단계가 실패했는지 본다. 실패했다면 멈추는 것이 정상 동작이다 |
 | `순차 단계는 최대 4개예요` 에러 | `CLAUDE_GRAPH` 에서 `>` 로 이은 단계가 4개를 넘었다 — `+` 로 묶어 동시에 돌리거나 작업을 두 번에 나눈다 |
 
-## 4단계 — 💻 스펙 먼저 쓰기 켜기
-
-새 기능을 만들 때 쓸 도구를 깐다. 이 저장소는 스펙을 먼저 쓰고 그 스펙으로 구현한다.
-
-```bash
-bash .github/agent/setup-speckit.sh
-git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
-```
-
-버전 파일을 커밋해야 나중에 clone 한 사람도 같은 버전을 받는다. 무엇이 깔리고 어떻게 쓰는지는 [sdd-guide.md](sdd-guide.md) 에 있다.
 
 ## 켠 다음 — 어디서 무엇을 바꾸나
 

@@ -27,6 +27,26 @@ bash .github/agent/setup-speckit.sh
 
 처음 돌리면 **그 시점의 최신 릴리스**로 버전이 정해지고 `common/speckit-ko/speckit-version.txt` 에 적힌다. **이 파일을 커밋한다.** 그래야 나중에 clone 한 사람도 같은 버전을 받는다.
 
+## uv 를 깔 수 없는 환경이라면
+
+사내 정책이나 망 제한으로 `uv` 를 못 까는 경우가 있다. **그래도 스펙 먼저 쓰기는 그대로 쓸 수 있다.**
+
+도구가 하는 일은 스펙 문서를 **거들어 주는 것**이지, 스펙을 읽는 쪽에 필요한 것이 아니다. CI 노드는 `specs/` 를 평범한 마크다운 파일로 읽을 뿐이고, 노드에 허용된 명령에는 spec-kit 이 아예 없다.
+
+한국어 템플릿 4종이 저장소에 커밋돼 있으니 그것을 복사해 손으로 채우면 된다.
+
+```bash
+mkdir -p specs/001-주문취소
+cp common/speckit-ko/templates/spec-template.md specs/001-주문취소/spec.md
+cp common/speckit-ko/templates/plan-template.md specs/001-주문취소/plan.md
+```
+
+채운 뒤 커밋하고, 이슈 본문에 `specs/001-주문취소/spec.md` 를 적으면 이후 흐름은 똑같다.
+
+잃는 것은 `/speckit-*` 명령의 도움뿐이다 — 번호를 자동으로 매기고, 모호한 곳을 질문으로 뽑아 주고(`/speckit-clarify`), 문서끼리 어긋나는지 검사해 주는(`/speckit-analyze`) 편의가 사라지므로 그만큼 사람이 챙긴다.
+
+`uv` 대신 `pipx` 나 `pip` 로 `specify-cli` 를 설치하는 길도 있지만, 이 저장소의 설치 스크립트는 `uv` 만 다룬다. 그 경로로 갈 거면 버전 고정(`speckit-version.txt`)을 손으로 맞춰야 한다.
+
 ## 무엇이 어디에 생기나
 
 | 자리 | 무엇 | 커밋하나 |
