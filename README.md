@@ -140,7 +140,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 항목 | 규칙 |
 |---|---|
 | 백엔드 레이어 | Controller → Domain Service → Implement → Repository, 단방향 |
-| 프론트 레이어 | pages → hooks → services → api → lib, 단방향 |
+| 프론트 레이어 | screens → hooks → services → api → lib, 단방향 |
 | 컨트롤러 | 요청·응답 변환과 인증 정보 추출만 한다 |
 | 도메인 서비스 | 유스케이스 조립과 트랜잭션 경계만 갖는다 |
 | 구현 레이어 | `TodoFinder`·`TodoAppender` 처럼 재사용 단위로 쪼갠다 |

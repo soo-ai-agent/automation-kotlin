@@ -264,7 +264,7 @@ SDK 타입만 필요한 곳은 `types/` 의 `typeof import(...)` 를 쓴다 — 
 
 - [ ] 부르는 엔드포인트가 서버 매핑에 전부 있는가
 
-- [ ] 참조가 `pages → hooks → services → api → lib` 한 방향인가
+- [ ] 참조가 `screens(pages) → hooks → services → api → lib` 한 방향인가
 
 - [ ] JSX 없는 파일이 `.ts` 이고, default export 는 화면뿐인가
 

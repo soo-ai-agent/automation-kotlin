@@ -73,11 +73,11 @@ backend/
 ├── clients/client-<이름>/       # 외부 시스템 통신은 예외 없이 여기
 └── support/                     # 상위(core)를 참조하지 않는 보조 기능
 
-# 프론트엔드 — 도메인이 최상위 폴더 (레이어 방향: pages → hooks → services → api → lib)
+# 프론트엔드 — 도메인이 최상위 폴더 (레이어 방향: screens → hooks → services → api → lib)
 frontend/src/
 ├── <도메인>/
-│   ├── pages/ hooks/ services/ api/
-│   └── enums/
+│   ├── screens/ components/ hooks/ services/ api/
+│   └── enums/ types/
 └── common/                      # 여러 도메인이 함께 쓰는 것
 ```
 

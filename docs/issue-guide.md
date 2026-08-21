@@ -63,7 +63,7 @@
 
 ## 참고 (선택)
 - 목록 API: backend/core/core-todo/.../todo/api/controller/TodoController.kt
-- 목록 화면: frontend/src/todo/pages/Todo.tsx
+- 목록 화면: frontend/src/todo/screens/Todo.tsx
 ```
 
 - 파일 경로를 알면 적어라 — 에이전트가 찾는 시간이 줄고 정확도가 오른다.

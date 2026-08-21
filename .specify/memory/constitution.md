@@ -60,7 +60,7 @@ Sync Impact Report
 상위에서 하위로만 참조한다. 건너뛰기와 역참조를 하지 않는다.
 
 - 백엔드 — controller → domain service → implement → repository
-- 프론트엔드 — pages → hooks → services → api → lib
+- 프론트엔드 — screens → hooks → services → api → lib (Expo/RN 이라 화면 폴더가 `screens/` 다)
 
 **엔티티는 구현 레이어 위로 올라가지 않는다.** 구현 레이어가 지역변수로 다루고 도메인 모델로 바꿔 올리는 것까지가 허용이다.
 
