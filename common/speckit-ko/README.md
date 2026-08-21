@@ -14,6 +14,10 @@
 bash .github/agent/setup-speckit.sh
 ```
 
+잊기 쉬운 실수라 훅을 걸어 두었다 — `.claude/hooks/warn-speckit-preset-stale.sh` 가 이 폴더를 고칠 때 설치본과 어긋났는지 보고 알려준다.
+
+에이전트가 고칠 때만 걸린다. 편집기로 직접 고쳤다면 `diff -rq common/speckit-ko .specify/presets/korean` 으로 확인한다.
+
 ## 번역 범위 — 사람이 읽는 것만
 
 | 대상 | 번역 | 이유 |

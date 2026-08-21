@@ -8,7 +8,20 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/warn-bulk-api-calls.sh\"",
             "timeout": 10,
-            "statusMessage": "외부 API 대량 호출 확인"
+            "statusMessage": "\uc678\ubd80 API \ub300\ub7c9 \ud638\ucd9c \ud655\uc778"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/warn-speckit-preset-stale.sh\"",
+            "timeout": 10,
+            "statusMessage": "\ud55c\uad6d\uc5b4 \ud504\ub9ac\uc14b \ub3d9\uae30\ud654 \ud655\uc778"
           }
         ]
       }
