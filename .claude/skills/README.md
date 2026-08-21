@@ -13,6 +13,7 @@
 | [ponytail-audit](ponytail-audit/SKILL.md) | 저장소 전체 오버엔지니어링 감사 | "이 저장소에서 뭘 덜어낼 수 있어?" |
 | [ponytail-debt](ponytail-debt/SKILL.md) | `ponytail:` 주석을 모아 만든 부채 장부 | "미뤄둔 게 뭐야?" |
 | [oop-responsibility-design](oop-responsibility-design/SKILL.md) | 책임주도 설계 — 책임 배치, 다형성, 캡슐화, GRASP | "이 로직을 어느 클래스에 두나" |
+| [algorithm-implementation](algorithm-implementation/SKILL.md) | 이해를 입출력 표로 고정하고, 표를 테스트로 1:1 변환 | 돈 계산·매칭·상태 기계 등 복잡한 로직 구현 전 |
 
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 
