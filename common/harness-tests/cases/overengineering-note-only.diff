@@ -1,8 +1,7 @@
 # expect: PASS
 --- /dev/null
 +++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/DiscountPolicy.kt
-@@ -0,0 +1,4 @@
-+// 지금은 정률 할인 하나지만 나중에 다른 정책이 올 수 있어 확장 지점을 미리 둔다
+@@ -0,0 +1,3 @@
 +interface DiscountPolicy {
 +    fun apply(price: Long): Long
 +}
