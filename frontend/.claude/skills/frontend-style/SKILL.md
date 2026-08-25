@@ -18,6 +18,8 @@ description: TypeScript React Native 의 조건·분기·반복·비동기 문�
 
 이 스킬은 `frontend-react` 의 문법 보강이다. 충돌하면 `frontend-react` 와 동봉 정답 코드(`frontend/src/`)가 우선한다.
 
+`kotlin-style`·`api-contract` 와 목표(유지보수성·정합성·가독성)를 공유한다 — 전문은 `api-contract` 의 "세 스킬이 공유하는 목표" 절.
+
 바쁘면 아래 표만 보면 된다. 근거와 예시는 본문에 있다.
 
 ## 핵심 요약

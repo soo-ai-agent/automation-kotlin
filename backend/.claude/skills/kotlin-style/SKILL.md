@@ -15,6 +15,8 @@ description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상�
 
 **다루지 않는 것** — 자료형·불변성·람다 체이닝 일반 규칙은 `kotlin-common` 에, 실패 표현(예외 설계)은 `kotlin-error` 에, 서버-클라이언트 계약은 `api-contract` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
 
+이 스킬은 `api-contract`·`frontend-style` 과 목표(유지보수성·정합성·가독성)를 공유한다 — 전문은 `api-contract` 의 "세 스킬이 공유하는 목표" 절.
+
 바쁘면 아래 표만 보면 된다. 근거와 예시는 본문에 있다.
 
 ## 핵심 요약

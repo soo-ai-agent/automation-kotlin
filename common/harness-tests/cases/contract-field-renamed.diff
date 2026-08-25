@@ -1,0 +1,23 @@
+# expect: CHANGES_REQUESTED
+--- a/frontend/src/todo/types/todo.ts
++++ b/frontend/src/todo/types/todo.ts
+@@ -1,6 +1,9 @@
++// 서버 TodoResponse (CONTRACT.md): {id, title, done, createdAt}
+ export type Todo = {
+     id: number;
+     title: string;
+     done: boolean;
++    // 서버는 createdAt 으로 주지만 우리 표기 규칙에 맞춰 이름을 바꿨다
++    reg_date: string;
+ };
+--- a/frontend/src/todo/api/todo.ts
++++ b/frontend/src/todo/api/todo.ts
+@@ -8,7 +8,9 @@ export const todo = {
+     async list(): Promise<ApiResult<Todo[]>> {
+         const result = await apiClient.get<ServerTodo[]>("/api/v1/todos");
+-        return result;
++        if (!result.ok) return result;
++        // 서버 필드 createdAt 을 프론트 이름 reg_date 로 옮겨 담는다
++        return {...result, data: result.data.map(row => ({...row, reg_date: row.createdAt}))};
+     },
+ };
