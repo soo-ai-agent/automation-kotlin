@@ -18,6 +18,7 @@
 | 6 | [ads.md](ads.md) | 앱에 광고를 넣을지 정할 때 — 판단 기준과 스토어 체크리스트 |
 | 7 | [external-apis.md](external-apis.md) | 외부 시스템이 막혔을 때 — 무엇을 쓰고 있고 막히면 무엇이 대신 나가는지 |
 | 8 | [upstream.md](upstream.md) | 빌려온 것의 원본과 라이선스 — ponytail · spec-kit |
+| 9 | [architecture.md](architecture.md) | 전체 구조를 한 장으로 보고 싶을 때 — 파이프라인·스킬 체계·문서 지도 |
 
 1~3 만 읽어도 쓰는 데는 지장이 없다. 4 는 기본 동작을 바꾸고 싶어질 때 연다.
 

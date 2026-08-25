@@ -171,6 +171,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
 | 하고 싶은 것 | 볼 문서 |
 |---|---|
+| 전체 구조를 한 장으로 | [docs/architecture.md](docs/architecture.md) |
 | 처음 켜기 (한 번) | [docs/setup.md](docs/setup.md) |
 | 일 시키기 — 이슈 쓰는 법, 라벨 고르기 | [docs/issue-guide.md](docs/issue-guide.md) |
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
