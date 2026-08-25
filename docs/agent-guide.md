@@ -52,10 +52,11 @@ flowchart TD
 
 규칙 스킬은 세 모듈로 나뉜다 — 공통은 `.claude/skills/`, 백엔드는 `backend/.claude/skills/`, 프론트엔드는 `frontend/.claude/skills/`.
 
-일꾼과 리뷰어가 자동으로 읽으며, 어떤 규칙이 적용될지는 고치는 파일의 위치가 정한다.
+일꾼과 리뷰어가 자동으로 읽는다. 공통 스킬은 어디를 고치든 항상 적용되고, 고치는 파일의 위치가 그 위에 얹는 영역 스킬을 정한다.
 
-    backend/api/... 또는 backend/core/core-<도메인>/... 를 고치면  → 백엔드 계층 규칙 (kotlin-*)
-    frontend/src/... 를 고치면           → 프론트엔드 규칙 (frontend-react)
+    어디를 고치든                        → 공통 규칙 (.claude/skills/ — ponytail·oop-responsibility-design 등)
+    backend/api/... 또는 backend/core/core-<도메인>/... 를 고치면  → 위에 더해 백엔드 계층 규칙 (kotlin-*)
+    frontend/src/... 를 고치면           → 위에 더해 프론트엔드 규칙 (frontend-react)
 
 리뷰어가 머지를 막는 것은 두 가지뿐이다 — [코드 리뷰 규칙](../common/docs/code-review/rules.md)의 MUST 위반과 해당 영역 스킬의 Critical 항목. 스타일 취향이나 있으면 좋을 개선은 통과시키고 코멘트로만 남긴다.
 

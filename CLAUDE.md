@@ -2,7 +2,9 @@
 
 > **이 문서는 에이전트가 읽습니다.** 사용자가 읽을 문서는 [README.md](README.md) 입니다.
 
-코딩 규칙 스킬은 세 모듈로 나뉜다 — 공통 `.claude/skills/`, 백엔드 `backend/.claude/skills/`, 프론트엔드 `frontend/.claude/skills/`. 어떤 규칙이 적용될지는 **고치는 파일의 위치**가 정한다.
+코딩 규칙 스킬은 세 모듈로 나뉜다 — 공통 `.claude/skills/`, 백엔드 `backend/.claude/skills/`, 프론트엔드 `frontend/.claude/skills/`.
+
+공통 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 영역 스킬을 고른다 — `backend/` 는 `kotlin-*`, `frontend/` 는 `frontend-*`.
 
 리뷰 규칙은 아래 import 로 함께 읽힌다. 작성 기준과 리뷰 기준은 같은 문서에서 관리한다.
 

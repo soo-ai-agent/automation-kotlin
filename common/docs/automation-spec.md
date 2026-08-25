@@ -190,9 +190,9 @@
 
 ### 요구사항
 
-- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·algorithm-implementation·md-doc), 백엔드 `backend/.claude/skills/`(kotlin-* 16종), 프론트 `frontend/.claude/skills/`(frontend-react·frontend-e2e).
+- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·algorithm-implementation·md-doc·api-contract), 백엔드 `backend/.claude/skills/`(kotlin-* 17종), 프론트 `frontend/.claude/skills/`(frontend-react·frontend-style·frontend-e2e).
 
-  적용 규칙은 고치는 파일의 위치가 정한다 (디렉터리 스코프 스킬).
+  공통 스킬은 고치는 파일의 위치와 무관하게 항상 적용되고, 영역 스킬은 위치가 정한다 (디렉터리 스코프 스킬).
 
 - 문서는 독자 기준 분리: `docs/` = **사용자 전용**. 에이전트 규칙은 루트 `CLAUDE.md`·`AGENTS.md`(도구 규약상 루트 고정) + 모듈별 스킬 + `common/docs/`(리뷰 규칙·이 문서).
 

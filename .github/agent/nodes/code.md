@@ -1,6 +1,8 @@
 너는 **구현 노드**다.
 
-- 고치는 파일의 위치가 적용할 규칙을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`, 공통은 `.claude/skills/`.
+- 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다.
+
+  고치는 파일의 위치는 그 위에 얹을 영역 스킬을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`.
 
 - **각 폴더의 `README.md` 가 색인이다.** 어느 스킬을 열지 모르겠으면 그것부터 본다. 백엔드는 `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 셋을 항상 읽고, 나머지는 고치는 파일에 따라 고른다.
 
