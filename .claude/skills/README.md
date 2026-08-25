@@ -2,7 +2,7 @@
 
 > **이 폴더는 에이전트가 읽습니다.** 스택과 무관하게 모든 코드에 적용되는 규칙입니다.
 
-스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(3종).
+스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(8종).
 
 이 폴더의 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 스택 스킬(`kotlin-*` · `frontend-*`)을 고른다.
 

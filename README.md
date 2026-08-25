@@ -14,7 +14,7 @@
 
 - **스펙 먼저 쓰기(SDD)** — 새 기능은 `specs/` 에 스펙을 먼저 쓰고 그 스펙으로 구현한다. 산출물은 한국어로 나온다
 
-- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 28종 (백엔드 17 · 프론트 3 · 공통 8)
+- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 33종 (백엔드 17 · 프론트 8 · 공통 8)
 
 - **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, Spring 멀티모듈을 채워 넣을 백엔드 자리
 
@@ -138,7 +138,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     CLAUDE.md · AGENTS.md   에이전트 작업 규칙 진입점
     .claude/                공통 코딩 규칙 (ponytail, 객체지향 설계)
     backend/.claude/        백엔드 규칙 (kotlin-* 계층 스킬 17종)
-    frontend/.claude/       프론트엔드 규칙 (frontend-react, frontend-style, frontend-e2e)
+    frontend/.claude/       프론트엔드 규칙 (frontend-* 계층 스킬 8종)
     CONTRACT.md             백엔드가 기록하는 API 계약 (프론트가 읽는다)
     .github/workflows/      자동화 본체 — 기능을 개조할 때만 연다 ([안내](.github/README.md))
 

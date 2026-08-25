@@ -1,6 +1,6 @@
 ---
 name: api-contract
-description: 서버와 클라이언트가 주고받는 데이터의 계약 규칙. CONTRACT.md 와 백엔드 응답 DTO 코드를 기준으로 한 미러링, nullable 대칭, 미지의 enum 정규화, 검증·변환의 자리, 와이어 단위(시각·금액), 필드 추가·삭제 절차를 다룬다. API 타입·DTO·필드를 추가·변경하거나 "서버랑 타입이 안 맞아", "정합성" 문제를 다룰 때 반드시 사용할 것. 서버 쪽 상세는 kotlin-dto·kotlin-style, 클라이언트 쪽 상세는 frontend-react 11장·frontend-style 이 담당한다.
+description: 서버와 클라이언트가 주고받는 데이터의 계약 규칙. CONTRACT.md 와 백엔드 응답 DTO 코드를 기준으로 한 미러링, nullable 대칭, 미지의 enum 정규화, 검증·변환의 자리, 와이어 단위(시각·금액), 필드 추가·삭제 절차를 다룬다. API 타입·DTO·필드를 추가·변경하거나 "서버랑 타입이 안 맞아", "정합성" 문제를 다룰 때 반드시 사용할 것. 서버 쪽 상세는 kotlin-dto·kotlin-style, 클라이언트 쪽 상세는 frontend-api·frontend-style 이 담당한다.
 ---
 
 # 서버-클라이언트 계약
@@ -12,7 +12,7 @@ description: 서버와 클라이언트가 주고받는 데이터의 계약 규�
 **왜 이 문서가 있는가** — 분기의 상당수는 "이 값이 진짜 있을까"라는 계약 불신에서 나온다.
 계약을 한 곳에 고정하면 그 분기, 재검증, 자료형 변환이 사라진다.
 
-이 문서는 백엔드(`kotlin-dto`·`kotlin-style`)와 프론트(`frontend-react` 11장·`frontend-style`) 양쪽에 걸치는 경계 규칙을 정한다.
+이 문서는 백엔드(`kotlin-dto`·`kotlin-style`)와 프론트(`frontend-api`·`frontend-style`) 양쪽에 걸치는 경계 규칙을 정한다.
 
 ## 세 스킬이 공유하는 목표
 
@@ -31,7 +31,7 @@ description: 서버와 클라이언트가 주고받는 데이터의 계약 규�
 
 - **`CONTRACT.md`(저장소 루트)** — `api` 노드가 엔드포인트마다 요청·응답 필드/타입/nullable/상태코드를 기록하고, `web` 노드가 읽어 화면을 만든다.
 
-- **백엔드 응답 DTO 코드** — 프론트 타입의 최종 기준. 문서와 코드가 어긋나면 코드를 확인한다(`frontend-react` 11-4장).
+- **백엔드 응답 DTO 코드** — 프론트 타입의 최종 기준. 문서와 코드가 어긋나면 코드를 확인한다(`frontend-api`).
 
 모든 응답은 `ApiResponse<T>` 로 감싸이고, 프론트 `apiClient` 가 래퍼를 벗겨 `ApiResult<T>` 로 돌려준다.
 `CONTRACT.md` 에는 `data` 안쪽의 모양만 적는다.
@@ -62,7 +62,7 @@ description: 서버와 클라이언트가 주고받는 데이터의 계약 규�
 snake_case 응답이 필요해지는 순간이 오면 그 변환은 직렬화 설정 한 곳(Jackson)에서 하고, 코드 곳곳에서 이름을 바꿔 부르지 않는다.
 
 **미러링은 대조로 끝맺는다.** 스키마 생성 도구가 없으므로, 프론트 타입을 만들었으면 백엔드 응답 DTO 의 필드 목록(이름·타입·nullable)과
-나란히 놓고 **차집합이 0** 인지 실제로 센다. 엔드포인트 목록의 대조는 `frontend-react` 11-5장이 담당한다.
+나란히 놓고 **차집합이 0** 인지 실제로 센다. 엔드포인트 목록의 대조는 `frontend-api` 가 담당한다.
 
 리뷰어가 미러링 위반(개명)을 여전히 잡는지는 `common/harness-tests/cases/contract-field-renamed.diff` 가 회귀로 확인한다 —
 이 규칙을 고치면 그 케이스도 함께 돌린다.
@@ -86,7 +86,7 @@ type User = {id: number; name: string};
 
 **서버가 null 을 보낼 수 있으면 그 사실을 타입에 남긴다.** `?? 기본값` 으로 조용히 덮지 않는다 —
 "없음"과 "기본값"은 다른 상태고, 덮는 순간 하류에서 둘을 구분할 방법이 사라진다.
-`| null` 이냐 `?` 냐는 서버 코드(`@JsonInclude` 여부까지)를 열어 정한다(`frontend-react` 11-4장). 사유 주석 규칙도 그쪽을 따른다.
+`| null` 이냐 `?` 냐는 서버 코드(`@JsonInclude` 여부까지)를 열어 정한다(`frontend-api`). 사유 주석 규칙도 그쪽을 따른다.
 
 **"지금은 항상 오지만 언젠가 안 올 수도"는 계약이 아니다.** 보장하거나 nullable 로 선언하거나, 둘 중 하나를 `CONTRACT.md` 에 적는다.
 
@@ -98,7 +98,7 @@ type User = {id: number; name: string};
 **양쪽 케이스 집합을 동일하게 유지한다.** 서버에 케이스가 늘면 `CONTRACT.md` 와 프론트 enum 이 **같은 변경 단위**에서 는다.
 
 **미지의 케이스는 경계 한 곳에서 정규화한다.** 화면과 서비스마다 `else`/`default` 로 방어하지 않는다.
-프론트의 닫힌 값 집합은 enum 으로 선언하므로(`frontend-react`), `UNKNOWN` 멤버를 가진 enum + 판정 함수 하나로 흡수한다.
+프론트의 닫힌 값 집합은 enum 으로 선언하므로(`frontend-api`), `UNKNOWN` 멤버를 가진 enum + 판정 함수 하나로 흡수한다.
 
 ```ts
 // <도메인>/enums/order.ts — 서버 집합 + UNKNOWN

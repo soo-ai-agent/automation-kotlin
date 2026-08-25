@@ -4,7 +4,9 @@
 
   서버가 주는 이름을 그대로 쓴다 — Kotlin + Jackson 기본이라 camelCase 로 내려온다.
 
-- `frontend/.claude/skills/frontend-react` 순서를 따른다: types → api → services → hooks → components → page.
+- `frontend/.claude/skills/` 의 계층 스킬을 따른다 — 구축 순서는 `frontend-common` 의 표대로 types → api → enums → services → hooks → components → screen.
+
+  어느 스킬을 열지는 `frontend/.claude/skills/README.md` 색인이 안내한다. `frontend-common`·`frontend-style` 은 항상 읽는다.
 
   `src/user/` 아래 파일들이 그대로 따라 쓸 본보기다. 도메인이 최상위 폴더이고 그 아래가 계층이다 — 새 도메인은 `src/<도메인>/{types,api,services,hooks,components,screens}` 로 만들고, 스타일은 `이름.styles.ts` 로 나란히 둔다.
 

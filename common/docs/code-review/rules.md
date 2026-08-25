@@ -6,7 +6,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 공통 스킬(`.claude/skills/`)은 영역과 무관하게 모든 코드에 적용됩니다.
 
-스택별 상세 규칙은 영역 스킬이 담당합니다 — 백엔드 `backend/.claude/skills/kotlin-*`, 프론트엔드 `frontend/.claude/skills/frontend-react`.
+스택별 상세 규칙은 영역 스킬이 담당합니다 — 백엔드 `backend/.claude/skills/kotlin-*`, 프론트엔드 `frontend/.claude/skills/frontend-*`.
 
 각 스킬의 '적발 신호' 표에서 **Critical** 인 항목도 머지 차단 사유입니다.
 

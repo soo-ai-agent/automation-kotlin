@@ -1,6 +1,6 @@
 ---
 name: frontend-style
-description: TypeScript React Native 의 조건·분기·반복·비동기 문법 규칙. 판별 union 상태 표현과 switch 소진 검사, JSX 조건부 렌더링(숫자 && 금지), ??/|| 구분, 훅 호출 위치, 리스트 key, 배열 원본 보존, catch 의 unknown 좁히기, 떠 있는 Promise 를 다룬다. .tsx/.ts 에서 조건부 렌더링·훅 조건·리스트 key·async 오류를 작성하거나 리뷰할 때 frontend-react 와 항상 함께 사용한다. "조건부 렌더링", "리스트 key", "훅 조건" 요청에도 사용할 것.
+description: TypeScript React Native 의 조건·분기·반복·비동기 문법 규칙. 판별 union 상태 표현과 switch 소진 검사, JSX 조건부 렌더링(숫자 && 금지), ??/|| 구분, 훅 호출 위치, 리스트 key, 배열 원본 보존, catch 의 unknown 좁히기, 떠 있는 Promise 를 다룬다. .tsx/.ts 에서 조건부 렌더링·훅 조건·리스트 key·async 오류를 작성하거나 리뷰할 때 frontend-common 과 항상 함께 사용한다. "조건부 렌더링", "리스트 key", "훅 조건" 요청에도 사용할 것.
 ---
 
 # TypeScript/RN 문법: 조건·반복·비동기
@@ -13,10 +13,10 @@ description: TypeScript React Native 의 조건·분기·반복·비동기 문�
 
 **다루는 것** — 분기·반복·비동기에서 TS/RN 문법 때문에 달라지는 규칙.
 
-**다루지 않는 것** — 폴더·계층·페이지 무상태·결과 표현(2분법)·타입 규칙은 `frontend-react`(+`chapters.md`)에,
-서버-클라이언트 계약은 `api-contract` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
+**다루지 않는 것** — 폴더·계층·람다 기준은 `frontend-common` 에, 페이지 무상태는 `frontend-screen` 에, 결과 표현(2분법)은 `frontend-service` 에,
+타입·DTO 규칙은 `frontend-api` 에, 서버-클라이언트 계약은 `api-contract` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
 
-이 스킬은 `frontend-react` 의 문법 보강이다. 충돌하면 `frontend-react` 와 동봉 정답 코드(`frontend/src/`)가 우선한다.
+이 스킬은 레이어 스킬들의 문법 보강이다. 충돌하면 레이어 스킬과 동봉 정답 코드(`frontend/src/`)가 우선한다.
 
 `kotlin-style`·`api-contract` 와 목표(유지보수성·정합성·가독성)를 공유한다 — 전문은 `api-contract` 의 "세 스킬이 공유하는 목표" 절.
 
@@ -40,7 +40,7 @@ description: TypeScript React Native 의 조건·분기·반복·비동기 문�
 **여러 갈래 상태를 새로 설계할 때는 판별 필드를 가진 union 으로 표현한다.** `loading`·`data`·`error` 를 나란히 두면
 "로딩 중인데 에러도 있음" 같은 조합이 표현 가능해지고, 그 조합을 막느라 화면마다 방어 분기가 생긴다.
 
-판별 필드의 값 집합은 문자열 리터럴이 아니라 **enum** 으로 선언한다(`frontend-react` 의 enum 규칙). 선언 자리는 `enums/` 다.
+판별 필드의 값 집합은 문자열 리터럴이 아니라 **enum** 으로 선언한다(`frontend-api` 의 enum 규칙). 선언 자리는 `enums/` 다.
 
 ```ts
 // ❌ 8가지 조합 중 3가지만 유효 — 나머지는 화면이 방어해야 함
@@ -59,11 +59,11 @@ type DetailState =
     | {status: DetailStatus.FAILED; message: string};
 ```
 
-공용 3상태 목록 표현형은 이미 있다 — `common/lib/listState.ts`(`ListStatus.OK/EMPTY/ERROR`, chapters 2-4장). 목록 화면은 그것을 그대로 쓰고,
+공용 3상태 목록 표현형은 이미 있다 — `common/lib/listState.ts`(`ListStatus.OK/EMPTY/ERROR` — `frontend-hooks` 의 3상태 절). 목록 화면은 그것을 그대로 쓰고,
 이 규칙은 도메인 고유의 다갈래 상태를 **새로** 만들 때 적용한다.
 
 **`field?:` 와 `field: T | undefined` 를 구분한다.** 앞은 "필드 자체가 없을 수 있다", 뒤는 "필드는 있으나 값이 비어 있을 수 있다"이다.
-계약이 다르면 타입도 달라야 한다. `?` 마다 사유 주석, `x?: T | null` 의 판정 기준은 `frontend-react` 11장이 담당한다.
+계약이 다르면 타입도 달라야 한다. `?` 마다 사유 주석, `x?: T | null` 의 판정 기준은 `frontend-api` 가 담당한다.
 
 **배열 인덱싱은 `noUncheckedIndexedAccess` 없이는 거짓말을 한다.** 이 저장소 tsconfig 에는 꺼져 있으므로,
 인덱스 접근 뒤 존재 확인을 직접 한다(`items[i]` 를 바로 쓰지 않고 지역 변수에 받아 `undefined` 를 판정).
@@ -114,7 +114,7 @@ const qty = input.qty ?? 1;  // ✅ null/undefined 일 때만 1
 
 ## 3. 반복과 리스트
 
-**리스트 key 는 안정적인 도메인 id 를 쓴다.** (`frontend-react` 적발 신호 `key={index}` 와 같은 규칙 — 여기는 근거다.)
+**리스트 key 는 안정적인 도메인 id 를 쓴다.**
 
 ```tsx
 // ❌ 재정렬·삭제 시 입력값과 체크 상태가 엉뚱한 행에 남음
@@ -130,16 +130,16 @@ const qty = input.qty ?? 1;  // ✅ null/undefined 일 때만 1
 const sorted = [...items].sort(byDate);  // ✅ 원본 보존
 ```
 
-판단·누적이 든 람다 체이닝을 풀어 쓰는 기준과 허용 관용구(훅 인자·JSX 핸들러·`keyExtractor` 등)는 `frontend-react` 0-4장이 담당한다.
+판단·누적이 든 람다 체이닝을 풀어 쓰는 기준과 허용 관용구(훅 인자·JSX 핸들러·`keyExtractor` 등)는 `frontend-common` 이 담당한다.
 
 ## 4. 비동기와 예외 — 잡는 쪽 문법
 
-**결과 표현은 `frontend-react` 7장의 2분법이 기준이다.** 예상된 비정상은 결과 enum 반환, 진짜 실패는 `ServiceError` throw —
+**결과 표현은 `frontend-service` 의 2분법이 기준이다.** 예상된 비정상은 결과 enum 반환, 진짜 실패는 `ServiceError` throw —
 상태코드 번역은 services 가 하고, 훅은 `useServiceErrorHandler` 로 받는다. 이 절은 그 위에서의 문법만 다룬다.
 
 **`try`/`catch` 는 실제 `await` 경계에만 둔다.** 순수 계산까지 감싸면 버그가 "네트워크 오류" 메시지로 둔갑한다.
 
-**`catch (e)` 의 `e` 는 `unknown` 이다.** 좁히기 전에 `e.message` 를 읽지 않는다 (`unknown` 사유·즉시 좁히기 규칙은 `frontend-react` 11장).
+**`catch (e)` 의 `e` 는 `unknown` 이다.** 좁히기 전에 `e.message` 를 읽지 않는다 (`unknown` 사유·즉시 좁히기 규칙은 `frontend-api`).
 
 ```ts
 catch (e) {
@@ -161,7 +161,7 @@ catch (e) {
 | `await` 없는 Promise 방치 (`void` 표기 없음) | 실패가 조용히 사라짐 | Critical |
 | `loading`·`data`·`error` 를 나란히 둔 새 상태 타입 | 불가능한 조합을 화면마다 방어 | Important |
 | 판별 union 분기에 소진 검사(`assertNever`) 없음 | 새 케이스 누락이 조용히 통과 | Important |
-| `key={index}` | 재정렬·삭제 시 상태 꼬임 (`frontend-react` 와 동일) | Important |
+| `key={index}` | 재정렬·삭제 시 상태 꼬임 | Important |
 | `sort`·`reverse`·`splice` 로 원본 배열 변형 | 같은 배열을 보는 곳의 전제 오염 | Important |
 | 좁히기 전의 `e.message` 접근 | `e` 는 `unknown` — 런타임 오류 | Important |
 | JSX 안 삼항 중첩 | 렌더 분기 은폐 | Important |

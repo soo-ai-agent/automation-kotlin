@@ -79,4 +79,4 @@ npm run e2e
 
 스타일은 컴포넌트와 같은 폴더의 `이름.styles.ts` 에 두고, 색·간격은 `src/common/lib/theme.ts` 토큰만 쓴다.
 
-`src/common/` 아래(`lib/`·`utils/`·`services/ServiceError`)는 여러 도메인이 쓰는 공통 코드라 그대로 둔다. 규칙 전문은 `.claude/skills/frontend-react/` 에 있다.
+`src/common/` 아래(`lib/`·`utils/`·`services/ServiceError`)는 여러 도메인이 쓰는 공통 코드라 그대로 둔다. 규칙 전문은 `.claude/skills/` 의 계층별 스킬 8종에 있다 — 색인은 그 폴더의 README.md.
