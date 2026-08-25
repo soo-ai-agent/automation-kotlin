@@ -19,6 +19,7 @@
 | Kotlin 조건·분기·반복 문법 (when·sealed·null·코루틴 예외) | `backend/.claude/skills/kotlin-style/SKILL.md` |
 | 파일을 어디 둘지 판단, 새 기능의 소유 도메인 정하기 | `backend/.claude/skills/kotlin-module-layout/SKILL.md` |
 | 엔드포인트 추가 | `backend/.claude/skills/kotlin-controller`, `kotlin-dto` |
+| 서버-클라이언트 계약 (API 타입·DTO 필드·enum 추가) | `.claude/skills/api-contract/SKILL.md` |
 | 업무 흐름·트랜잭션 | `backend/.claude/skills/kotlin-domain-service` |
 | 조회·저장 상세 구현 | `backend/.claude/skills/kotlin-implement` |
 | 테이블·상태 변경 | `backend/.claude/skills/kotlin-entity` + `kotlin-migration` |
@@ -31,6 +32,7 @@
 | 쿼리 | `backend/.claude/skills/kotlin-repository` |
 | 테스트 (모든 기능 작업에 동반) | `backend/.claude/skills/kotlin-test` |
 | 프론트엔드 | `frontend/.claude/skills/frontend-react/SKILL.md` + `chapters.md` 해당 장, `frontend/README.md` |
+| TS/RN 조건·분기·리스트 문법 | `frontend/.claude/skills/frontend-style/SKILL.md` |
 | E2E 테스트 | `frontend/.claude/skills/frontend-e2e/SKILL.md` |
 | 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
 | CI 자동화 수정 | `common/docs/automation-spec.md` (명세·구현 위치·불변 조건) |

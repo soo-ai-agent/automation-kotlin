@@ -2,7 +2,7 @@
 
 > **이 폴더는 에이전트가 읽습니다.** 스택과 무관하게 모든 코드에 적용되는 규칙입니다.
 
-스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(2종).
+스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(3종).
 
 이 폴더의 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 스택 스킬(`kotlin-*` · `frontend-*`)을 고른다.
 
@@ -15,6 +15,7 @@
 | [oop-responsibility-design](oop-responsibility-design/SKILL.md) | 책임주도 설계 — 책임 배치, 다형성, 캡슐화, GRASP | "이 로직을 어느 클래스에 두나" |
 | [algorithm-implementation](algorithm-implementation/SKILL.md) | 이해를 입출력 표로 고정하고, 표를 테스트로 1:1 변환 | 돈 계산·매칭·상태 기계 등 복잡한 로직 구현 전 |
 | [md-doc](md-doc/SKILL.md) | 이슈 분석·기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선 | md 문서를 쓰거나 고칠 때 |
+| [api-contract](api-contract/SKILL.md) | 서버-클라이언트 계약 — CONTRACT.md 미러링, nullable 대칭, enum 정규화, 와이어 단위 | API 타입·DTO·필드를 추가·변경할 때 |
 
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 

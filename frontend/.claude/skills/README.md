@@ -10,6 +10,7 @@ React Native(Expo) + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙�
 |---|---|---|
 | [frontend-react/SKILL.md](frontend-react/SKILL.md) | 규칙 요약 — 코드 스타일, 적발 신호, 체크리스트 | 프론트 작업·리뷰 전부 |
 | [frontend-react/chapters.md](frontend-react/chapters.md) | 0~16장 전문과 ❌/✅ 사례 | SKILL.md 만으로 판단이 안 설 때 해당 장만 |
+| [frontend-style/SKILL.md](frontend-style/SKILL.md) | TS/RN 문법 — 판별 union 상태·소진 검사, 조건부 렌더링, 리스트 key, 비동기 함정 | 조건·분기·리스트·async 작업 시 frontend-react 와 함께 |
 | [frontend-e2e/SKILL.md](frontend-e2e/SKILL.md) | Playwright E2E — 선택자 정책, 대기, 다이얼로그 함정 | `e2e` 노드, 사용자 흐름 테스트 |
 
 ## 핵심 다섯 줄

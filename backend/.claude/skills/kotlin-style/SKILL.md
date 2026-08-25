@@ -13,7 +13,7 @@ description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상�
 
 **다루는 것** — 분기·반복·상태 표현에서 Kotlin 문법 때문에 달라지는 규칙.
 
-**다루지 않는 것** — 자료형·불변성·람다 체이닝 일반 규칙은 `kotlin-common` 에, 실패 표현(예외 설계)은 `kotlin-error` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
+**다루지 않는 것** — 자료형·불변성·람다 체이닝 일반 규칙은 `kotlin-common` 에, 실패 표현(예외 설계)은 `kotlin-error` 에, 서버-클라이언트 계약은 `api-contract` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
 
 바쁘면 아래 표만 보면 된다. 근거와 예시는 본문에 있다.
 
