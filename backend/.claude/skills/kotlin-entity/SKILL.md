@@ -54,6 +54,14 @@ class TodoEntity(
 
 - 상태 변경 규칙과 불변식은 **엔티티 메서드에 캡슐화**한다. 검증 없이 대입만 하는 메서드는 세터와 같으니 만들지 않는다.
 
+  ```kotlin
+  // ❌ 이름만 행위 메서드지 검증 없는 대입 — 공개 세터와 같다
+  fun updateTitle(newTitle: String) {
+      title = newTitle
+  }
+  // ✅ 위 rename() 처럼 require 로 불변식을 지킨 뒤 바꾼다
+  ```
+
 - 식별자·생성시각·수정시각은 `BaseEntity` 가 갖는다. 다시 선언하지 않는다.
 
 ## 애그리게이트

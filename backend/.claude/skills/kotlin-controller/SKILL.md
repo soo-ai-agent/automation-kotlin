@@ -41,6 +41,21 @@ class TodoController(
 }
 ```
 
+```kotlin
+// ❌ 차단 사유 셋이 한 메서드에 — 업무 규칙 분기, 리포지토리 직접 호출, try/catch
+@PostMapping
+fun create(@RequestBody request: TodoCreateRequest): TodoEntity {   // 엔티티 반환도 위반
+    if (request.title.isNullOrBlank()) {                            // 검증은 @Valid 의 일
+        throw IllegalArgumentException("제목 필수")
+    }
+    return try {
+        todoRepository.save(TodoEntity(request.title))              // 서비스를 건너뜀
+    } catch (e: Exception) {
+        throw RuntimeException(e)                                   // 번역은 Advice 의 일
+    }
+}
+```
+
 ## 규칙
 
 - 생성자 주입만 쓴다. `@Autowired` 필드 주입 금지.
