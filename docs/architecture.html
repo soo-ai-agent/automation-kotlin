@@ -482,8 +482,8 @@
     </table></div>
 
     <div class="note">
-      <b>리뷰 게이트</b> — 머지를 막는 것은 둘뿐이다: <span class="mono">common/docs/code-review/rules.md</span> 의 MUST 위반,
-      그리고 스킬 적발 신호의 Critical 항목. 스타일 취향·요청 밖 개선 제안은 통과시키고 코멘트로만 남긴다.
+      <b>리뷰 게이트</b> — 머지를 막는 것은 셋뿐이다: <span class="mono">common/docs/code-review/rules.md</span> 의 MUST 위반,
+      스킬 적발 신호의 Critical 항목, 그리고 이슈가 가리키는 스펙(specs/)과 어긋난 구현. 스타일 취향·요청 밖 개선 제안은 통과시키고 코멘트로만 남긴다.
       "변경 범위" 규칙은 특히 강하다 — 요청 밖 리팩터링을 곁들인 diff 는 내용이 옳아도 차단된다.
     </div>
   </section>
@@ -666,7 +666,7 @@ CLAUDE.md / AGENTS.md             <span class="c">진입점 — rules.md 를 imp
 
 .specify/memory/constitution.md   <span class="c">헌법 — 규칙 사본이 아닌 포인터. 스킬과 어긋나면 스킬이 이긴다</span>
 common/docs/automation-spec.md    <span class="c">CI 를 고치는 에이전트용 명세 — 요구사항·구현 위치·불변 조건</span>
-common/harness-tests/             <span class="c">리뷰어 회귀 테스트 — 심어 둔 위반 4케이스 (계약 개명 위반 포함)</span>
+common/harness-tests/             <span class="c">리뷰어 회귀 테스트 — 심어 둔 케이스 6개 (계약 개명·스펙 위반 차단, 과설계 통과 고정)</span>
 common/speckit-ko/                <span class="c">스펙 산출물 한국어 템플릿 (설치 원본)</span></pre>
 
     <div class="note">

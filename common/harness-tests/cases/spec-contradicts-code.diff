@@ -1,0 +1,28 @@
+# expect: CHANGES_REQUESTED
+--- a/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderCanceler.kt
++++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderCanceler.kt
+@@ -8,6 +8,15 @@ class OrderCanceler(
+     private val orderRepository: OrderRepository,
+ ) {
++    // specs/002-주문취소/spec.md FR-003: 배송이 시작된 주문은 취소할 수 없다 (409 CONFLICT)
++    fun cancel(memberId: Long, orderId: Long): OrderResult {
++        val entity: OrderEntity = orderRepository.findByIdAndMemberId(orderId, memberId)
++            ?: throw OrderNotFoundException()
++        // 배송 상태를 확인하지 않고 항상 취소한다
++        entity.cancel()
++        return entity.toResult()
++    }
+ }
+--- a/backend/core/core-order/src/test/kotlin/.../order/domain/service/OrderCancelerTest.kt
++++ b/backend/core/core-order/src/test/kotlin/.../order/domain/service/OrderCancelerTest.kt
+@@ -12,4 +12,12 @@ class OrderCancelerTest {
++    @Test
++    fun `주문을 취소한다`() {
++        every { orderRepository.findByIdAndMemberId(1L, 1L) } returns
++            orderEntity(status = OrderStatus.SHIPPING)
++
++        val result: OrderResult = canceler.cancel(1L, 1L)
++
++        assertThat(result.cancelled).isTrue()
++    }
+ }

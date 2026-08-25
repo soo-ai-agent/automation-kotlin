@@ -112,6 +112,9 @@
 
 - **착수**: 디스패처 1)단계(claude-split → `node=split`), 2)단계(claude → 개발). 두 라벨이 같이 붙으면 분할이 우선. 브랜치는 `graph` 잡이 `claude/issue-N` 으로 정한다.
 
+- **스펙 대조**: 리뷰어(`claude-review.yml`)의 `기준 스펙 찾기` step 이 head 브랜치 `claude/issue-N` 의 이슈 본문에서 `specs/` 경로를 찾아,
+  있으면 spec.md 를 리뷰 입력의 '기준 스펙' 절로 붙인다(30KB 상한). 스펙과 어긋난 구현은 차단 사유다.
+
 ### 수정 시 불변 조건
 
 - **Claude 에게 GitHub API 권한을 주지 않는다** — Claude 는 파일만 쓰고, API 호출은 셸이 한다. `GH_TOKEN` 을 잡 레벨 `env` 로 올리지 말 것.
@@ -123,6 +126,8 @@
 - 하위 이슈 라벨은 `claude,claude-made` 둘 다여야 한다 — `claude` 가 빠지면 착수가 안 되고, `claude-made` 가 빠지면 자동 머지가 안 된다.
 
 - `gh issue view`/`gh issue comment` 는 PR 번호를 받지 못한다. `context_type=pr`(리뷰 fix 루프)에서는 `gh pr` 계열을 써야 한다.
+
+- 스펙 경로를 못 찾거나 파일이 없으면 **스펙 대조 없이** 기존 기준으로만 판정한다 — 이슈 조회 실패가 리뷰를 죽이면 안 된다.
 
 ## 3. 완료 후 무인 정리
 

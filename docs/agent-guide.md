@@ -58,7 +58,7 @@ flowchart TD
     backend/api/... 또는 backend/core/core-<도메인>/... 를 고치면  → 위에 더해 백엔드 계층 규칙 (kotlin-*)
     frontend/src/... 를 고치면           → 위에 더해 프론트엔드 규칙 (frontend-*)
 
-리뷰어가 머지를 막는 것은 두 가지뿐이다 — [코드 리뷰 규칙](../common/docs/code-review/rules.md)의 MUST 위반과 해당 영역 스킬의 Critical 항목. 스타일 취향이나 있으면 좋을 개선은 통과시키고 코멘트로만 남긴다.
+리뷰어가 머지를 막는 것은 세 가지뿐이다 — [코드 리뷰 규칙](../common/docs/code-review/rules.md)의 MUST 위반, 해당 영역 스킬의 Critical 항목, 그리고 이슈가 스펙(`specs/`)을 가리킬 때 스펙과 어긋난 구현. 스타일 취향이나 있으면 좋을 개선은 통과시키고 코멘트로만 남긴다.
 
 ## 여러 단계로 나눠 시키기 (`CLAUDE_GRAPH`)
 

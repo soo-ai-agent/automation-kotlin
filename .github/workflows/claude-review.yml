@@ -76,6 +76,30 @@ jobs:
           echo "리뷰 라운드: $ROUNDS / $MAX_ROUNDS"
           echo "ROUNDS=$ROUNDS" >> "$GITHUB_ENV"
 
+      - name: 기준 스펙 찾기
+        if: env.SKIP != 'true'
+        run: |
+          # 이슈 본문의 specs/ 경로를 찾는다. 못 찾으면 스펙 대조 없이 기존 기준으로만 판정한다
+          # (이슈 조회 실패가 리뷰를 죽이면 안 된다 — 안전 측 실패)
+          SPEC_PATH=""
+          case "$HEAD_REF" in
+            claude/issue-*)
+              N="${HEAD_REF#claude/issue-}"
+              case "$N" in
+                ''|*[!0-9]*) ;;
+                *) SPEC_PATH=$(gh issue view "$N" --json body --jq '.body' 2>/dev/null                      | grep -oE 'specs/[A-Za-z0-9._/-]+' | head -n 1) || true ;;
+              esac ;;
+          esac
+          if [ -n "$SPEC_PATH" ] && [ ! -f "$SPEC_PATH" ]; then
+            SPEC_PATH="$(dirname "$SPEC_PATH")/spec.md"
+          fi
+          if [ -n "$SPEC_PATH" ] && [ -f "$SPEC_PATH" ]; then
+            echo "SPEC_PATH=$SPEC_PATH" >> "$GITHUB_ENV"
+            echo "기준 스펙: $SPEC_PATH"
+          else
+            echo "스펙 없음 — 기존 기준으로만 판정"
+          fi
+
       - name: 리뷰
         if: env.SKIP != 'true'
         env:
@@ -87,7 +111,12 @@ jobs:
             printf '## 리뷰 규칙\n\n'
             find "$RULES_DIR" -name '*.md' -type f -print0 2>/dev/null | sort -z | xargs -0 -r cat \
               || echo "(리뷰 규칙 문서 없음 — 통과 기준만 적용)"
-            printf '\n\n## 통과 기준\n\n%s\n\n## DIFF\n\n' "$REVIEW_BAR"
+            printf '\n\n## 통과 기준\n\n%s\n' "$REVIEW_BAR"
+            if [ -n "${SPEC_PATH:-}" ] && [ -f "$SPEC_PATH" ]; then
+              printf '\n## 기준 스펙 — %s\n\n' "$SPEC_PATH"
+              head -c 30000 "$SPEC_PATH"
+            fi
+            printf '\n\n## DIFF\n\n'
             cat /tmp/diff.patch
           } > /tmp/review-input.txt
 
@@ -96,6 +125,8 @@ jobs:
           그리고 diff 파일 경로에 해당하는 영역 스킬 (backend/ 는 backend/.claude/skills/kotlin-* 중 해당 레이어,
           frontend/ 는 frontend/.claude/skills/frontend-* 중 해당 스킬).
           각 스킬의 '적발 신호' 표와 체크리스트를 열어 대조하고, 지적에는 해당 스킬 항목을 근거로 명시해.
+          입력에 '기준 스펙' 절이 있으면 구현이 그 스펙과 어긋나는지도 대조해 —
+          스펙 위반은 차단 사유고, 근거에 스펙 항목(FR 번호 등)을 명시해.
 
           출력 형식(엄수):
           첫 줄: 'VERDICT: PASS' 또는 'VERDICT: CHANGES_REQUESTED' 만.

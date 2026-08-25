@@ -32,6 +32,8 @@ for case_file in common/harness-tests/cases/*.diff; do
 - backend/.claude/skills/ — 백엔드 규칙 (kotlin-*)
 - frontend/.claude/skills/ — 프론트엔드 규칙
 - .claude/skills/ — 공통 규칙
+- 동작을 깨뜨리는 버그·처리되지 않은 엣지 케이스, diff 가 인용한 스펙(specs/)과 어긋나는 구현도 차단 사유다
+- 스타일 취향·과설계·있으면 좋을 리팩터링은 차단하지 말고 PASS + 참고 코멘트로 남긴다
 
 첫 줄에 'VERDICT: PASS' 또는 'VERDICT: CHANGES_REQUESTED' 만 쓰고,
 차단 사유가 있으면 근거가 된 규칙을 인용하라.

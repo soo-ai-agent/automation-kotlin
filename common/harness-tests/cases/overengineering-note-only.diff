@@ -1,0 +1,40 @@
+# expect: PASS
+--- /dev/null
++++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/DiscountPolicy.kt
+@@ -0,0 +1,4 @@
++// 지금은 정률 할인 하나지만 나중에 다른 정책이 올 수 있어 확장 지점을 미리 둔다
++interface DiscountPolicy {
++    fun apply(price: Long): Long
++}
+--- /dev/null
++++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/AbstractDiscountPolicy.kt
+@@ -0,0 +1,9 @@
++abstract class AbstractDiscountPolicy : DiscountPolicy {
++    final override fun apply(price: Long): Long {
++        require(price >= 0) { "가격은 음수가 될 수 없습니다" }
++        return discount(price)
++    }
++
++    protected abstract fun discount(price: Long): Long
++}
+--- /dev/null
++++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/RateDiscountPolicy.kt
+@@ -0,0 +1,8 @@
++@Component
++class RateDiscountPolicy : AbstractDiscountPolicy() {
++    override fun discount(price: Long): Long = price - price * RATE / 100
++
++    companion object {
++        private const val RATE: Long = 10
++    }
++}
+--- /dev/null
++++ b/backend/core/core-order/src/test/kotlin/.../order/domain/service/RateDiscountPolicyTest.kt
+@@ -0,0 +1,8 @@
++class RateDiscountPolicyTest {
++
++    @Test
++    fun `정률 할인을 적용한다`() {
++        assertThat(RateDiscountPolicy().apply(10000L)).isEqualTo(9000L)
++    }
++}
