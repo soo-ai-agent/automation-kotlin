@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>automation-kotlin 설계도</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F6F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #EFF2EF;
+    --ink: #1C2420;
+    --muted: #5A6660;
+    --line: #DCE2DD;
+    --line-strong: #B9C4BC;
+    --accent: #0E5F4B;
+    --accent-ink: #0A4A3A;
+    --accent-soft: #E2EEE8;
+    --crit: #B3372C;
+    --crit-soft: #F6E7E4;
+    --warn: #9A6510;
+    --warn-soft: #F5EDDC;
+    --code-bg: #EDF1EE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101613;
+      --surface: #171F1B;
+      --surface-2: #1C2620;
+      --ink: #E4EAE5;
+      --muted: #94A29A;
+      --line: #2A352E;
+      --line-strong: #405047;
+      --accent: #5CBD97;
+      --accent-ink: #7FD2B0;
+      --accent-soft: #1A2E25;
+      --crit: #E08175;
+      --crit-soft: #35201D;
+      --warn: #D9A648;
+      --warn-soft: #322818;
+      --code-bg: #1C2620;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101613;
+    --surface: #171F1B;
+    --surface-2: #1C2620;
+    --ink: #E4EAE5;
+    --muted: #94A29A;
+    --line: #2A352E;
+    --line-strong: #405047;
+    --accent: #5CBD97;
+    --accent-ink: #7FD2B0;
+    --accent-soft: #1A2E25;
+    --crit: #E08175;
+    --crit-soft: #35201D;
+    --warn: #D9A648;
+    --warn-soft: #322818;
+    --code-bg: #1C2620;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 15.5px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  h1, h2 { font-family: "Hahmlet", "Noto Serif KR", serif; text-wrap: balance; }
+  h1 { font-size: clamp(30px, 4.5vw, 42px); font-weight: 700; line-height: 1.25; margin: 10px 0 14px; letter-spacing: -0.01em; }
+  h2 { font-size: 23px; font-weight: 600; margin: 0 0 6px; }
+  h3 { font-size: 16px; font-weight: 700; margin: 30px 0 10px; }
+  p { margin: 10px 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover, a:focus-visible { border-bottom-color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  code, .mono {
+    font-family: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+    font-size: 0.86em;
+  }
+  code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .lede { font-size: 17px; color: var(--muted); max-width: 46em; margin: 0 0 26px; }
+  .lede strong { color: var(--ink); }
+
+  .statrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+  .stat {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    padding: 5px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+  }
+  .stat b { color: var(--ink); font-weight: 600; }
+
+  nav.toc {
+    margin: 34px 0 0;
+    padding: 16px 20px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--ink); }
+  nav.toc .n { color: var(--accent); margin-right: 6px; }
+
+  section { margin-top: 72px; }
+  .sec-head { border-top: 2px solid var(--ink); padding-top: 14px; margin-bottom: 18px; }
+  .sec-head .eyebrow { display: block; margin-bottom: 4px; }
+  .sec-sub { color: var(--muted); margin-top: 2px; max-width: 52em; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 14px 16px;
+  }
+  .card h4 { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; }
+  .card p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+  .card .mono { color: var(--accent); font-size: 11.5px; display: block; margin-bottom: 6px; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.8px; line-height: 1.6; }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.k { white-space: nowrap; font-weight: 500; }
+  td .mono, th .mono { font-size: 12px; }
+  .num { font-family: "IBM Plex Mono", monospace; color: var(--accent); font-weight: 600; font-size: 12px; }
+
+  .pill {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.crit { color: var(--crit); background: var(--crit-soft); }
+  .pill.warn { color: var(--warn); background: var(--warn-soft); }
+  .pill.ok { color: var(--accent-ink); background: var(--accent-soft); }
+
+  figure { margin: 22px 0; }
+  figure svg { display: block; max-width: 100%; height: auto; color: var(--ink); }
+  .figbox { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 18px 16px 8px; overflow-x: auto; }
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 10px; padding: 0 4px 8px; }
+  figcaption b { color: var(--ink); }
+
+  pre.tree {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  pre.tree .c { color: var(--muted); }
+  pre.tree .hl { color: var(--accent); font-weight: 600; }
+
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+  .note .mono { color: var(--accent-ink); }
+
+
+  footer {
+    margin-top: 88px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+  }
+  @media (max-width: 640px) {
+    .wrap { padding-top: 36px; }
+    section { margin-top: 56px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">soo-ai-agent / automation-kotlin · 아키텍처 레퍼런스</span>
+    <h1>automation-kotlin 설계도</h1>
+    <p class="lede"><strong>만들 것을 글로 적어 두면, Claude 가 코드를 짜고 스스로 리뷰까지 마친 PR 을 여는 저장소 템플릿.</strong>
+    사람이 하는 일은 둘뿐이다 — 무엇을 만들지 쓰기, 완성된 PR 을 머지할지 결정하기.</p>
+    <div class="statrow">
+      <span class="stat">워크플로 <b>5</b></span>
+      <span class="stat">노드 <b>8종</b></span>
+      <span class="stat">규칙 스킬 <b>33종</b> <span>= 공통8 + 백엔드17 + 프론트8</span></span>
+      <span class="stat">스택 <b>Kotlin·Spring / Expo(RN)</b></span>
+    </div>
+    <nav class="toc" aria-label="목차">
+      <a href="#overview"><span class="n">1</span>구성</a>
+      <a href="#pipeline"><span class="n">2</span>자동화 파이프라인</a>
+      <a href="#skills"><span class="n">3</span>규칙(스킬) 체계</a>
+      <a href="#backend"><span class="n">4</span>백엔드 아키텍처</a>
+      <a href="#docs"><span class="n">5</span>문서 구조</a>
+    </nav>
+  </header>
+
+  <section id="overview">
+    <div class="sec-head">
+      <span class="eyebrow">1 · Composition</span>
+      <h2>저장소를 이루는 네 덩이</h2>
+      <p class="sec-sub">앱 하나가 아니라, 에이전트가 앱을 만들게 하는 기반 전체가 들어 있다.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="mono">.github/</span>
+        <h4>자동화 본체</h4>
+        <p>이슈 발견 → 코드 작성 → PR → 리뷰 → 자기 수정 → 배포까지 도는 GitHub Actions 워크플로 5개와 오케스트레이션 스크립트.</p>
+      </div>
+      <div class="card">
+        <span class="mono">*/.claude/skills/</span>
+        <h4>코딩 규칙 25종</h4>
+        <p>에이전트가 코드를 쓸 때와 리뷰할 때 따르는 규칙. 공통 8 · 백엔드 17 · 프론트 8 의 3계층.</p>
+      </div>
+      <div class="card">
+        <span class="mono">.specify/ · specs/</span>
+        <h4>스펙 먼저 쓰기 (SDD)</h4>
+        <p>새 기능은 spec-kit 으로 스펙을 먼저 쓴다. 산출물은 한국어. 스펙과 코드가 어긋나면 코드를 고친다 — 스펙이 기준.</p>
+      </div>
+      <div class="card">
+        <span class="mono">backend/ · frontend/</span>
+        <h4>앱 뼈대</h4>
+        <p>프론트는 완성 상태로 동봉(Expo, iOS·Android·웹 한 코드). 백엔드는 Spring 멀티모듈을 사람이 한 번 채우는 빈 자리.</p>
+      </div>
+    </div>
+    <div class="note">
+      권한 경계 — <b>Claude 는 파일만 쓴다.</b> 이슈·PR·라벨 같은 API 호출은 전부 셸이 하고,
+      허용 명령도 <span class="mono">git · gradle · npm</span> 으로 좁혀져 있다.
+      그래서 <span class="mono">/speckit-*</span> 는 CI 밖(로컬·사람)에서 돌고, CI 의 노드는 커밋된 <span class="mono">specs/</span> 를 읽기만 한다.
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="sec-head">
+      <span class="eyebrow">2 · Pipeline</span>
+      <h2>이슈 하나의 여정</h2>
+      <p class="sec-sub">제작(그래프)과 품질(리뷰 루프)의 2단계. 사람은 맨 앞(이슈 작성)과 맨 뒤(머지)에만 선다.</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 940 312" role="img" aria-label="이슈가 디스패처, 일꾼 노드 그래프, PR 을 거쳐 리뷰어 판정에 이르고, 수정 요청이면 fix 노드가 고쳐 PR 을 갱신하는 루프를 최대 3회 돈 뒤 머지되는 흐름">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+          <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="8"   y="64" width="112" height="64" rx="8"/>
+          <rect x="160" y="64" width="128" height="64" rx="8"/>
+          <rect x="316" y="52" width="180" height="88" rx="8"/>
+          <rect x="560" y="64" width="72"  height="64" rx="8"/>
+          <rect x="688" y="64" width="128" height="64" rx="8"/>
+        </g>
+        <g fill="none" stroke="var(--accent)" stroke-width="1.3">
+          <rect x="430" y="216" width="150" height="60" rx="8"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="688" y="216" width="240" height="60" rx="8"/>
+        </g>
+
+        <g stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)">
+          <line x1="120" y1="96" x2="156" y2="96"/>
+          <line x1="288" y1="96" x2="312" y2="96"/>
+          <line x1="496" y1="96" x2="556" y2="96"/>
+          <line x1="632" y1="96" x2="684" y2="96"/>
+          <line x1="752" y1="128" x2="752" y2="212"/>
+        </g>
+        <g fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#arA)">
+          <path d="M 716 128 L 716 166 L 505 166 L 505 212"/>
+          <path d="M 480 216 L 480 186 L 596 186 L 596 132"/>
+        </g>
+
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="64" y="91" font-weight="600">👤 사람</text>
+          <text x="64" y="110" font-size="11.5">이슈 + claude 라벨</text>
+          <text x="224" y="91" font-weight="600">디스패처</text>
+          <text x="224" y="110" font-size="11.5">10분마다 훑는다</text>
+          <text x="406" y="80" font-weight="600">일꾼 · 노드 그래프</text>
+          <text x="406" y="101" font-family="IBM Plex Mono, monospace" font-size="11.5">api&gt;web&gt;e2e</text>
+          <text x="406" y="122" font-size="11.5">같은 브랜치에 커밋·push</text>
+          <text x="596" y="101" font-weight="600">PR</text>
+          <text x="752" y="91" font-weight="600">리뷰어</text>
+          <text x="752" y="110" font-size="11.5">diff 판정</text>
+          <text x="808" y="243" font-weight="600">머지</text>
+          <text x="808" y="262" font-size="11.5">사람 이슈 → 사람 · claude-made → 자동</text>
+        </g>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--accent)" text-anchor="middle">
+          <text x="505" y="243" font-weight="600">fix 노드</text>
+          <text x="505" y="262" font-size="11.5">지적만 고친다</text>
+        </g>
+
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="currentColor">
+          <text x="526" y="88" text-anchor="middle">PR 생성</text>
+          <text x="764" y="176" text-anchor="start">PASS</text>
+        </g>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="var(--accent)">
+          <text x="648" y="160" text-anchor="middle">수정 요청 · 최대 3회</text>
+          <text x="500" y="200" text-anchor="middle">push 가 PR 갱신</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption><b>리뷰 루프가 품질 장치다.</b> 리뷰어는 판정만 하고 코드를 고치지 않는다. fix 노드는 고치기만 하고 판정하지 않는다.
+      <code>CLAUDE_MAX_ROUNDS</code>(기본 3)를 소진하면 자동을 멈추고 사람을 부른다.</figcaption>
+    </figure>
+
+    <h3>그래프 문법 — 기호 세 개</h3>
+    <p><code>.github/agent/settings.env</code> 의 <code>CLAUDE_GRAPH</code> 가 노드를 잇는다. 노드들은 같은 브랜치를 이어받는다.</p>
+    <div class="tablewrap"><table>
+      <tr><th>문법</th><th>뜻</th><th>예</th></tr>
+      <tr><td class="k"><code>a&gt;b</code></td><td>순차 — b 는 a 가 끝난 뒤. <b>최대 4단계</b> (Actions 가 잡을 실행 중에 못 만들어서 미리 선언)</td><td><code>plan&gt;code&gt;test</code></td></tr>
+      <tr><td class="k"><code>a+b</code></td><td>병렬 — 같은 단계에서 동시에. 수는 무제한</td><td><code>api+web&gt;e2e</code></td></tr>
+      <tr><td class="k"><code>a?b</code></td><td>수습 — a 가 실패하면 b 가 같은 브랜치를 이어받아 완수</td><td><code>code?fix&gt;test</code></td></tr>
+    </table></div>
+
+    <h3>노드 8종 — 일꾼이 맡는 역할</h3>
+    <p>역할 지시문은 <code>.github/agent/nodes/&lt;이름&gt;.md</code> 에 노드당 파일 하나.</p>
+    <div class="tablewrap"><table>
+      <tr><th>노드</th><th>하는 일</th><th>경계</th></tr>
+      <tr><td class="k"><code>api</code></td><td>백엔드 API 구현, 만든 엔드포인트를 <code>CONTRACT.md</code> 에 기록</td><td><code>backend/</code> 만. 뼈대 없으면 보고 후 중단</td></tr>
+      <tr><td class="k"><code>web</code></td><td><code>CONTRACT.md</code> + 백엔드 DTO 코드를 읽고 화면 구현. 필드명은 서버 것 그대로</td><td><code>frontend/</code> 만</td></tr>
+      <tr><td class="k"><code>e2e</code></td><td>Playwright 사용자 흐름 테스트 작성·실행</td><td>기능 추가 금지</td></tr>
+      <tr><td class="k"><code>code</code></td><td>범용 구현 — 위치가 규칙을 고른다</td><td>—</td></tr>
+      <tr><td class="k"><code>test</code></td><td>직전 구현의 유닛 테스트 보강·실행</td><td>새 기능 금지</td></tr>
+      <tr><td class="k"><code>plan</code></td><td>구현 계획 수립 (스펙이 있으면 그것이 계획)</td><td>코드 수정 금지</td></tr>
+      <tr><td class="k"><code>split</code></td><td>큰 이슈를 독립 하위 이슈 2~6개로 분해</td><td>코드·커밋 금지</td></tr>
+      <tr><td class="k"><code>fix</code></td><td>리뷰 지적만 고쳐 push</td><td>지적 외 개선 금지</td></tr>
+    </table></div>
+
+    <div class="note">
+      만든 주체가 끝낸다 — 에이전트가 쪼갠 하위 이슈(<span class="mono">claude-made</span> 라벨)의 PR 만 리뷰 통과 시 자동 머지.
+      사람이 올린 이슈의 PR 은 언제나 사람이 머지하고, 분할 상위 이슈도 완료 보고만 달고 닫지 않는다.
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head">
+      <span class="eyebrow">3 · Rules</span>
+      <h2>규칙(스킬) 체계 — 3계층</h2>
+      <p class="sec-sub">공통이 바닥에 늘 깔리고, 고치는 파일의 위치가 그 위에 얹는 영역 스킬을 고른다.</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 760 236" role="img" aria-label="공통 스킬이 바닥에 항상 깔리고, backend 파일을 고치면 kotlin 스킬 17종이, frontend 파일을 고치면 frontend 스킬 8종이 그 위에 얹히는 구조">
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="40"  y="36" width="330" height="76" rx="8"/>
+          <rect x="390" y="36" width="330" height="76" rx="8"/>
+        </g>
+        <rect x="40" y="150" width="680" height="60" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="205" y="66" font-weight="600">backend/ 를 고치면</text>
+          <text x="205" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5">kotlin-* · 17종</text>
+          <text x="555" y="66" font-weight="600">frontend/ 를 고치면</text>
+          <text x="555" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5">frontend-* · 8종</text>
+        </g>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--accent-ink)" text-anchor="middle">
+          <text x="380" y="176" font-weight="600">공통 스킬 · .claude/skills/ (8종)</text>
+          <text x="380" y="196" font-size="11.5">고치는 파일 위치와 무관하게 항상 함께 적용</text>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="17" fill="var(--accent)" text-anchor="middle">
+          <text x="205" y="139">+</text>
+          <text x="555" y="139">+</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption><b>위치는 위층만 고른다.</b> 바닥(공통)은 백엔드·프론트 어느 작업에도 늘 깔린다 —
+      진입점·색인·노드 지시문 10개 문서가 이 규칙을 같은 문장으로 말한다.</figcaption>
+    </figure>
+
+    
+
+    <h3>공통 스킬 8종 <span class="mono" style="color:var(--muted)">.claude/skills/</span></h3>
+    <div class="tablewrap"><table>
+      <tr><th>스킬</th><th>무엇을 강제하나</th></tr>
+      <tr><td class="k"><code>ponytail</code> <span class="mono">(+review·audit·debt)</span></td><td>실제로 동작하는 가장 게으른 해법 — YAGNI, 표준 라이브러리 우선, 가장 짧은 diff. 리뷰·감사·부채 장부 변형 3종 동반</td></tr>
+      <tr><td class="k"><code>oop-responsibility-design</code></td><td>책임주도 설계 — 책임 배치, 캡슐화 경계, 다형성, GRASP. "이 로직을 어느 클래스에 두나"의 판정 기준</td></tr>
+      <tr><td class="k"><code>algorithm-implementation</code></td><td>복잡한 로직은 이해를 입출력 표로 먼저 고정하고, 표를 테스트로 1:1 변환</td></tr>
+      <tr><td class="k"><code>md-doc</code></td><td>기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선</td></tr>
+      <tr><td class="k"><code>api-contract</code></td><td>서버-클라이언트 계약 — <code>CONTRACT.md</code>+백엔드 DTO 를 프론트가 그대로 미러링(개명 금지), nullable 대칭, 미지의 enum 은 경계 한 곳에서 <code>UNKNOWN</code> 정규화, 시각·금액 와이어 단위, 필드 하나 추가는 표준 경로의 자리마다 한 곳씩만. 세 스킬(kotlin-style·frontend-style)이 공유하는 목표(유지보수성·정합성·가독성)의 원문이 여기 있다</td></tr>
+    </table></div>
+
+    <h3>백엔드 스킬 17종 <span class="mono" style="color:var(--muted)">backend/.claude/skills/</span></h3>
+    <p>모두 같은 구조다: 규칙 → <b>적발 신호</b>(<span class="pill crit">Critical</span> 머지 차단 · <span class="pill warn">Important</span> 참고 코멘트) → 체크리스트.
+    16종을 다 읽지 않는다 — "항상" 셋 + 고치는 파일에 맞는 것만.</p>
+
+    <div class="tablewrap"><table>
+      <tr><th colspan="2">항상 읽는 셋</th></tr>
+      <tr><td class="k"><code>kotlin-common</code></td><td>판단 순서(IDE 경고 &gt; 와이어 계약 &gt; 읽기 쉬움 &gt; 구조 &gt; 적게 쓰기). <code>Any</code>·<code>!!</code>·<code>var</code> 금지, 판단이 든 람다 체이닝 대신 <code>if</code>/<code>for</code>, 데이터를 가진 타입이 계산도 소유, "없음"에 이름 주기</td></tr>
+      <tr><td class="k"><code>kotlin-module-layout</code></td><td>멀티모듈 배치표와 단방향 의존. 소유 도메인 판정 4단계(주어 → 타입 생산자 → import 역전파 → 공용 재확인), 모듈 분리·접기 기준</td></tr>
+      <tr><td class="k"><code>kotlin-test</code></td><td>한 메서드 = 한 기능. 조건이 다르면 메서드를 나눈다. 테스트 대상 목 대체·단언 약화 금지. <code>BUILD SUCCESSFUL</code> 은 증명이 아니다 — 실계수를 센다</td></tr>
+    </table></div>
+
+    <div class="tablewrap"><table>
+      <tr><th colspan="3">기능 하나를 만들 때 — 아래에서 위로 쌓는 순서</th></tr>
+      <tr><td class="num">1</td><td class="k"><code>kotlin-entity</code></td><td>본문 선언 + <code>protected set</code>, 변경은 행위 메서드로만. 애그리게이트는 루트를 통해서만. LAZY + <code>EnumType.STRING</code></td></tr>
+      <tr><td class="num">2</td><td class="k"><code>kotlin-migration</code></td><td>엔티티 변경 = 같은 커밋에 Flyway. 버전은 <code>V&lt;YYYYMMDDHHmm&gt;</code>(순번 금지), 적용된 파일 수정 금지, 삭제·개명은 배포 두 번</td></tr>
+      <tr><td class="num">3</td><td class="k"><code>kotlin-repository</code></td><td>파생 쿼리로 의도 표현, 소유자 조건은 쿼리에. 상한 없는 <code>findAll</code> 금지, N+1 은 fetch join/<code>@EntityGraph</code></td></tr>
+      <tr><td class="num">4</td><td class="k"><code>kotlin-implement</code></td><td><code>Finder</code>·<code>Appender</code>·<code>Updater</code>… 역할 하나씩. 엔티티↔도메인 모델 변환의 유일한 자리(<code>internal</code> 확장 함수). 트랜잭션 금지</td></tr>
+      <tr><td class="num">5</td><td class="k"><code>kotlin-domain-service</code></td><td>흐름 조립 + 트랜잭션 경계 소유. 리포지토리 직접 접근 금지, 트랜잭션 안 외부 호출 금지. 도메인 간 통지는 이벤트 + <code>@Async</code> 리스너</td></tr>
+      <tr><td class="num">6</td><td class="k"><code>kotlin-dto</code></td><td><code>Request</code>/<code>Response</code>/<code>Command</code>/<code>Result</code> 접미사(Dto 금지). <code>@field:</code> 필수, 검증 대상 원시 타입은 nullable 로, <code>?</code> 필드엔 사유 주석</td></tr>
+      <tr><td class="num">7</td><td class="k"><code>kotlin-controller</code></td><td>DTO 변환·인증 추출·<code>ApiResponse</code> 래핑 셋만. REST 경로(복수형·하이픈·동사 금지·중첩 한 겹), 상태코드 계약 201/204/200</td></tr>
+    </table></div>
+
+    <div class="tablewrap"><table>
+      <tr><th colspan="2">상황에 따라 읽는 일곱</th></tr>
+      <tr><td class="k"><code>kotlin-style</code></td><td>조건·분기·반복의 Kotlin 문법 — sealed 상태 표현(불가능한 상태를 타입에서 제거), <code>else</code> 없는 <code>when</code>, <code>?.let</code> 람다 분기 금지, <code>forEach</code> 조기 종료는 <code>for</code> 로, 코루틴 <code>CancellationException</code> 재던지기</td></tr>
+      <tr><td class="k"><code>kotlin-error</code></td><td>예외가 status·code·detail 을 스스로 가진다(<code>ApiException</code>) — 핸들러가 안 늘어남. 예외는 던지는 도메인이 소유. 403/404 구분으로 존재 여부를 유출하지 않는다</td></tr>
+      <tr><td class="k"><code>kotlin-auth</code></td><td>security 의존성 = <code>SecurityFilterChain</code> 동반(아니면 헬스체크 401 → 컨테이너 재시작 반복). 인증은 필터, 인가는 도메인. 식별자를 요청에서 받지 않는다</td></tr>
+      <tr><td class="k"><code>kotlin-client</code></td><td>외부 통신은 예외 없이 <code>clients/client-*</code>. 문서보다 실응답 먼저, 0건·실패로 기존 데이터 교체 금지, 30건 이상 호출은 사전 승인</td></tr>
+      <tr><td class="k"><code>kotlin-config</code></td><td>설정은 쓰는 모듈이 소유(<code>&lt;모듈&gt;.yml</code> + import). 프로파일 5종. 비밀값은 환경변수만 — <code>${VAR:기본값}</code> 금지</td></tr>
+      <tr><td class="k"><code>kotlin-logging</code></td><td>레벨 기준은 "누가 봐야 하는가" — 4xx 는 ERROR 가 아니다. <code>{}</code> 치환, 예외는 마지막 인자로 통째로, traceId 로 요청 재구성</td></tr>
+      <tr><td class="k"><code>kotlin-api-docs</code></td><td>REST Docs — 문서를 손으로 쓰지 않는다. 테스트가 스니펫을 만들고, 필드가 빠지면 테스트가 먼저 깨진다</td></tr>
+    </table></div>
+
+    <h3>프론트엔드 스킬 8종 <span class="mono" style="color:var(--muted)">frontend/.claude/skills/</span></h3>
+    <div class="tablewrap"><table>
+      <tr><th colspan="2">항상 읽는 둘</th></tr>
+      <tr><td class="k"><code>frontend-common</code></td><td>도메인 최상위 폴더·의존 방향(<code>screens → hooks → services → api → lib</code> 단방향), 파일 이름·export, 람다 관용구, 이름 규칙, 구축 순서, 리뷰 절차. <code>src/user/</code> 가 살아 있는 정답 코드</td></tr>
+      <tr><td class="k"><code>frontend-style</code></td><td>TS/RN 문법 — 판별 필드(enum) union + <code>assertNever</code> 소진 검사, <code>{count &amp;&amp; ...}</code> 숫자 렌더링 금지, <code>??</code>/<code>||</code> 구분, 훅 호출 위치, 리스트 key, 배열 원본 보존, 떠 있는 Promise</td></tr>
+      <tr><th colspan="2">화면 하나를 만들 때 — 아래에서 위로</th></tr>
+      <tr><td class="k"><code>frontend-api</code></td><td><code>types/</code>+<code>api/</code> — 서버 DTO 미러링(개명 금지), 엔드포인트 1:1, nullable 은 서버 코드를 열어 결정, <code>?</code> 사유 주석</td></tr>
+      <tr><td class="k"><code>frontend-service</code></td><td><code>services/</code>+<code>enums/</code> — 상태코드 → 결과 enum/<code>ServiceError</code> 번역(2분법), 메시지 enum, 알림 단일 창구(notify)</td></tr>
+      <tr><td class="k"><code>frontend-hooks</code></td><td><code>hooks/</code> — 단일책임 훅·조립 훅(소비처별 그룹 반환), 3상태(ListState), useEffect 판정 넷</td></tr>
+      <tr><td class="k"><code>frontend-screen</code></td><td><code>screens/</code>+<code>components/</code> — 페이지 무상태(훅 1개 + JSX), 자기 표현 상태 예외, 모달 ref, 전역 확인 팝업, 스타일 분리</td></tr>
+      <tr><th colspan="2">상황에 따라</th></tr>
+      <tr><td class="k"><code>frontend-lib</code></td><td><code>lib/</code> — HTTP 클라이언트는 앱에 하나, 래퍼 벗기기, 도메인 단어 금지</td></tr>
+      <tr><td class="k"><code>frontend-e2e</code></td><td>Playwright — 선택자 정책, 대기 규칙, 다이얼로그 함정. 기본은 <code>page.route</code> 모킹</td></tr>
+    </table></div>
+
+    <div class="note">
+      <b>리뷰 게이트</b> — 머지를 막는 것은 둘뿐이다: <span class="mono">common/docs/code-review/rules.md</span> 의 MUST 위반,
+      그리고 스킬 적발 신호의 Critical 항목. 스타일 취향·요청 밖 개선 제안은 통과시키고 코멘트로만 남긴다.
+      "변경 범위" 규칙은 특히 강하다 — 요청 밖 리팩터링을 곁들인 diff 는 내용이 옳아도 차단된다.
+    </div>
+  </section>
+
+  <section id="backend">
+    <div class="sec-head">
+      <span class="eyebrow">4 · Backend</span>
+      <h2>백엔드 아키텍처 — 레이어와 차단선</h2>
+      <p class="sec-sub">Gradle 멀티모듈이라 참조 방향이 빌드로 강제된다. 규칙을 사람이 기억하는 대신 컴파일러가 지킨다.</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 730 372" role="img" aria-label="Controller 에서 Domain Service, Implement, Repository 로 한 방향으로만 참조가 흐르고, 엔티티는 Implement 위로 올라가지 못하며 그 위로는 도메인 모델만 오르는 구조">
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="40" y="16"  width="250" height="56" rx="8"/>
+          <rect x="40" y="112" width="250" height="56" rx="8"/>
+          <rect x="40" y="228" width="250" height="56" rx="8"/>
+          <rect x="40" y="316" width="250" height="48" rx="8"/>
+        </g>
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <g stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)">
+          <line x1="165" y1="72"  x2="165" y2="108"/>
+          <line x1="165" y1="168" x2="165" y2="224"/>
+          <line x1="165" y1="284" x2="165" y2="312"/>
+        </g>
+        <line x1="24" y1="198" x2="706" y2="198" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="165" y="39" font-weight="600">Controller</text>
+          <text x="165" y="58" font-family="IBM Plex Mono, monospace" font-size="10.5">core-&lt;도메인&gt;/api</text>
+          <text x="165" y="135" font-weight="600">Domain Service</text>
+          <text x="165" y="154" font-family="IBM Plex Mono, monospace" font-size="10.5">core-&lt;도메인&gt;/domain</text>
+          <text x="165" y="251" font-weight="600">Implement — Finder·Appender…</text>
+          <text x="165" y="270" font-family="IBM Plex Mono, monospace" font-size="10.5">core-&lt;도메인&gt;/domain/service</text>
+          <text x="165" y="345" font-weight="600">Repository / Client</text>
+        </g>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="currentColor" text-anchor="start">
+          <text x="330" y="40">요청 DTO 변환 · 인증 추출 · ApiResponse 래핑만</text>
+          <text x="330" y="140">유스케이스 조립 · @Transactional 경계 소유</text>
+          <text x="330" y="252">엔티티 ↔ 도메인 모델 변환의 유일한 자리</text>
+          <text x="330" y="270" fill="var(--muted)">internal 확장 함수 · 트랜잭션 금지</text>
+          <text x="330" y="340">storage/db-core · clients/client-*</text>
+          <text x="330" y="358" fill="var(--muted)">SQL·외부 JSON 은 이 밖으로 안 샌다</text>
+        </g>
+        <g font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--accent-ink)">
+          <text x="330" y="193" font-weight="600">엔티티 차단선 — 이 위로는 도메인 모델(Result)만 오른다</text>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--muted)" text-anchor="end">
+          <text x="706" y="216">TodoEntity 는 여기까지</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption><b>엔티티와 도메인 모델을 나누는 이유</b> — DB 사정이 업무 코드로 번지지 않게.
+      컬럼을 쪼개도 도메인 모델이 그대로면 위쪽 코드는 아무것도 모른다. Implement 레이어는 템플릿에 없던, 이 저장소가 추가한 층이다.</figcaption>
+    </figure>
+
+    <h3>모듈 배치</h3>
+    <div class="tablewrap"><table>
+      <tr><th>모듈</th><th>담는 것</th></tr>
+      <tr><td class="k"><code>api</code></td><td>유일한 부팅 모듈 — Application, ControllerAdvice, 전역 설정</td></tr>
+      <tr><td class="k"><code>core:core-&lt;도메인&gt;</code></td><td>한 도메인 통째로 (<code>api/</code> 컨트롤러·DTO + <code>domain/</code> 서비스·모델·에러)</td></tr>
+      <tr><td class="k"><code>core:core-common</code> · <code>core-enum</code></td><td>둘 이상의 도메인이 쓰는 것만 — 예외 베이스, 공유 enum</td></tr>
+      <tr><td class="k"><code>storage:db-core</code></td><td>엔티티·리포지토리. 올려다볼 수 있는 것은 <code>core-enum</code> 하나뿐</td></tr>
+      <tr><td class="k"><code>clients:client-*</code></td><td>외부 시스템 하나당 모듈 하나 — 통신 DTO 는 <code>internal</code></td></tr>
+      <tr><td class="k"><code>support:*</code></td><td>로깅·모니터링·도메인을 모르는 범용 함수</td></tr>
+    </table></div>
+    <p>검증선: 백엔드 <code>./gradlew ktlintCheck unitTest</code> · 프론트 <code>npm run build</code>(tsc strict 포함) — 노드가 커밋 전에 돌리는 최소선이다.</p>
+  </section>
+
+  <section id="docs">
+    <div class="sec-head">
+      <span class="eyebrow">5 · Documents</span>
+      <h2>문서 구조 — 독자가 위치를 정한다</h2>
+      <p class="sec-sub">사람용 · 에이전트용 · 경계 문서의 3분류. 문서마다 머리에 "누가 읽는지"가 선언돼 있다.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h4>📖 사람이 읽는다</h4>
+        <p><code>README.md</code> 진입점 · <code>docs/</code> 설명서 8종(읽는 순서 번호) · 모듈별 README · <code>.github/README.md</code> CI 지도</p>
+      </div>
+      <div class="card">
+        <h4>🤖 에이전트가 읽는다</h4>
+        <p><code>CLAUDE.md</code>·<code>AGENTS.md</code> 진입점 · 스킬 3계층 · <code>common/docs/</code>(리뷰 규칙·자동화 명세) · 헌법(포인터)</p>
+      </div>
+      <div class="card">
+        <h4>↔️ 경계 문서 — 이동 금지</h4>
+        <p><code>TASK.md</code> 사람 → 에이전트 주문서 · <code>CONTRACT.md</code> api 노드 → web 노드 API 계약</p>
+      </div>
+    </div>
+
+<pre class="tree"><span class="c">사람이 고치는 설정 셋</span>
+.github/agent/settings.env        <span class="c">그래프 모양 · 재수정 횟수 · 리뷰 기준</span>
+.github/agent/nodes/*.md          <span class="c">노드 8종 역할 지시문</span>
+common/docs/code-review/rules.md  <span class="c">팀 리뷰 규칙 (MUST = 머지 차단)</span>
+
+<span class="c">규칙의 흐름</span>
+CLAUDE.md / AGENTS.md             <span class="c">진입점 — rules.md 를 import</span>
+├─ <span class="hl">.claude/skills/        7종 — 항상 적용</span>
+├─ backend/.claude/skills/  16종 <span class="c">backend/ 를 고칠 때 위에 얹음</span>
+└─ frontend/.claude/skills/  2종 <span class="c">frontend/ 를 고칠 때 위에 얹음</span>
+
+.specify/memory/constitution.md   <span class="c">헌법 — 규칙 사본이 아닌 포인터. 스킬과 어긋나면 스킬이 이긴다</span>
+common/docs/automation-spec.md    <span class="c">CI 를 고치는 에이전트용 명세 — 요구사항·구현 위치·불변 조건</span>
+common/harness-tests/             <span class="c">리뷰어 회귀 테스트 — 심어 둔 위반 4케이스 (계약 개명 위반 포함)</span>
+common/speckit-ko/                <span class="c">스펙 산출물 한국어 템플릿 (설치 원본)</span></pre>
+
+    <div class="note">
+      규칙을 고칠 때의 절차(헌법 VI) — 같은 규칙을 말하는 문서를 <b>전부</b> 찾아 고치고, 같은 낱말로 재검색해 0건을 확인한다.
+      스킬 하나만 고치면 규칙이 바뀌지 않는다는 것이 실측으로 확인돼 있다.
+    </div>
+  </section>
+
+  
+
+  <footer>
+    <span>soo-ai-agent/automation-kotlin · docs/architecture.html</span>
+    <span>규칙 원문은 각 절이 가리키는 스킬·문서가 기준이다</span>
+  </footer>
+</div>
+</body>
+</html>

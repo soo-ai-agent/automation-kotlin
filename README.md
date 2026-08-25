@@ -125,22 +125,11 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     docs/        사용 설명서 — 읽는 순서는 docs/README.md
     TASK.md      첫 구축 명세 양식 (빈칸을 채워 쓴다)
 
-**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳은 이 셋이다
-
-    .github/agent/settings.env       그래프 모양·재수정 횟수·런타임·리뷰 기준
-    .github/agent/nodes/             노드별 역할 지시문 (노드 하나당 파일 하나)
-    common/docs/code-review/rules.md 리뷰 규칙 (MUST 를 어기면 머지가 막힌다)
+**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳 셋(settings.env·노드 지시문·리뷰 규칙)은 [.github/README.md](.github/README.md) 가 안내한다.
 
 스펙 먼저 쓰기 쪽도 사람이 고치는 자리가 둘 있다 — `common/speckit-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법) ([안내](docs/sdd-guide.md)).
 
-**에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다
-
-    CLAUDE.md · AGENTS.md   에이전트 작업 규칙 진입점
-    .claude/                공통 코딩 규칙 (ponytail, 객체지향 설계)
-    backend/.claude/        백엔드 규칙 (kotlin-* 계층 스킬 17종)
-    frontend/.claude/       프론트엔드 규칙 (frontend-* 계층 스킬 8종)
-    CONTRACT.md             백엔드가 기록하는 API 계약 (프론트가 읽는다)
-    .github/workflows/      자동화 본체 — 기능을 개조할 때만 연다 ([안내](.github/README.md))
+**에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다. 독자별 문서 지도는 [docs/architecture.html](docs/architecture.html) 의 "문서 구조" 절에 있다.
 
 **앱 코드**
 
@@ -150,28 +139,15 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
 ## 어떤 코드가 나오나
 
-에이전트는 아무렇게나 짜지 않는다. 아래 규칙을 지키도록 강제되고, 어기면 리뷰어가 머지를 막는다.
+에이전트는 아무렇게나 짜지 않는다. 코딩 규칙 스킬 33종을 따르도록 강제되고, 어기면 리뷰어가 머지를 막는다.
 
-| 항목 | 규칙 |
-|---|---|
-| 백엔드 레이어 | Controller → Domain Service → Implement → Repository, 단방향 |
-| 프론트 레이어 | screens → hooks → services → api → lib, 단방향 |
-| 컨트롤러 | 요청·응답 변환과 인증 정보 추출만 한다 |
-| 도메인 서비스 | 유스케이스 조립과 트랜잭션 경계만 갖는다 |
-| 구현 레이어 | `TodoFinder`·`TodoAppender` 처럼 재사용 단위로 쪼갠다 |
-| 저장소 | `storage:db-core` 로 격리하고, 엔티티는 그 밖으로 내보내지 않는다 |
-| 자료형 | 타입을 반드시 명시하고 `Any`·`!!`·`any` 를 쓰지 않는다 |
-| 불변성 | 세터를 만들지 않는다. 엔티티는 `protected set` + 행위 메서드로만 바꾼다 |
-| 주석 | 규칙에서 벗어난 곳과 특이사항에만 남긴다 |
-| 테스트 | 새 동작마다 유닛 테스트를 함께 만들고, 한 메서드는 한 기능만 검증한다 |
-
-전체 규칙은 각 모듈의 `.claude/skills/` 에 있다.
+레이어 구조와 규칙 체계는 [docs/architecture.html](docs/architecture.html) 한 장에 그려져 있고, 규칙 전문은 각 모듈 `.claude/skills/` 의 색인(README)이 안내한다.
 
 ## 무엇이 궁금하면 어디로
 
 | 하고 싶은 것 | 볼 문서 |
 |---|---|
-| 전체 구조를 한 장으로 | [docs/architecture.md](docs/architecture.md) |
+| 전체 구조를 한 장으로 | [docs/architecture.html](docs/architecture.html) — 브라우저로 연다 |
 | 처음 켜기 (한 번) | [docs/setup.md](docs/setup.md) |
 | 일 시키기 — 이슈 쓰는 법, 라벨 고르기 | [docs/issue-guide.md](docs/issue-guide.md) |
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
