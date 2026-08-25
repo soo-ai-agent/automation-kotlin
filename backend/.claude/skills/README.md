@@ -4,7 +4,7 @@
 
 Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있고, 백엔드 작업에도 항상 함께 적용된다.
 
-**16종을 다 읽지 않는다.** 아래 "항상" 셋을 읽고, 나머지는 지금 고치는 파일이 무엇인지에 따라 골라 읽는다.
+**17종을 다 읽지 않는다.** 아래 "항상" 셋을 읽고, 나머지는 지금 고치는 파일이 무엇인지에 따라 골라 읽는다.
 
 ## 항상
 
@@ -32,6 +32,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 
 | 스킬 | 언제 |
 |---|---|
+| [kotlin-style](kotlin-style/SKILL.md) | 조건·분기·반복의 Kotlin 문법 — sealed 상태, `else` 없는 `when`, null 좁히기, 코루틴 취소 예외 |
 | [kotlin-error](kotlin-error/SKILL.md) | 실패 분기를 만들 때 — 예외의 `code`·예외가 스스로 가진 status·code·`ApiException` 하위 예외, 상태코드·로그 레벨 |
 | [kotlin-auth](kotlin-auth/SKILL.md) | 로그인·권한·"내 것만 조회" — 소유자 스코프, 401·403·404 구분 |
 | [kotlin-client](kotlin-client/SKILL.md) | 외부 API 연동 — 처음 붙일 때 실응답부터 확인하는 법, `clients/client-*`, `internal` 캡슐화, 타임아웃, 쿼터·폴백 |
@@ -41,7 +42,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 
 ## 문서 구조
 
-스킬 16종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
+스킬 17종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
 
 - **규칙** — 지켜야 할 것
 

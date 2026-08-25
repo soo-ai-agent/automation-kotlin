@@ -18,7 +18,7 @@ Sync Impact Report
 이 문서에 규칙을 복사해 적지 않는다. 규칙 본문은 아래가 갖는다.
 
 - 공통 코딩 규칙 — `.claude/skills/`
-- 백엔드 규칙 — `backend/.claude/skills/` (`kotlin-*` 16종)
+- 백엔드 규칙 — `backend/.claude/skills/` (`kotlin-*` 17종)
 - 프론트엔드 규칙 — `frontend/.claude/skills/`
 - 머지를 막는 기준 — `common/docs/code-review/rules.md`
 - 작업 규칙 진입점 — `CLAUDE.md`(Claude), `AGENTS.md`(Codex)
@@ -114,4 +114,4 @@ Sync Impact Report
 
 **준수 확인.** 모든 PR 은 위 원칙을 지켰는지 확인받는다. 원칙을 어겨야만 하는 사정이 있으면 `plan.md` 의 Complexity Tracking 에 어긴 항목·필요한 이유·더 단순한 방법을 버린 이유를 적는다. 적지 않은 위반은 되돌린다.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-21 | **Last Amended**: 2026-08-21
+**Version**: 1.0.1 | **Ratified**: 2026-08-21 | **Last Amended**: 2026-08-25
