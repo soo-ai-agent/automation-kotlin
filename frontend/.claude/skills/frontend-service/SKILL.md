@@ -6,7 +6,24 @@ description: 서비스 레이어와 사용자 메시지 규칙. 상태코드를 
 # 서비스 (services) — 업무 규칙과 결과 번역
 
 서비스는 **React 를 모르는 순수 TS 모듈**이다. 하는 일은 둘: ① `api/` 호출, ② 그 결과(상태코드·본문)를 **도메인 결과 또는 `ServiceError` 로 번역.**
-동봉 정답: `frontend/src/user/services/userService.ts`.
+
+```ts
+// O — 동봉 frontend/src/user/services/userService.ts (요지). 상태코드는 여기서 끝난다
+export async function getUserList(): Promise<User[]> {
+    const result: ApiResult<User[]> = await user.list();
+
+    if (result.ok) {
+        return result.data;
+    }
+    if (result.status === 401) {
+        throw new ServiceError(SessionResultMessages.EXPIRED, 401, ErrorLevel.WARNING);
+    }
+    if (result.status === 403) {
+        throw new ServiceError(UserResultMessages.FORBIDDEN, 403, ErrorLevel.WARNING);
+    }
+    throw new ServiceError(UserResultMessages.LIST_LOAD_ERROR, result.status, ErrorLevel.ERROR);
+}
+```
 
 - **상태코드가 등장해도 되는 유일한 레이어**가 서비스다. 훅·컴포넌트에 `status === 404` 가 보이면 위반.
 

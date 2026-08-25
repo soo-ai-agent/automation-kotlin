@@ -7,9 +7,38 @@ description: 훅 작성 규칙. 단일책임 훅(훅 하나 = 유스케이스 �
 
 ## 단일책임 훅
 
-훅 하나 = 유스케이스 하나. 목록 로딩·선택·삭제·상세는 **각각 다른 훅**이다. 동봉 정답: `frontend/src/user/hooks/useUserList.ts`.
+훅 하나 = 유스케이스 하나. 목록 로딩·선택·삭제·상세는 **각각 다른 훅**이다.
 
-훅의 고정 골격 — 이 순서를 지킨다:
+```ts
+// O — 동봉 frontend/src/user/hooks/useUserList.ts (요지). 로딩 하나만 책임진다
+export function useUserList(handleError: ServiceErrorHandler) {
+    const [users, setUsers] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [listState, setListState] = useState<ListState>({status: ListStatus.OK, message: ""});
+
+    const loadUserList = useCallback(async (): Promise<void> => {
+        setIsLoading(true);
+        try {
+            const loadedUsers: User[] = await getUserList();           // services 호출
+            setUsers(loadedUsers);
+            if (loadedUsers.length === 0) {
+                setListState({status: ListStatus.EMPTY, message: UserResultMessages.LIST_EMPTY});
+            } else {
+                setListState({status: ListStatus.OK, message: ""});
+            }
+        } catch (error) {
+            setListState({status: ListStatus.ERROR, message: UserResultMessages.LIST_LOAD_ERROR});
+            handleError(error, UserResultMessages.LIST_LOAD_ERROR);    // 공용 에러 핸들러
+        } finally {
+            setIsLoading(false);
+        }
+    }, [handleError]);
+
+    return {users, isLoading, listState, loadUserList};
+}
+```
+
+훅의 고정 골격 — 위 예시의 순서를 지킨다:
 
 1. `useState` 선언 (로딩·데이터·상태 표시)
 

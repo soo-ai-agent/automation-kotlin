@@ -17,7 +17,31 @@ description: 화면(screens)과 컴포넌트·모달 작성 규칙. 페이지 �
 | 훅 파일 수 | 33 | 6 |
 
 **화면은 상태를 갖지 않는다.** 화면이 하는 일은 딱 셋이다: 훅 1개 호출 → 받은 값을 컴포넌트에 배분 → JSX 반환.
-동봉 정답: `frontend/src/user/screens/User.tsx` — `const {table, detailModal} = useUsers()` 가 전부다.
+
+```tsx
+// O — 동봉 frontend/src/user/screens/User.tsx (요지). 훅 1개, 상태 0, 나머지는 배분과 JSX 뿐이다
+const User = ({navigation}: UserProps) => {
+    const {table, modalRefs} = useUsers();   // 훅 1개. 이게 전부다.
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <UserToolbar selectedCount={table.selectedIds.length} isLoading={table.isLoading}
+                reloadUsers={table.reloadUsers} deleteSelected={table.deleteSelected} />
+            <UserTable users={table.users} listState={table.listState} selectedIds={table.selectedIds}
+                toggleSelect={table.toggleSelect} openDetail={table.openDetail} deleteOne={table.deleteOne} />
+            <UserDetailModal ref={modalRefs.detailModalRef} />
+        </SafeAreaView>
+    );
+};
+
+// X — 규칙 도입 전 화면 (실측 262줄, useState 9 · useEffect 3). 전부 훅으로 이동 대상이다
+export function RouteComparison() {
+    const [routeOptions, setRouteOptions] = useState<RouteOption[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    // … 로드 effect, 취소 처리, 에러 문자열 조립까지 전부 화면 안에
+}
+```
 
 화면이 50줄을 크게 넘으면 훅 분해가 덜 된 것이다.
 

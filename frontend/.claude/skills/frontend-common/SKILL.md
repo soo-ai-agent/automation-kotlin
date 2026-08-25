@@ -132,6 +132,20 @@ screens ──▶ hooks ──▶ services ──▶ api ──▶ lib
 **import 는 예외다 — 120자까지는 반드시 한 줄로 쓴다.** 120자를 넘으면 딱 3줄로 래핑한다 — 여는 줄, 지정자 전부를 몰아 적은 한 줄(들여쓰기 2), `} from` 줄.
 지정자를 한 줄에 하나씩 세로로 펼치지 않는다(포맷터 기본 동작이어도 되돌린다).
 
+```ts
+// O — 120자 초과라 3줄 래핑
+import {
+  createShare, endShare, getShareWatching, isShareApiConfigured, isShareExpired, postShareRoute
+} from "../../share/services/shareSession";
+
+// X — 지정자를 한 줄에 하나씩 세로로 펼친 것(포맷터 기본 동작). 화면만 길어진다
+import {
+  createShare,
+  endShare,
+  getShareWatching,
+} from "../../share/services/shareSession";
+```
+
 **여러 줄 객체·return 객체·구조분해도 같은 채워 적기다** — 100자 근처까지 채워 적고 넘치면 다음 줄로 잇는다.
 예외: **항목마다 사유 주석이 붙는 블록(DTO 필드 등)은 세로를 유지한다** — 주석이 항목을 따라가야 한다.
 
