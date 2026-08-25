@@ -8,6 +8,10 @@
 
 - 어느 스킬을 열지는 `backend/.claude/skills/README.md` 색인이 안내한다. `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 는 항상 읽는다.
 
+- 공통 스킬(`.claude/skills/`)도 파일 위치와 무관하게 항상 함께 적용된다 — 모든 코딩에 `ponytail`, 설계 판단에 `oop-responsibility-design`, 복잡한 로직에 `algorithm-implementation`.
+
+  색인은 `.claude/skills/README.md` 다.
+
 - **엔티티나 컬럼을 바꿨으면 같은 커밋에 Flyway 마이그레이션을 넣는다** (`kotlin-migration`). 운영은 `ddl-auto: validate` 라 없으면 배포가 부팅에 실패한다.
 
 - 실패 분기를 만들 때는 `kotlin-error` 의 예외 추가 절차를 따른다 — 예외가 status·code·detail 을 스스로 갖고, 던지는 도메인이 소유한다. 컨트롤러에서 `try/catch` 하지 않는다.

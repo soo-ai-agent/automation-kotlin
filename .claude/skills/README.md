@@ -4,7 +4,7 @@
 
 스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(16종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(2종).
 
-어떤 규칙이 적용될지는 **고치는 파일의 위치**가 정한다.
+이 폴더의 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 스택 스킬(`kotlin-*` · `frontend-*`)을 고른다.
 
 | 스킬 | 무엇을 다루나 | 언제 |
 |---|---|---|

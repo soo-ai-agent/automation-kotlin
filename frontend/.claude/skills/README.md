@@ -2,7 +2,9 @@
 
 > **이 폴더는 에이전트가 읽습니다.** `frontend/` 아래 파일을 고칠 때 자동으로 적용됩니다.
 
-React Native(Expo) + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 한 코드가 iOS·Android 네이티브와 웹(react-native-web)으로 나간다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있다.
+React Native(Expo) + TypeScript 프론트엔드 규칙과 E2E 테스트 규칙이다. 한 코드가 iOS·Android 네이티브와 웹(react-native-web)으로 나간다.
+
+스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있고, 프론트엔드 작업에도 항상 함께 적용된다.
 
 | 파일 | 무엇이 들어 있나 | 언제 |
 |---|---|---|
