@@ -246,6 +246,7 @@ class LocationView private constructor(…) {
 | 판단·누적이 든 람다 체이닝 (`firstOrNull { }`·`fold` 등) | 흐름이 람다 안에 숨음 | Important |
 | 코드를 그대로 옮긴 주석 | 소음 | Important |
 | 새 동작에 유닛 테스트 없음 | 미검증 동작 유입 | Critical |
+| 구현이 하나뿐인데 신설한 인터페이스·추상 클래스·설정 옵션 (확장 지점 미리 두기) | 요청받지 않은 추상화 — 2대 원칙 1 위반 | Critical |
 
 ## 체크리스트
 

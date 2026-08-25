@@ -273,6 +273,7 @@ HTTP 호출부를 `api/` 로 분리 → 사용자 메시지를 메시지 enum �
 | 판단·누적이 든 람다 체이닝(`reduce`·조건 든 `filter().map()`) | 흐름이 람다 안에 숨는다 — `if`/`for` 로 | Important |
 | `data`·`info`·`temp`·`useStuff` 류 이름 | 무엇인지 없는 이름 | Important |
 | 이미 있는 공용 훅·컴포넌트의 재구현 | 중복 — 쓰기 전에 먼저 찾는다 | Important |
+| 사용처가 하나뿐인데 신설한 추상 계층·설정 옵션 (확장 지점 미리 두기) | 요청받지 않은 추상화 | Critical |
 
 ## 체크리스트
 
