@@ -8,12 +8,9 @@
 +}
 --- /dev/null
 +++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/AbstractDiscountPolicy.kt
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,6 @@
 +abstract class AbstractDiscountPolicy : DiscountPolicy {
-+    final override fun apply(price: Long): Long {
-+        require(price >= 0) { "가격은 음수가 될 수 없습니다" }
-+        return discount(price)
-+    }
++    final override fun apply(price: Long): Long = discount(price)
 +
 +    protected abstract fun discount(price: Long): Long
 +}
