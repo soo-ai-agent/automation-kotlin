@@ -8,6 +8,7 @@
 
 | 스킬 | 무엇을 다루나 | 언제 |
 |---|---|---|
+| [core-principles](core-principles/SKILL.md) | **최상위 3대 원칙** — 단순함 최우선, 최소 수정·무파괴, 데이터의 흐름과 통제. 다른 모든 규칙이 종속된다 | 모든 코드·규칙 문서 작업 |
 | [ponytail](ponytail/SKILL.md) | 가장 게으른 해법 — YAGNI, 표준 라이브러리 우선, 가장 짧은 diff | 모든 코딩 작업 |
 | [ponytail-review](ponytail-review/SKILL.md) | diff 에서 오버엔지니어링만 골라내는 리뷰 | "뭘 지울 수 있어?" |
 | [ponytail-audit](ponytail-audit/SKILL.md) | 저장소 전체 오버엔지니어링 감사 | "이 저장소에서 뭘 덜어낼 수 있어?" |

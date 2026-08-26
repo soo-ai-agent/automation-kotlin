@@ -10,6 +10,7 @@
 
 | 작업 | 읽을 파일 |
 |---|---|
+| **모든 작업의 최상위 원칙** | `.claude/skills/core-principles/SKILL.md` — 다른 모든 규칙이 이 3대 원칙에 종속된다 |
 | 모든 코딩 | `.claude/skills/ponytail/SKILL.md` |
 | 설계 판단 (책임 배치·다형성·상속) | `.claude/skills/oop-responsibility-design/SKILL.md` |
 | 돈 계산·매칭·상태 기계 등 복잡한 로직 | `.claude/skills/algorithm-implementation/SKILL.md` |

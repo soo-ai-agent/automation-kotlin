@@ -10,7 +10,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 
 | 스킬 | 다루는 것 |
 |---|---|
-| [kotlin-common](kotlin-common/SKILL.md) | 2대 원칙, 자료형, 불변성, 조건문 풀어쓰기, 이름, 예외, 주석, 검증 |
+| [kotlin-common](kotlin-common/SKILL.md) | 자료형, 불변성, 조건문 풀어쓰기, 이름, 예외, 주석, 검증 (최상위 원칙은 공통 `core-principles`) |
 | [kotlin-module-layout](kotlin-module-layout/SKILL.md) | 새 파일을 어느 모듈·패키지에 둘지, 의존 방향, 도메인 경계 |
 | [kotlin-test](kotlin-test/SKILL.md) | 한 메서드 = 한 기능, MockK 범위, 계층별 테스트 대상 |
 
