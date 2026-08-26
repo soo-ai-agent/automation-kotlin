@@ -134,6 +134,38 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 | `순차 단계는 최대 4개예요` 에러 | `CLAUDE_GRAPH` 에서 `>` 로 이은 단계가 4개를 넘었다 — `+` 로 묶어 동시에 돌리거나 작업을 두 번에 나눈다 |
 
 
+## 내 컴퓨터에서 같은 규칙으로 Claude 쓰기
+
+지금까지는 GitHub 이 에이전트를 돌렸다. **내 컴퓨터에서 직접 Claude 를 열 때도 같은 규칙을 그대로 쓸 수 있다.**
+
+저장소에 그 launcher 가 들어 있다. 어디서 실행하든 되므로 절대 경로로 부르면 그만이다.
+
+```bash
+# 저장소를 내려받은 경로가 ~/work/automation-kotlin 이라면
+~/work/automation-kotlin/bin/claude-skills.sh backend     # 백엔드 자리에서 열기
+~/work/automation-kotlin/bin/claude-skills.sh frontend    # 프론트 자리에서 열기
+~/work/automation-kotlin/bin/claude-skills.sh             # 저장소 전체
+```
+
+셋 다 루트 `CLAUDE.md` 와 공통 스킬(3대 원칙·ponytail 등)을 함께 읽는다. 다른 것은 **어느 영역 스킬이 주로 붙느냐**다 —
+`backend` 는 `kotlin-*`, `frontend` 는 `frontend-*` 가 먼저 걸린다.
+
+뒤에 붙인 것은 claude 로 그대로 넘어간다. `... backend -c` 는 백엔드 자리에서 이전 대화를 이어서 여는 것이다.
+
+준비물은 claude CLI 하나다. 없으면 launcher 가 설치 명령을 알려 준다.
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude setup-token
+```
+
+매번 긴 경로를 치기 싫으면 셸 설정에 별칭을 건다 (`~/.bashrc` 또는 `~/.zshrc`).
+
+```bash
+alias cbe='~/work/automation-kotlin/bin/claude-skills.sh backend'
+alias cfe='~/work/automation-kotlin/bin/claude-skills.sh frontend'
+```
+
 ## 켠 다음 — 어디서 무엇을 바꾸나
 
 원칙은 하나다: **스위치와 비밀값은 🌐 웹에서, 동작의 내용은 💻 저장소 파일을 고쳐 커밋한다.**
