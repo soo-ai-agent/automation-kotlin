@@ -17,6 +17,8 @@
 | [md-doc](md-doc/SKILL.md) | 이슈 분석·기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선 | md 문서를 쓰거나 고칠 때 |
 | [api-contract](api-contract/SKILL.md) | 서버-클라이언트 계약 — CONTRACT.md 미러링, nullable 대칭, enum 정규화, 와이어 단위 | API 타입·DTO·필드를 추가·변경할 때 |
 
+`ponytail` 계열은 해법을 줄이는 스킬이지 규칙을 줄이는 스킬이 아니다 — 리뷰 규칙의 MUST(`common/docs/code-review/rules.md`)는 ponytail 로도 생략할 수 없다.
+
 `oop-responsibility-design` 은 두 문서로 나뉜다.
 
 - **[SKILL.md](oop-responsibility-design/SKILL.md)** — 규칙 요약. 코드 작성·리뷰 판단에는 이것만으로 충분하다.
