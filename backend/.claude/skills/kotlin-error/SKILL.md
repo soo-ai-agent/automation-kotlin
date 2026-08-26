@@ -56,7 +56,7 @@ fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Any>> = … 
 
 ## 새 실패를 만났을 때 — 순서대로
 
-**1. 이미 있는 예외가 스스로 가진 status·code 으로 되는지 본다.** "할 일이 없음"과 "회원이 없음"이 클라이언트에게 똑같이 취급된다면 하나로 충분하다. 매번 새로 만들면 코드만 늘고 분기는 못 한다.
+**1. 이미 있는 예외가 스스로 가진 status·code 로 되는지 본다.** "할 일이 없음"과 "회원이 없음"이 클라이언트에게 똑같이 취급된다면 하나로 충분하다. 매번 새로 만들면 코드만 늘고 분기는 못 한다.
 
 **2. 안 되면 셋을 함께 추가한다.**
 
@@ -76,10 +76,10 @@ class TodoNotFoundException(todoId: Long) : ApiException(
 **3. 도메인에서 던진다.** 던지는 자리는 그 실패를 처음 아는 곳이다 — 보통 구현 레이어나 도메인 서비스다.
 
 ```kotlin
-fun find(id: Long): Todo {
+fun getById(id: Long): TodoResult {
     val entity: TodoEntity = todoRepository.findOneById(id)
         ?: throw TodoNotFoundException(id)
-    return entity.toModel()
+    return entity.toResult()
 }
 ```
 
@@ -100,7 +100,7 @@ fun find(id: Long): Todo {
 
 ## 응답 메시지에 담아도 되는 것
 
-`ApiException.message` 는 **사용자에게 그대로 보인다.**
+`ApiException.detail` 은 **사용자에게 그대로 보인다.**
 
 - 담는다: 무엇이 잘못됐고 무엇을 하면 되는지. "할 일을 찾을 수 없습니다."
 
@@ -164,7 +164,7 @@ catch (e: IOException) { throw UnexpectedServerException() }
 catch (e: IOException) { throw UnexpectedServerException(cause = e) }
 ```
 
-`ApiException` 하위 예외 에 원인을 넘길 자리가 없으면 그 자리를 만든다.
+`ApiException` 하위 예외에 원인을 넘길 자리가 없으면 그 자리를 만든다.
 
 ## 적발 신호
 
@@ -178,12 +178,12 @@ catch (e: IOException) { throw UnexpectedServerException(cause = e) }
 | 좁은 핸들러가 포괄 `Exception` 핸들러 아래에 있음 | 좁은 핸들러가 안 걸림 | Critical |
 | 4xx 상황을 `LogLevel.ERROR` 로 | 진짜 장애가 로그에 묻힘 | Important |
 | 도메인 실패에 `DEFAULT_ERROR` 재사용 | 클라이언트가 분기 불가 | Important |
-| 실패마다 예외가 스스로 가진 status·code 을 새로 만듦 | 코드만 늘고 구분은 안 됨 | Important |
+| 실패마다 예외가 스스로 가진 status·code 를 새로 만듦 | 코드만 늘고 구분은 안 됨 | Important |
 | 서비스가 `HttpStatus`·`ResponseEntity` 를 직접 다룸 | 레이어 침범 | Important |
 
 ## 체크리스트
 
-- [ ] 새 실패가 기존 예외가 스스로 가진 status·code 으로 안 되는 것이 확실한가
+- [ ] 새 실패가 기존 예외가 스스로 가진 status·code 로 안 되는 것이 확실한가
 
 - [ ] 상태코드와 로그 레벨이 위 표 기준과 맞는가 (4xx 는 `ERROR` 가 아니다)
 

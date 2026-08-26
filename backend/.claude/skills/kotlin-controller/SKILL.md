@@ -31,6 +31,7 @@ class TodoController(
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)   // 생성은 201 — 상태코드 계약 (아래 "URL 은 REST 를 지킨다")
     fun create(
         @AuthenticationPrincipal member: MemberPrincipal,
         @Valid @RequestBody request: TodoCreateRequest,

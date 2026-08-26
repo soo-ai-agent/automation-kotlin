@@ -594,7 +594,7 @@ abstract class DiscountPolicy(
 
 // 만드는 쪽에서 실제 종류를 꽂아 넣는다
 val policy: DiscountPolicy = AmountDiscountPolicy(
-    discountAmount = Money.of(1_000),
+    discountAmount = Money.wons(1_000),
     conditions = listOf(
         PeriodCondition(DayOfWeek.MONDAY, LocalTime.of(10, 0), LocalTime.of(12, 0)),
         SequenceCondition(sequence = 1),

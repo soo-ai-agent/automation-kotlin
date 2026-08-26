@@ -21,8 +21,7 @@ description: 외부 시스템 연동 규칙. 처음 붙이는 API 를 실응답�
 |---|---|---|
 | `<이름>ApiSpec.kt` | 엔드포인트·옵션 상수. 외부 규격이 바뀌면 여기만 고친다 | **`internal`** |
 | `<이름>Request.kt`·`<이름>Response.kt` | 외부가 요구하는·주는 JSON 모양 | **`internal`** |
-| `<이름>Client.kt` | `RestClient` 로 호출하고 우리 말로 번역한다 | 공개 |
-| `<이름>Client.kt` | 바깥이 부르는 유일한 창구 | `public` |
+| `<이름>Client.kt` | `RestClient` 로 호출하고 우리 말로 번역한다 — 바깥이 부르는 유일한 창구 | 공개 |
 | `model/<이름>ClientResult.kt` | 바깥으로 나가는 결과 모델 | `public` |
 
 ## 처음 붙이는 API 는 문서보다 실응답이 먼저다
@@ -95,7 +94,7 @@ Claude 세션에는 `.claude/hooks/warn-bulk-api-calls.sh` 훅이 걸려 있어 
 
 **외부 API 의 JSON 모양이 우리 도메인으로 새어 들어오면 안 된다.** 외부가 필드 이름을 바꾸면 우리 서비스까지 고쳐야 하기 때문이다.
 
-HTTP 호출은 **`RestClient`** 로 한다(RestClient 아님). 자동구성된 `RestClient.Builder` 를 주입받아
+HTTP 호출은 **`RestClient`** 로 한다(Feign·RestTemplate 아님). 자동구성된 `RestClient.Builder` 를 주입받아
 `clone().build()` 로 쓰면 타임아웃 같은 전역 설정이 한곳에서 걸린다.
 
 그래서 통신 DTO 를 `internal` 로 막고, `Client` 가 우리 말로 번역한 결과만 내보낸다.
@@ -106,23 +105,34 @@ HTTP 호출은 **`RestClient`** 로 한다(RestClient 아님). 자동구성된 `
 
 ```kotlin
 // ❌ 밖에서 보이면 안 되는 것들
-internal interface ExampleApi { ... }
+internal data class ExampleRequest(val parameter: String)
 internal data class ExampleResponse(val exampleResponseValue: String) {
     fun toResult(): ExampleClientResult = ExampleClientResult(exampleResponseValue)
 }
 
 // ✅ 밖에서 보이는 것 — 이것만
 @Component
-class ExampleClient internal constructor(
-    private val exampleApi: ExampleApi,
+class ExampleClient(
+    restClientBuilder: RestClient.Builder,
+    properties: ExampleApiProperties,
 ) {
+    private val restClient: RestClient = restClientBuilder.clone().baseUrl(properties.url).build()
+
     fun example(parameter: String): ExampleClientResult {
-        return exampleApi.example(ExampleRequest(parameter)).toResult()
+        val response: ExampleResponse = restClient.post()
+            .uri("/example")
+            .body(ExampleRequest(parameter))
+            .retrieve()
+            .body(ExampleResponse::class.java)
+            ?: throw ExampleApiFailedException()
+        return response.toResult()
     }
 }
 ```
 
-`internal constructor` 를 쓴 이유는, 클래스는 공개하되 **`internal` 타입을 받는 생성자는 감춰야** 하기 때문이다. 스프링은 그대로 주입한다.
+`ExampleApiProperties` 는 주소·타임아웃을 담는 `@ConfigurationProperties` 클래스다 (`kotlin-config`).
+
+`internal` DTO 는 `Client` 안에서만 살고, 반환 직전 `toResult()` 로 우리 모델이 되어 나간다.
 
 변환 메서드(`toResult()`)는 `Response` 가 갖는다 — DTO 가 자기 변환을 아는 것은 `kotlin-dto` 와 같은 규칙이다.
 
@@ -141,13 +151,14 @@ class ExampleClient internal constructor(
 기본값에 맡기면 외부가 응답하지 않을 때 **우리 스레드가 통째로 묶인다.** 설정은 그 모듈의 yml 에 둔다 (`kotlin-config`).
 
 ```yaml
-spring.cloud.openfeign:
-  client:
-    config:
-      example-api:                # RestClient 의 value 와 같아야 한다
-        connectTimeout: 2100
-        readTimeout: 5000
+spring:
+  http:
+    client:
+      connect-timeout: 2100   # ms. 자동구성된 RestClient.Builder 전체에 걸린다
+      read-timeout: 5000
 ```
+
+한 클라이언트만 다른 타임아웃이 필요하면 그 모듈의 설정 클래스에서 `ClientHttpRequestFactorySettings` 로 빌더를 따로 만든다.
 
 - 주소는 `${example.api.url}` 처럼 자리만 두고 프로파일별로 채운다. **코드에 URL 을 박지 않는다.**
 
@@ -157,11 +168,17 @@ spring.cloud.openfeign:
 
 외부 예외(`RestClientException`)가 도메인까지 올라가면, 도메인이 외부 라이브러리를 알게 된다.
 
-`Client` 나 구현 레이어에서 잡아 `ApiException` 하위 예외 으로 바꾼다 (`kotlin-error`).
+`Client` 나 구현 레이어에서 잡아 `ApiException` 하위 예외로 바꾼다 (`kotlin-error`).
 
 ```kotlin
 try {
-    return exampleApi.example(request).toResult()
+    val response: ExampleResponse = restClient.post()
+        .uri("/example")
+        .body(request)
+        .retrieve()
+        .body(ExampleResponse::class.java)
+        ?: throw ExampleApiFailedException()
+    return response.toResult()
 } catch (e: RestClientException) {
     throw ExampleApiFailedException(cause = e)   // 원인을 안고 간다
 }
@@ -213,7 +230,7 @@ DB 트랜잭션을 열어 둔 채 외부를 호출하면, 외부가 느린 만�
 
 - [ ] `connectTimeout`·`readTimeout` 을 설정했는가
 
-- [ ] 외부 예외를 `ApiException` 하위 예외 으로 바꾸면서 원인을 안고 가는가
+- [ ] 외부 예외를 `ApiException` 하위 예외로 바꾸면서 원인을 안고 가는가
 
 - [ ] 트랜잭션 밖에서 호출하는가
 

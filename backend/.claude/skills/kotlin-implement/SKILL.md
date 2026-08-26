@@ -31,10 +31,10 @@ class TodoFinder(
     fun listByMember(memberId: Long): List<TodoResult> =
         todoRepository.findAllByMemberIdOrderByIdDesc(memberId).map { it.toResult() }
 
-    fun getOwned(memberId: Long, todoId: Long): Todo {
+    fun getOwned(memberId: Long, todoId: Long): TodoResult {
         val entity: TodoEntity = todoRepository.findByIdAndMemberId(todoId, memberId)
             ?: throw TodoNotFoundException()
-        return Todo.from(entity)
+        return entity.toResult()
     }
 }
 ```

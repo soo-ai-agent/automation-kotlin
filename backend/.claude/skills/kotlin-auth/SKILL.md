@@ -19,7 +19,7 @@ GET /actuator/prometheus -> 401
 **헬스체크가 401 이면 배포된 컨테이너가 재시작을 반복하고, Prometheus 수집도 끊긴다.** 그래서 의존성을 넣는 순간 `SecurityFilterChain` 을 함께 만들어야 한다.
 
 ```kotlin
-// core/api/config/SecurityConfig.kt
+// api/.../config/SecurityConfig.kt   (부팅 모듈)
 @Configuration
 class SecurityConfig {
     @Bean
