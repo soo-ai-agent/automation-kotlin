@@ -3,32 +3,62 @@
 #
 # 어디서 실행해도 된다 — 스크립트 자기 위치로 저장소를 찾으므로 절대 경로로 부르면 그만이다.
 #
-#   /경로/automation-kotlin/bin/claude-skills.sh backend
-#   /경로/automation-kotlin/bin/claude-skills.sh frontend
-#   /경로/automation-kotlin/bin/claude-skills.sh            # 저장소 전체
+#   /경로/automation-kotlin/bin/claude-skills.sh install     # 짧은 명령어 3개를 깐다 (한 번만)
+#   claude-be / claude-fe / claude-all                       # 깐 뒤에는 이렇게만 친다
 #
-# 뒤에 붙인 인자는 claude 로 그대로 넘어간다 — `... backend -c` 는 백엔드 자리에서 이어서 대화하기다.
+# 뒤에 붙인 인자는 claude 로 그대로 넘어간다 — `claude-be -c` 는 백엔드 자리에서 이어서 대화하기다.
 set -euo pipefail
 
-# readlink -f 로 심볼릭 링크를 풀어, PATH 에 링크를 걸어 두어도 저장소를 제대로 찾는다
+# readlink -f 로 심볼릭 링크를 풀어, 링크로 불러도 저장소 원본 위치를 찾는다
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 REPO_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 
+# 깔리는 명령어 이름 = 영역. 링크 이름으로 불리면 인자 없이 그 영역이 열린다
+declare -A LINKS=([claude-be]=backend [claude-fe]=frontend [claude-all]=all)
+BIN_DIR="${CLAUDE_SKILLS_BIN_DIR:-$HOME/.local/bin}"
+
 usage() {
     cat << USAGE
-사용법: $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
+사용법
+  claude-be                     백엔드 자리에서 열기 — kotlin-* 스킬
+  claude-fe                     프론트 자리에서 열기 — frontend-* 스킬
+  claude-all                    저장소 전체에서 열기 — 모든 스킬
 
-  backend   backend/ 에서 연다 — 백엔드 스킬(kotlin-*)이 주로 적용된다
-  frontend  frontend/ 에서 연다 — 프론트 스킬(frontend-*)이 주로 적용된다
-  all       저장소 루트에서 연다 (기본값) — 양쪽을 다 만질 때
+  $(basename "$SCRIPT_PATH") install     위 세 명령어를 $BIN_DIR 에 깐다 (한 번만)
+  $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
 
 어느 자리에서 열든 루트 CLAUDE.md 와 공통 스킬(.claude/skills/)은 항상 함께 적용된다.
+뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
 USAGE
 }
 
-AREA="${1:-all}"
-[ $# -gt 0 ] && shift
+install_links() {
+    mkdir -p "$BIN_DIR"
+    for name in "${!LINKS[@]}"; do
+        ln -sf "$SCRIPT_PATH" "$BIN_DIR/$name"
+        echo "  $BIN_DIR/$name  →  ${LINKS[$name]}"
+    done
+    echo
+    case ":$PATH:" in
+        *":$BIN_DIR:"*)
+            echo "완료. 이제 어디서든 claude-be · claude-fe · claude-all 로 열면 된다."
+            ;;
+        *)
+            echo "완료. 다만 $BIN_DIR 이 PATH 에 없어서 아직 이름만으로는 안 불린다."
+            echo "셸 설정(~/.bashrc 또는 ~/.zshrc)에 아래 한 줄을 넣고 터미널을 다시 연다."
+            echo
+            echo "  export PATH=\"\$PATH:$BIN_DIR\""
+            ;;
+    esac
+}
+
+# 링크 이름으로 불렸으면 그 이름이 영역이다 — 인자를 먹지 않고 전부 claude 로 넘긴다
+AREA="${LINKS[$(basename "$0")]:-}"
+if [ -z "$AREA" ]; then
+    AREA="${1:-all}"
+    [ $# -gt 0 ] && shift
+fi
 
 case "$AREA" in
     backend | be)
@@ -42,6 +72,10 @@ case "$AREA" in
     all | root)
         TARGET="$REPO_ROOT"
         LABEL="저장소 전체 — 모든 스킬"
+        ;;
+    install)
+        install_links
+        exit 0
         ;;
     -h | --help | help)
         usage

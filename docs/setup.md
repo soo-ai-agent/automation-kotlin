@@ -138,19 +138,16 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 
 지금까지는 GitHub 이 에이전트를 돌렸다. **내 컴퓨터에서 직접 Claude 를 열 때도 같은 규칙을 그대로 쓸 수 있다.**
 
-저장소에 그 launcher 가 들어 있다. 어디서 실행하든 되므로 절대 경로로 부르면 그만이다.
+### 한 번만 — 명령어 깔기
+
+저장소의 launcher 를 `install` 로 한 번 실행하면 짧은 명령어 세 개가 깔린다. 저장소를 내려받은 경로가 `~/work/automation-kotlin` 이라면:
 
 ```bash
-# 저장소를 내려받은 경로가 ~/work/automation-kotlin 이라면
-~/work/automation-kotlin/bin/claude-skills.sh backend     # 백엔드 자리에서 열기
-~/work/automation-kotlin/bin/claude-skills.sh frontend    # 프론트 자리에서 열기
-~/work/automation-kotlin/bin/claude-skills.sh             # 저장소 전체
+~/work/automation-kotlin/bin/claude-skills.sh install
 ```
 
-셋 다 루트 `CLAUDE.md` 와 공통 스킬(3대 원칙·ponytail 등)을 함께 읽는다. 다른 것은 **어느 영역 스킬이 주로 붙느냐**다 —
-`backend` 는 `kotlin-*`, `frontend` 는 `frontend-*` 가 먼저 걸린다.
-
-뒤에 붙인 것은 claude 로 그대로 넘어간다. `... backend -c` 는 백엔드 자리에서 이전 대화를 이어서 여는 것이다.
+`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 이 만들어진다. 그 폴더가 PATH 에 없으면 넣을 한 줄을 알려 주므로,
+그것만 셸 설정(`~/.bashrc` 또는 `~/.zshrc`)에 붙이고 터미널을 다시 연다.
 
 준비물은 claude CLI 하나다. 없으면 launcher 가 설치 명령을 알려 준다.
 
@@ -159,12 +156,20 @@ npm install -g @anthropic-ai/claude-code
 claude setup-token
 ```
 
-매번 긴 경로를 치기 싫으면 셸 설정에 별칭을 건다 (`~/.bashrc` 또는 `~/.zshrc`).
+### 그다음부터 — 이렇게만 친다
 
 ```bash
-alias cbe='~/work/automation-kotlin/bin/claude-skills.sh backend'
-alias cfe='~/work/automation-kotlin/bin/claude-skills.sh frontend'
+claude-be      # 백엔드 자리에서 열기
+claude-fe      # 프론트 자리에서 열기
+claude-all     # 저장소 전체
 ```
+
+어느 폴더에 있든 상관없다. 셋 다 루트 `CLAUDE.md` 와 공통 스킬(3대 원칙·ponytail 등)을 함께 읽고,
+다른 것은 **어느 영역 스킬이 주로 붙느냐**다 — `claude-be` 는 `kotlin-*`, `claude-fe` 는 `frontend-*` 가 먼저 걸린다.
+
+뒤에 붙인 것은 claude 로 그대로 넘어간다. `claude-be -c` 는 백엔드 자리에서 이전 대화를 이어서 여는 것이다.
+
+깔지 않고 쓸 수도 있다 — `bin/claude-skills.sh backend` 처럼 절대 경로로 부르면 같은 동작이다.
 
 ## 켠 다음 — 어디서 무엇을 바꾸나
 
