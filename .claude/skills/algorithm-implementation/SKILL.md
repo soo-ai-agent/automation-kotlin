@@ -142,7 +142,7 @@ class OrderService(
 
 - 매직 넘버 금지 — `0.1` 이 아니라 `companion object` 의 `val DEFAULT_FEE_RATE = BigDecimal("0.1")` 처럼 이름을 준다.
 
-- 분기가 종류(type) 로 갈리기 시작하면 다형성으로 (oop-responsibility-design 핵심 원칙 3). 단, 종류가 하나뿐일 때 미리 인터페이스를 만들지 않는다 (core-principles 제1원칙).
+- 분기가 종류(type) 로 갈리기 시작하면 다형성으로 (oop-responsibility-design 의 다형성 절). 단, 종류가 하나뿐일 때 미리 인터페이스를 만들지 않는다 (core-principles 제1원칙).
 
 - 명세에 없는 최적화(캐시, 조기 종료로 인한 순서 변화)를 임의로 넣지 않는다. 성능이 걱정되면 보고에 적고 그대로 둔다 — 정확성 먼저, 최적화는 요청받고.
 
