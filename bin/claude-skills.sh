@@ -20,14 +20,14 @@ BIN_DIR="${CLAUDE_SKILLS_BIN_DIR:-$HOME/.local/bin}"
 usage() {
     cat << USAGE
 사용법
-  claude-be                     백엔드 자리에서 열기 — kotlin-* 스킬
-  claude-fe                     프론트 자리에서 열기 — frontend-* 스킬
-  claude-all                    저장소 전체에서 열기 — 모든 스킬
+  claude-be                     백엔드 작업 — kotlin-* 스킬, 변경은 backend/ 안에서만
+  claude-fe                     프론트 작업 — frontend-* 스킬, 변경은 frontend/ 안에서만
+  claude-all                    저장소 전체 — 모든 스킬
 
   $(basename "$SCRIPT_PATH") install     위 세 명령어를 $BIN_DIR 에 깐다 (한 번만)
   $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
 
-어느 자리에서 열든 루트 CLAUDE.md 와 공통 스킬(.claude/skills/)은 항상 함께 적용된다.
+셋 다 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(3대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
 뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
 USAGE
@@ -60,17 +60,24 @@ if [ -z "$AREA" ]; then
     [ $# -gt 0 ] && shift
 fi
 
+# 어느 자리를 고르든 claude 는 저장소 루트에서 연다.
+# 하위 폴더에서 열면 루트 CLAUDE.md 의 @import(3대 원칙·리뷰 규칙 MUST)가 펼쳐지지 않아
+# 최상위 규칙이 통째로 빠진다 — 실측으로 확인했다. 영역은 cwd 가 아니라 아래 FOCUS 로 좁힌다.
+FOCUS=""
 case "$AREA" in
     backend | be)
-        TARGET="$REPO_ROOT/backend"
-        LABEL="백엔드 — kotlin-* + 공통 스킬"
+        LABEL="백엔드 — kotlin-* 가 주로 적용"
+        FOCUS="이번 세션의 작업 영역은 backend/ 다. 코드 변경은 backend/ 안에서만 한다.
+적용할 영역 스킬은 backend/.claude/skills/ 의 kotlin-* 이고, 색인은 backend/.claude/skills/README.md 다.
+frontend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     frontend | fe)
-        TARGET="$REPO_ROOT/frontend"
-        LABEL="프론트엔드 — frontend-* + 공통 스킬"
+        LABEL="프론트엔드 — frontend-* 가 주로 적용"
+        FOCUS="이번 세션의 작업 영역은 frontend/ 다. 코드 변경은 frontend/ 안에서만 한다.
+적용할 영역 스킬은 frontend/.claude/skills/ 의 frontend-* 이고, 색인은 frontend/.claude/skills/README.md 다.
+backend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     all | root)
-        TARGET="$REPO_ROOT"
         LABEL="저장소 전체 — 모든 스킬"
         ;;
     install)
@@ -95,19 +102,12 @@ command -v claude > /dev/null || {
     exit 1
 }
 
-[ -d "$TARGET" ] || {
-    echo "폴더가 없어요: $TARGET" >&2
-    exit 1
-}
-
 echo "▶ $LABEL"
-echo "  자리: $TARGET"
+echo "  저장소: $REPO_ROOT"
 
-cd "$TARGET"
+cd "$REPO_ROOT"
 
-# 루트에서 열 때는 --add-dir 이 필요 없다. 하위에서 열 때만 저장소 전체를 읽을 수 있게 더한다
-# — CONTRACT.md·common/docs 처럼 경계 밖 문서를 스킬이 참조하기 때문이다.
-if [ "$TARGET" = "$REPO_ROOT" ]; then
+if [ -z "$FOCUS" ]; then
     exec claude "$@"
 fi
-exec claude --add-dir "$REPO_ROOT" "$@"
+exec claude --append-system-prompt "$FOCUS" "$@"
