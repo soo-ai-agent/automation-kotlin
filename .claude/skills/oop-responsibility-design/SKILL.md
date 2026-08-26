@@ -139,36 +139,47 @@ class ReservationService(
 | 필드가 바뀌면 | 꺼내 쓰던 모든 코드가 함께 바뀐다 | 이 클래스만 바뀐다 |
 
 ```kotlin
-// ❌ 바보 데이터 객체 — 이름은 TodoEntity 지만 하는 일이 없고, 판단은 전부 바깥에서
-if (todo.title != request.title) {
-    if (request.title.isBlank()) {
-        throw TodoTitleBlankException()
+// ❌ 바보 데이터 객체 — 이름은 CouponEntity 지만 하는 일이 없고, 판단은 전부 바깥에서
+var amount: BigDecimal = order.total
+if (order.total >= coupon.minOrderAmount) {          // 쿠폰의 규칙이 호출부에 산다
+    amount = order.total - coupon.discountAmount
+    if (amount < BigDecimal.ZERO) {                  // 음수 금지 규칙도 호출부에 산다
+        amount = BigDecimal.ZERO
     }
-    todo.title = request.title        // 공개 세터 — rules.md MUST 위반이기도 하다
 }
 ```
 
 ```kotlin
-// ✅ 똑똑한 객체 — 자기 규칙을 자기가 안다 (kotlin-entity 의 행위 메서드)
+// ✅ 똑똑한 객체 — 자기 값으로 하는 판단·계산은 자기가 안다
 @Entity
-class TodoEntity(title: String) : BaseEntity() {
-    @Column(name = "title", nullable = false, length = 200)
-    var title: String = title
-        protected set
+@Table(name = "coupon")
+class CouponEntity(
+    @Column(name = "discount_amount", nullable = false)
+    val discountAmount: BigDecimal,
 
-    fun rename(newTitle: String) {
-        require(newTitle.isNotBlank()) { "제목은 비어 있을 수 없습니다" }
-        title = newTitle
+    @Column(name = "min_order_amount", nullable = false)
+    val minOrderAmount: BigDecimal,
+) : BaseEntity() {
+
+    /** 적용 불가면 원금 그대로, 결과는 0 미만이 되지 않는다. */
+    fun applyTo(orderAmount: BigDecimal): BigDecimal {
+        if (orderAmount < minOrderAmount) {
+            return orderAmount
+        }
+        return (orderAmount - discountAmount).max(BigDecimal.ZERO)
     }
 }
 ```
 
 ```kotlin
 // 호출부(구현 레이어)는 '무엇을 할지'만 말한다
-todo.rename(command.title)
+val amount: BigDecimal = coupon.applyTo(order.total)
 ```
 
-차이는 코드 길이가 아니라 **규칙이 사는 곳**이다. 위쪽은 제목 검증 규칙이 호출부마다 복사되고 한 곳을 빼먹으면 빈 제목이 저장된다. 아래쪽은 규칙이 한 곳에 있다.
+차이는 코드 길이가 아니라 **규칙이 사는 곳**이다. 위쪽은 최소주문·음수 금지 규칙이 호출부마다 복사되고,
+쿠폰을 쓰는 두 번째 서비스가 생기는 순간 한쪽만 고쳐져 결제 금액이 갈라진다. 아래쪽은 규칙이 한 곳에 있다.
+
+같은 예가 **algorithm-implementation** 에도 있다 — 거기서는 이 메서드를 입출력 표와 테스트로 잠그는 절차를 다룬다.
 
 > 판별법: 그 클래스에서 필드와 getter 를 지웠을 때 아무것도 남지 않으면 데이터다.
 >
