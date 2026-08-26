@@ -9,12 +9,34 @@
 # 뒤에 붙인 인자는 claude 로 그대로 넘어간다 — `claude-be -c` 는 백엔드 자리에서 이어서 대화하기다.
 set -euo pipefail
 
-# readlink -f 로 심볼릭 링크를 풀어, 링크로 불러도 저장소 원본 위치를 찾는다
-SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+# 심볼릭 링크를 풀어 저장소 원본 위치를 찾는다.
+# readlink -f 를 쓰지 않는 이유는 macOS(BSD) 에 그 옵션이 없기 때문이다 — 직접 따라간다.
+resolve_link() {
+    path="$1"
+    while [ -L "$path" ]; do
+        target="$(readlink "$path")"
+        case "$target" in
+            /*) path="$target" ;;
+            *) path="$(dirname "$path")/$target" ;;
+        esac
+    done
+    printf '%s/%s' "$(cd "$(dirname "$path")" && pwd)" "$(basename "$path")"
+}
+
+SCRIPT_PATH="$(resolve_link "${BASH_SOURCE[0]}")"
 REPO_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 
-# 깔리는 명령어 이름 = 영역. 링크 이름으로 불리면 인자 없이 그 영역이 열린다
-declare -A LINKS=([claude-be]=backend [claude-fe]=frontend [claude-all]=all)
+# 깔리는 명령어 이름 = 영역. 링크 이름으로 불리면 인자 없이 그 영역이 열린다.
+# 연관배열(declare -A)을 쓰지 않는 이유는 macOS 기본 bash 가 3.2 라 지원하지 않기 때문이다.
+LINK_NAMES="claude-be claude-fe claude-all"
+area_of_link() {
+    case "$1" in
+        claude-be) echo backend ;;
+        claude-fe) echo frontend ;;
+        claude-all) echo all ;;
+        *) echo "" ;;
+    esac
+}
 BIN_DIR="${CLAUDE_SKILLS_BIN_DIR:-$HOME/.local/bin}"
 
 usage() {
@@ -35,9 +57,9 @@ USAGE
 
 install_links() {
     mkdir -p "$BIN_DIR"
-    for name in "${!LINKS[@]}"; do
+    for name in $LINK_NAMES; do
         ln -sf "$SCRIPT_PATH" "$BIN_DIR/$name"
-        echo "  $BIN_DIR/$name  →  ${LINKS[$name]}"
+        echo "  $BIN_DIR/$name  →  $(area_of_link "$name")"
     done
     echo
     case ":$PATH:" in
@@ -46,7 +68,7 @@ install_links() {
             ;;
         *)
             echo "완료. 다만 $BIN_DIR 이 PATH 에 없어서 아직 이름만으로는 안 불린다."
-            echo "셸 설정(~/.bashrc 또는 ~/.zshrc)에 아래 한 줄을 넣고 터미널을 다시 연다."
+            echo "셸 설정에 아래 한 줄을 넣고 터미널을 다시 연다 — 맥 기본 셸은 zsh(~/.zshrc), 리눅스는 보통 bash(~/.bashrc) 다."
             echo
             echo "  export PATH=\"\$PATH:$BIN_DIR\""
             ;;
@@ -54,7 +76,7 @@ install_links() {
 }
 
 # 링크 이름으로 불렸으면 그 이름이 영역이다 — 인자를 먹지 않고 전부 claude 로 넘긴다
-AREA="${LINKS[$(basename "$0")]:-}"
+AREA="$(area_of_link "$(basename "$0")")"
 if [ -z "$AREA" ]; then
     AREA="${1:-all}"
     [ $# -gt 0 ] && shift

@@ -45,6 +45,47 @@ claude-all     # 저장소 전체
 깔지 않고 쓸 수도 있다 — `bin/claude-skills.sh backend` 처럼 절대 경로로 부르면 같은 동작이다.
 
 
+## 맥에서 (macOS)
+
+리눅스와 명령은 같고, 셸과 PATH 관례만 다르다. 순서대로 하면 된다.
+
+① **claude CLI 준비.** Node 가 없으면 [Homebrew](https://brew.sh) 로 먼저 깐다.
+
+```bash
+brew install node                             # 이미 있으면 건너뛴다
+npm install -g @anthropic-ai/claude-code
+claude setup-token                            # 브라우저가 열리며 로그인한다
+```
+
+`npm install -g` 에서 권한 오류(`EACCES`)가 나면 `sudo` 를 붙이지 말고 Homebrew 로 깐 Node 를 쓰는 편이 안전하다.
+`which node` 가 `/opt/homebrew/bin/node`(애플 실리콘) 또는 `/usr/local/bin/node`(인텔) 를 가리키면 정상이다.
+
+② **launcher 깔기.** 저장소를 내려받은 경로에서 한 번만 실행한다.
+
+```bash
+~/work/automation-kotlin/bin/claude-skills.sh install
+```
+
+③ **PATH 에 넣기.** 맥의 기본 셸은 **zsh** 이므로 `~/.zshrc` 다(`~/.bashrc` 가 아니다).
+
+```bash
+echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+`~/.local/bin` 이 없어도 `install` 이 만들어 두므로 그대로 넣으면 된다.
+셸이 zsh 인지 확인하려면 `echo $SHELL` 이 `/bin/zsh` 인지 본다 — `bash` 로 나오면 `~/.bash_profile` 에 같은 줄을 넣는다.
+
+④ **확인.**
+
+```bash
+claude-be --help
+```
+
+사용법이 나오면 끝이다.
+
+**맥의 기본 bash 는 3.2 지만 launcher 는 그대로 돈다** — 연관배열과 `readlink -f` 처럼 그 버전에 없는 것을 쓰지 않도록 만들었다.
+
 ## 무엇이 자동으로 붙나
 
 | 붙는 것 | 언제 |
@@ -62,7 +103,8 @@ claude-all     # 저장소 전체
 ## 안 될 때
 
 **`claude-be: command not found`** — `~/.local/bin` 이 PATH 에 없다. `install` 이 알려 준 `export PATH=...` 한 줄을
-`~/.bashrc`(또는 `~/.zshrc`)에 넣고 터미널을 다시 연다. 확인은 `echo $PATH | tr ':' '\n' | grep local/bin` 이다.
+셸 설정에 넣고 터미널을 다시 연다 — **맥은 `~/.zshrc`, 리눅스는 보통 `~/.bashrc`** 다.
+확인은 `echo $PATH | tr ':' '\n' | grep local/bin` 이다.
 
 **`claude CLI 가 없어요`** — `npm install -g @anthropic-ai/claude-code` 로 깔고 `claude setup-token` 으로 로그인한다.
 
