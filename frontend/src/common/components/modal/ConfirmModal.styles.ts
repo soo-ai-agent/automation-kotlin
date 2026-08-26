@@ -4,7 +4,7 @@ import {colors, radius, spacing} from "../../lib/theme";
 export const styles = StyleSheet.create({
     backdrop: {
         flex: 1, alignItems: "center", justifyContent: "center", padding: spacing(6),
-        backgroundColor: "rgba(15, 23, 42, 0.5)",
+        backgroundColor: colors.backdrop,
     },
     dialog: {
         width: "100%", maxWidth: 320, padding: spacing(6), borderRadius: radius.md,

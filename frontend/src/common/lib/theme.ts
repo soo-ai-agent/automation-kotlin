@@ -2,7 +2,7 @@
 export const colors = {
     bg: "#ffffff", bgElevated: "#f8fafc", panel: "#f1f5f9", text: "#0f172a", textDim: "#64748b",
     textMuted: "#94a3b8", primary: "#2563eb", primaryInk: "#ffffff", danger: "#dc2626",
-    border: "#e2e8f0",
+    border: "#e2e8f0", backdrop: "rgba(15, 23, 42, 0.5)",
 };
 
 export const radius = {

@@ -4,7 +4,7 @@ import {colors, radius, spacing} from "../../common/lib/theme";
 export const styles = StyleSheet.create({
     backdrop: {
         flex: 1, alignItems: "center", justifyContent: "center", padding: spacing(6),
-        backgroundColor: "rgba(15, 23, 42, 0.5)",
+        backgroundColor: colors.backdrop,
     },
     sheet: {
         alignSelf: "stretch", gap: spacing(4), padding: spacing(5), borderRadius: radius.md,
