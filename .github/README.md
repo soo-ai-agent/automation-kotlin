@@ -36,6 +36,7 @@ bash .github/agent/setup-speckit.sh
 | [workflows/claude-dispatch.yml](workflows/claude-dispatch.yml) | 디스패처 — 라벨 이슈 감지·착수, 완료 후 정리(상위 이슈 완료 보고, 이슈·PR·브랜치 청소) |
 | [workflows/claude-agent.yml](workflows/claude-agent.yml) | 진입점 — 그래프를 단계 잡(s1..s4)으로 펼쳐 노드들을 돌린다 |
 | [workflows/claude-node.yml](workflows/claude-node.yml) | 노드 하나 — 코드 작성·커밋·push, 명세/하위 이슈/PR 생성 |
+| [workflows/claude-harness.yml](workflows/claude-harness.yml) | 하네스 회귀 — 규칙 문서를 고친 PR 에서 리뷰어가 심어 둔 위반을 여전히 잡는지 확인 |
 | [agent/graph.js](agent/graph.js) | `CLAUDE_GRAPH` 펼치기 (`>` 순차 · `+` 병렬 · `?` 수습) |
 | [agent/dispatch.py](agent/dispatch.py) | 디스패처 본체 — `start`(이슈 착수) · `cleanup`(정리) 두 모드 |
 | [agent/run-claude.sh](agent/run-claude.sh) | 노드가 Claude 를 돌리는 부분 — 프롬프트 조립·실행·수습 |

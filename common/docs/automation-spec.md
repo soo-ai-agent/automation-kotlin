@@ -18,6 +18,8 @@
 | 노드의 Claude 실행 | `.github/agent/run-claude.sh` | 노드가 기본 브랜치에서 꺼내 씀 |
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
+| 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
+| 하네스 케이스 | `common/harness-tests/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh`) |
 | 설정 | `.github/agent/settings.env` | — |
 | 노드 지시문 | `.github/agent/nodes/<이름>.md` | — |
 | 서버 세팅 | `.github/agent/setup-agent.sh` | 사용자가 1회 실행 |
@@ -212,5 +214,11 @@
 - `CLAUDE.md`·`AGENTS.md` 는 루트에서 옮길 수 없다 (Claude Code·Codex 가 루트에서 읽는다).
 
 - `CLAUDE.md` 의 `@common/docs/code-review/rules.md` import 경로와 `settings.env` 의 `CLAUDE_REVIEW_RULES_DIR` 은 같은 곳을 가리켜야 한다.
+
+- **하네스 회귀(`claude-harness.yml`)는 PR 브랜치를 checkout 한다** — 리뷰어와 반대다.
+  리뷰어는 PR 이 자기 심사 기준을 바꾸지 못하게 기준 브랜치 설정을 쓰지만, 하네스는 그 PR 이 바꾼 규칙이 검사 대상이라 PR 것을 읽어야 한다.
+
+- 하네스의 `paths` 필터는 **규칙을 담은 파일 목록**이다 — 규칙 문서를 새 경로에 만들면 이 목록에 더할 것.
+  빠뜨리면 규칙이 바뀌어도 회귀가 돌지 않아 조용히 통과한다.
 
 - 문서를 추가할 때 독자를 정하고 위치를 고른다: 사용자 → `docs/`, 에이전트 → `common/docs/` 또는 스킬. `docs/README.md` 머리의 경계 선언을 유지할 것.

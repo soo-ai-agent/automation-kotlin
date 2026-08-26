@@ -1,0 +1,50 @@
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 케이스를 늘리려면 common/harness-tests/cases/ 에
+#    .diff 파일을 더하고, 첫 줄에 `# expect: PASS` 또는 `# expect: CHANGES_REQUESTED` 를 적어요.
+#    이 파일은 기능 자체를 개조할 때만 열고, 수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#
+# 하네스 회귀 테스트 — 규칙 문서를 고친 PR 에서, 리뷰어가 "심어 둔 위반"을 여전히 잡는지 확인해요.
+#
+# 왜 필요한가: 스킬·리뷰 규칙을 고치면 리뷰어의 판정이 함께 흔들려요. 잡아야 할 위반을 놓치거나
+# (case: CHANGES_REQUESTED 기대), 멀쩡한 변경을 막게 되거나(case: PASS 기대) 둘 다 사고예요.
+# 규칙을 안 건드린 PR 에서는 돌지 않아요 — 판정 기준이 그대로면 결과도 그대로니까요.
+#
+# 비용: 케이스 하나당 claude 호출 1건. 지금 6건이고, 케이스를 늘리면 그만큼 늘어나요.
+name: claude-harness
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**/.claude/skills/**"
+      - "common/docs/code-review/rules.md"
+      - "CLAUDE.md"
+      - "AGENTS.md"
+      - "common/harness-tests/**"
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # PR 브랜치의 규칙으로 돌려요 — claude-review.yml 이 기준 브랜치 설정을 쓰는 것과 반대예요.
+      # 저기서는 PR 이 자기 리뷰 기준을 바꾸는 것을 막아야 하지만,
+      # 여기서는 "이 PR 이 바꾼 규칙"이 검사 대상이라 PR 것을 그대로 읽어야 해요.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: claude CLI 설치
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: 하네스 회귀
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        # run.sh 는 FAIL 이 하나라도 있으면 0 이 아닌 코드로 끝나요 — 그대로 잡 실패가 되어 머지를 막아요.
+        run: bash common/harness-tests/run.sh
