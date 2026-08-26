@@ -49,7 +49,14 @@ claude-all     # 저장소 전체
 
 리눅스와 명령은 같고, 셸과 PATH 관례만 다르다. 순서대로 하면 된다.
 
-① **claude CLI 준비.** Node 가 없으면 [Homebrew](https://brew.sh) 로 먼저 깐다.
+① **저장소 내려받기.** 이미 받아 뒀으면 건너뛴다. 경로는 어디든 되고, 아래는 `~/work` 아래에 두는 예다.
+
+```bash
+mkdir -p ~/work && cd ~/work
+git clone <이 저장소 주소> automation-kotlin
+```
+
+② **claude CLI 준비.** Node 가 없으면 [Homebrew](https://brew.sh) 로 먼저 깐다.
 
 ```bash
 brew install node                             # 이미 있으면 건너뛴다
@@ -60,13 +67,13 @@ claude setup-token                            # 브라우저가 열리며 로그
 `npm install -g` 에서 권한 오류(`EACCES`)가 나면 `sudo` 를 붙이지 말고 Homebrew 로 깐 Node 를 쓰는 편이 안전하다.
 `which node` 가 `/opt/homebrew/bin/node`(애플 실리콘) 또는 `/usr/local/bin/node`(인텔) 를 가리키면 정상이다.
 
-② **launcher 깔기.** 저장소를 내려받은 경로에서 한 번만 실행한다.
+③ **launcher 깔기.** 내려받은 경로에서 한 번만 실행한다.
 
 ```bash
 ~/work/automation-kotlin/bin/claude-skills.sh install
 ```
 
-③ **PATH 에 넣기.** 맥의 기본 셸은 **zsh** 이므로 `~/.zshrc` 다(`~/.bashrc` 가 아니다).
+④ **PATH 에 넣기.** 맥의 기본 셸은 **zsh** 이므로 `~/.zshrc` 다(`~/.bashrc` 가 아니다).
 
 ```bash
 echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.zshrc
@@ -76,13 +83,20 @@ source ~/.zshrc
 `~/.local/bin` 이 없어도 `install` 이 만들어 두므로 그대로 넣으면 된다.
 셸이 zsh 인지 확인하려면 `echo $SHELL` 이 `/bin/zsh` 인지 본다 — `bash` 로 나오면 `~/.bash_profile` 에 같은 줄을 넣는다.
 
-④ **확인.**
+⑤ **확인.**
 
 ```bash
-claude-be --help
+claude-be --help          # 사용법이 나오면 명령어는 제대로 깔린 것이다
+claude-be                 # 실제로 열어 본다
 ```
 
-사용법이 나오면 끝이다.
+열린 세션에서 아래를 물어 규칙이 붙었는지 눈으로 확인한다.
+
+```
+도구 쓰지 말고 답해: 지금 적용되는 3대 원칙의 이름 3개와, 이번 세션의 작업 영역은?
+```
+
+3대 원칙 이름(단순함 최우선 · 최소 수정·무파괴 · 데이터의 흐름과 통제)과 `backend/` 가 나오면 정상이다.
 
 **맥의 기본 bash 는 3.2 지만 launcher 는 그대로 돈다** — 연관배열과 `readlink -f` 처럼 그 버전에 없는 것을 쓰지 않도록 만들었다.
 
