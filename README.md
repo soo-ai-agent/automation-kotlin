@@ -124,7 +124,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
     README.md    지금 이 문서
     docs/        사용 설명서 — 읽는 순서는 docs/README.md
     TASK.md      첫 구축 명세 양식 (빈칸을 채워 쓴다)
-    bin/         내 컴퓨터에서 같은 규칙으로 Claude 를 여는 launcher (docs/setup.md)
+    bin/         내 컴퓨터에서 같은 규칙으로 Claude 를 여는 launcher (docs/local-claude.md)
 
 **사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳 셋(settings.env·노드 지시문·리뷰 규칙)은 [.github/README.md](.github/README.md) 가 안내한다.
 
@@ -150,7 +150,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 |---|---|
 | 전체 구조를 한 장으로 | [docs/architecture.html](docs/architecture.html) — 브라우저로 연다 |
 | 처음 켜기 (한 번) | [docs/setup.md](docs/setup.md) |
-| 내 컴퓨터에서 같은 규칙으로 Claude 열기 | `claude-be` · `claude-fe` ([까는 법](docs/setup.md#내-컴퓨터에서-같은-규칙으로-claude-쓰기)) |
+| 내 컴퓨터에서 같은 규칙으로 Claude 열기 | `claude-be` · `claude-fe` ([docs/local-claude.md](docs/local-claude.md)) |
 | 일 시키기 — 이슈 쓰는 법, 라벨 고르기 | [docs/issue-guide.md](docs/issue-guide.md) |
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |

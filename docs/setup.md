@@ -134,45 +134,9 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 | `순차 단계는 최대 4개예요` 에러 | `CLAUDE_GRAPH` 에서 `>` 로 이은 단계가 4개를 넘었다 — `+` 로 묶어 동시에 돌리거나 작업을 두 번에 나눈다 |
 
 
-## 내 컴퓨터에서 같은 규칙으로 Claude 쓰기
+## 내 컴퓨터에서도 같은 규칙으로
 
-지금까지는 GitHub 이 에이전트를 돌렸다. **내 컴퓨터에서 직접 Claude 를 열 때도 같은 규칙을 그대로 쓸 수 있다.**
-
-### 한 번만 — 명령어 깔기
-
-저장소의 launcher 를 `install` 로 한 번 실행하면 짧은 명령어 세 개가 깔린다. 저장소를 내려받은 경로가 `~/work/automation-kotlin` 이라면:
-
-```bash
-~/work/automation-kotlin/bin/claude-skills.sh install
-```
-
-`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 이 만들어진다. 그 폴더가 PATH 에 없으면 넣을 한 줄을 알려 주므로,
-그것만 셸 설정(`~/.bashrc` 또는 `~/.zshrc`)에 붙이고 터미널을 다시 연다.
-
-준비물은 claude CLI 하나다. 없으면 launcher 가 설치 명령을 알려 준다.
-
-```bash
-npm install -g @anthropic-ai/claude-code
-claude setup-token
-```
-
-### 그다음부터 — 이렇게만 친다
-
-```bash
-claude-be      # 백엔드 자리에서 열기
-claude-fe      # 프론트 자리에서 열기
-claude-all     # 저장소 전체
-```
-
-어느 폴더에서 쳐도 된다. 셋 다 **저장소 루트에서** 열린다 — 루트 `CLAUDE.md` 와 거기 딸린 3대 원칙·리뷰 규칙(MUST)이
-통째로 읽히는 자리가 루트뿐이기 때문이다. 하위 폴더에서 열면 그 규칙들이 조용히 빠진다.
-
-다른 것은 **작업 영역**이다. `claude-be` 는 "backend/ 안에서만 고치고 kotlin-* 을 따른다"를,
-`claude-fe` 는 그 반대를 세션 시작부터 지시해 둔다. 반대편은 계약 확인용으로 읽기만 한다.
-
-뒤에 붙인 것은 claude 로 그대로 넘어간다. `claude-be -c` 는 백엔드 자리에서 이전 대화를 이어서 여는 것이다.
-
-깔지 않고 쓸 수도 있다 — `bin/claude-skills.sh backend` 처럼 절대 경로로 부르면 같은 동작이다.
+여기까지가 GitHub 자동화를 켜는 절차다. 내 컴퓨터에서 Claude 를 직접 열 때도 같은 규칙을 쓸 수 있다 — 방법은 [local-claude.md](local-claude.md) 에 있다.
 
 ## 켠 다음 — 어디서 무엇을 바꾸나
 
