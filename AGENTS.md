@@ -55,6 +55,8 @@ type: `feat` `fix` `remove` `refactor` `style` `comment` `rename` `docs` `test` 
 
 - 프론트엔드: `cd frontend && npm ci && npm run build` (tsc strict 포함) 통과가 최소선이다.
 
+  프론트에 유닛 테스트는 두지 않는다 — 사용자 흐름 검증은 E2E(`frontend/.claude/skills/frontend-e2e`)가 담당한다.
+
 - 실행하지 못한 검증은 완료 보고에서 실행한 검증과 구분해 기록한다. 돌리지 않은 것을 통과했다고 적지 않는다.
 
 ## 금지

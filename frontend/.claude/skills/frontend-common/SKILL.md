@@ -230,7 +230,7 @@ HTTP 호출부를 `api/` 로 분리 → 사용자 메시지를 메시지 enum �
 | 6 | `hooks/useUsers.ts` | 조립 훅 — 소비처별 그룹 반환 + 최초 로드 `useEffect` 하나 (`frontend-hooks`) |
 | 7 | `components/*.tsx` + `.styles.ts` | props 로 받은 값만 그린다 (`frontend-screen`) |
 | 8 | `screens/User.tsx` + `.styles.ts` | 훅 1개 호출 + JSX. **상태 0** (`frontend-screen`) |
-| 9 | `*.test.ts` | 서비스는 상태코드별 분기(정상 1 + 에러 2 이상), 훅은 로딩→성공/실패 전이 |
+| 9 | `frontend/e2e/<도메인>.spec.ts` | 사용자 흐름 E2E (`frontend-e2e` 스킬) — 유닛 테스트는 두지 않는다 |
 
 마지막으로 **3상태 확인**: 로딩·에러(재시도)·빈 상태가 화면에 다 있는가.
 
