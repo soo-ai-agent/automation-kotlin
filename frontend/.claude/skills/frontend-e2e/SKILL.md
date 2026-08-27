@@ -40,6 +40,9 @@ cd frontend && npx playwright install chromium && npm run e2e
 가짜 응답은 `e2e/fixtures.ts` 에 모여 있다 — **삭제하면 다음 목록 조회에서 빠지도록 상태를 가진다.**
 "삭제 → 재조회" 를 한 흐름으로 검증하려면 가짜 응답도 상태가 있어야 하기 때문이다.
 
+**`fixtures.ts` 는 공용 파일이 아니라 지금 쓰는 화면들의 stub 이 모인 곳이다.** 새 화면의 stub 은
+두 spec 이상이 쓰게 될 때 여기로 올리고, 그전에는 그 spec 파일 안에 둔다 — 코드의 콜로케이션·승격 규칙과 같다.
+
 ## 이 앱은 RN 을 웹으로 띄운 것이다
 
 앱은 Expo(React Native)이고, E2E 는 같은 코드를 react-native-web 으로 브라우저에 띄워 검증한다. 그래서 둘만 다르다.

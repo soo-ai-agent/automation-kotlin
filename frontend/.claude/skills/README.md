@@ -29,7 +29,7 @@ Expo(React Native) + Expo Router + TypeScript 프론트엔드 규칙이다. 한 
 
 | # | 스킬 | 폴더 |
 |---|---|---|
-| 1 | [frontend-api](frontend-api/SKILL.md) | `src/utils/` — 서버 DTO 미러링, 엔드포인트 1:1 요청 함수, 상태코드 → 결과/`ServiceError` 번역 |
+| 1 | [frontend-api](frontend-api/SKILL.md) | `src/api/` · `src/constants/` — 서버 DTO 미러링, 엔드포인트 1:1 요청 함수, 상태코드 → 결과/`ServiceError` 번역 |
 | 2 | [frontend-hooks](frontend-hooks/SKILL.md) | `src/hooks/` · `screens/<화면>/hooks/` — 단일책임 훅·조립 훅, 3상태, useEffect 판정 넷 |
 | 3 | [frontend-screen](frontend-screen/SKILL.md) | `src/screens/` · `src/components/` — 화면 무상태, 모달 ref, 확인 팝업 |
 | 4 | [frontend-route](frontend-route/SKILL.md) | `src/app/` — 라우트 파일이 하는 일 셋, 루트 레이아웃, 라우트 삭제 절차 |
@@ -57,11 +57,11 @@ npm run lint && npm run e2e && npm run build
 
 - **`src/app` 은 라우트만 담는다.** 컴포넌트·타입·유틸을 그 안에 두지 않는다. 라우트 파일은 `screens/` 의 화면 하나를 그릴 뿐이다
 
-- 참조는 `app → screens → components·hooks → utils → constants·theme` **한 방향**이다. 역방향·건너뛰기 금지
+- 참조는 `app → screens → components·hooks → api → utils → constants·theme` **한 방향**이다. 역방향·건너뛰기 금지
 
 - **화면·컴포넌트에 `useState`/`useEffect` 를 두지 않는다.** 화면 상태는 전부 훅에 있고, 화면은 상태 훅 하나를 부르고 JSX 만 반환한다
 
-- HTTP 상태코드 분기와 업무 규칙은 `src/utils/` 의 요청 모듈에만 둔다. 훅은 상태코드를 모른다
+- HTTP 상태코드 분기와 업무 규칙은 `src/api/` 의 요청 모듈에만 둔다. 훅은 상태코드를 모른다
 
 - 예상된 비정상은 **결과 enum 반환**, 진짜 실패는 **`ServiceError` throw**. 불리언 반환 금지
 

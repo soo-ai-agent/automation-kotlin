@@ -61,7 +61,7 @@ type DetailState =
     | {status: DetailStatus.FAILED; message: string};
 ```
 
-공용 3상태 목록 표현형은 이미 있다 — `common/lib/listState.ts`(`ListStatus.OK/EMPTY/ERROR` — `frontend-hooks` 의 3상태 절). 목록 화면은 그것을 그대로 쓰고,
+공용 3상태 목록 표현형은 이미 있다 — `src/utils/list-state.ts`(`ListStatus.OK/EMPTY/ERROR` — `frontend-hooks` 의 3상태 절). 목록 화면은 그것을 그대로 쓰고,
 이 규칙은 도메인 고유의 다갈래 상태를 **새로** 만들 때 적용한다.
 
 **`field?:` 와 `field: T | undefined` 를 구분한다.** 앞은 "필드 자체가 없을 수 있다", 뒤는 "필드는 있으나 값이 비어 있을 수 있다"이다.

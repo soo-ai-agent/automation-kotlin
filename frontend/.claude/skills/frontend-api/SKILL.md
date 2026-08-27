@@ -3,7 +3,7 @@ name: frontend-api
 description: 서버와 통신하는 코드(src/api)의 저장소 고유 규칙. HTTP 창구 하나(api/client.ts)와 ApiResult 계약, 자원별 요청 모듈(api/<자원>.ts)의 엔드포인트 1:1 함수, 서버 DTO 미러링과 nullable 사유 주석, 상태코드를 결과 enum 또는 ServiceError 로 번역하는 2분법, 사용자 문장은 화면마다 한 파일인 constants/, 알림 단일 창구 notify, 401 단일 경로, 엔드포인트 차집합 대조를 담는다. fetch·캐싱·환경변수·토큰 보관은 벤더링된 expo/expo-data-fetching 이 정본이다. src/api/ 아래 파일을 만들거나 고치거나 리뷰할 때 frontend-common·api-contract 와 함께 사용한다. "API 호출 추가", "DTO 타입", "nullable", "에러 처리", "알림" 요청에도 사용할 것.
 ---
 
-# 서버 통신 (src/utils) — 계약의 사본과 결과 번역
+# 서버 통신 (src/api) — 계약의 사본과 결과 번역
 
 서버와 말하는 코드는 전부 `src/api/` 에 있다. **자원마다 파일 하나**라 화면이 몇 개가 되든 폴더가 목차로 남는다. **React 를 모르는 순수 TS 모듈**이고, 훅만 이것을 부른다.
 
@@ -43,7 +43,7 @@ export type ApiResult<T> =
 
 - 인자는 **이름 있는 객체**(`{path, body}`)로 받는다. 위치 인자 `get(path, body, config)` 는 호출부에서 안 읽힌다.
 
-- **`api-client.ts` 는 어떤 도메인 단어도 모른다.** 등장하면 그 자원의 요청 모듈로 옮긴다.
+- **`api/client.ts` 는 어떤 도메인 단어도 모른다.** 등장하면 그 자원의 요청 모듈로 옮긴다.
 
 - 응답 래퍼 타입(`ApiResponseDTO<T>`)은 여기 한 번만 정의한다 — 서버 응답 모양이 바뀌면 고치는 곳은 이 타입 하나다.
 
@@ -259,7 +259,7 @@ phone?: string;       // 전화로 도움을 청할 수 있는 시설이 아니�
 
 ## 체크리스트
 
-- [ ] HTTP 클라이언트가 `api-client.ts` 하나뿐이고, 통신 파일에 React 가 없는가
+- [ ] HTTP 클라이언트가 `api/client.ts` 하나뿐이고, 통신 파일에 React 가 없는가
 
 - [ ] 상태코드 분기가 요청 모듈에만 있는가
 
