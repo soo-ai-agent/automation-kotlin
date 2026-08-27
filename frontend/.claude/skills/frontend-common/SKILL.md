@@ -1,133 +1,158 @@
 ---
 name: frontend-common
-description: 프론트엔드 전 레이어 공통 규칙. 도메인 최상위 폴더 구조, 의존 방향(screens→hooks→services→api→lib), 파일 이름·확장자·export, 줄 길이, 람다 관용구, 이름 규칙, 레퍼런스에서 베끼면 안 되는 것, 이관·구축 순서·리뷰 절차를 담는다. frontend/ 아래 파일을 만들거나 고치거나 리뷰할 때 레이어 스킬(frontend-screen·hooks·service·api·lib)과 항상 함께 사용한다.
+description: 프론트엔드 전 폴더 공통 규칙. 이 저장소의 src/ 폴더 지도와 의존 방향(app→screens→components·hooks→utils), 무엇이 Expo 공식 스킬 담당이고 무엇이 저장소 고유 규칙인지, 파일 이름·export, 줄 길이, 람다 관용구, 이름 규칙, 새 화면 구축 순서, 리뷰 절차를 담는다. frontend/ 아래 파일을 만들거나 고치거나 리뷰할 때 폴더 스킬(frontend-route·screen·hooks·api)과 항상 함께 사용한다.
 ---
 
 # 프론트엔드 공통 규칙
 
-핵심 사상은 백엔드와 같다: **화면(Controller)과 유스케이스(Service)와 재사용 단위(구현체)를 분리하고, 참조는 한 방향으로만 흐르게 한다.**
+폴더 구조는 Expo 공식 스킬 `expo-project-structure` 의 골격 그대로다. **역할이 최상위 폴더이고, `src/app` 은 라우트 전용이다.**
 
-이 스킬은 레이어와 무관한 공통 규칙을 담는다. 각 레이어의 상세는 `frontend-screen`·`frontend-hooks`·`frontend-service`·`frontend-api`·`frontend-lib` 가,
-TS/RN 문법은 `frontend-style` 이, 서버 계약은 `api-contract` 가 담당한다.
+## 프레임워크 규칙은 Expo 공식 스킬이 정본이다
 
-공통 문서(`common/docs/code-review/rules.md`)와 충돌하면 프론트 스킬이 우선한다. 단 CLAUDE.md·README 와 충돌하면 그쪽이 우선한다.
+**폴더 구조·라우팅·스타일·데이터 페칭의 규칙 본문을 이 폴더에 베껴 쓰지 않는다.** 저장소 안에 사본이 있으니 그것을 연다.
+
+| 알고 싶은 것 | 여는 문서 |
+|---|---|
+| 폴더 구조, 라우트 전용 `app/`, 콜로케이션, 플랫폼별 파일, kebab-case | [expo/expo-project-structure](../expo/expo-project-structure/SKILL.md) |
+| 라우트·네비게이션·모달 표시 | [expo/expo-router](../expo/expo-router/SKILL.md) |
+| 토큰 테마, 재사용 컴포넌트 계약, 승격 조건 | [expo/expo-design-system](../expo/expo-design-system/SKILL.md) |
+| HTTP·캐싱·환경변수·토큰 보관 | [expo/expo-data-fetching](../expo/expo-data-fetching/SKILL.md) |
+| 네이티브다운 스타일·컨트롤 | [expo/expo-native-ui](../expo/expo-native-ui/SKILL.md) |
+
+색인과 벤더링 규칙은 [expo/README.md](../expo/README.md) 에 있다.
+
+**이 스킬이 담는 것은 Expo 가 말하지 않는 저장소 고유 규칙뿐이다** — 의존 방향, 이름, 줄 길이, 구축 순서, 리뷰 절차.
+
+충돌하면 프레임워크 사용법은 Expo 가, 설계·리뷰 기준은 `core-principles`(3대 원칙)와 `common/docs/code-review/rules.md` 가 이긴다.
 
 ## 정답 코드가 동봉되어 있다
 
 **규칙을 그대로 구현해 `tsc --strict` 와 `expo export` 를 통과한 한 벌이 `frontend/src/` 에 살아 있다.** 글로 된 규칙과 코드가 어긋나면 **코드가 맞다.**
 
-- `src/user/` — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 수직 슬라이스. 새 화면은 이 파일들을 복사해 이름만 바꾸는 것으로 시작한다.
+- `src/screens/user/` — 목록·다중선택·삭제·상세 모달이 전부 들어 있는 완결된 화면. 새 화면은 이 파일들을 복사해 이름만 바꾸는 것으로 시작한다.
 
-- `src/splash/` — 파일 8개짜리 작은 도메인. 도메인은 이렇게 작아도 된다.
+- `src/screens/map/` — 파일 하나짜리 작은 화면. 화면은 이렇게 작아도 된다.
 
-- `src/common/` — 공통 인프라(apiClient·notify·theme·ServiceError 등). 그대로 둔다.
+- `src/api/user.ts` — 서버 DTO·요청 함수·상태코드 번역이 한 파일에 완결된 본보기.
 
-- `src/map/`·`src/ads/` — 자기완결 선택 모듈 + 제거 절차 README. 플랫폼별 구현이 갈리면 이 둘처럼 **파일 분기**(`.web.tsx`·`admob.web.ts`)로 푼다 — Metro 는 `require` 를 정적으로 해석해 실행 시점 분기로는 웹 번들에서 못 뺀다.
+- `src/components/kakao-map-view.tsx` + `.web.tsx` — 플랫폼별 파일 분기의 본보기.
 
-## 도메인이 최상위, 그 아래가 계층
+## src/ 폴더 지도
 
-**도메인이 먼저고 계층이 그 아래다.** 한 도메인의 코드는 한 폴더 안에서 끝나야 한다 — 화면 하나를 고치려고 여섯 폴더를 오가면 구조가 틀린 것이다.
-
-**이 지도에 없는 위치의 코드는 리뷰에서 잡는다.**
+**이 지도에 없는 위치의 코드는 리뷰에서 잡는다.** 골격의 근거는 `expo-project-structure` 이고, 여기 적는 것은 이 저장소의 실제 배치다.
 
 ```
-src/
-├── app/                    # 라우팅·전역 스토어·부트스트랩. 어떤 도메인도 아니다
-├── <도메인>/               # user · share · admin … 도메인 이름이 곧 폴더 이름
-│   ├── screens/            # 화면 조립만. 훅 1개 호출 + JSX (상태 0)   웹 프로젝트는 pages/
-│   ├── components/         # 이 도메인만 쓰는 표현 컴포넌트
-│   ├── hooks/              # 화면 상태 + 유스케이스 오케스트레이션 (useState 는 여기에만)
-│   ├── services/           # 업무 규칙 + 상태코드 → 결과/에러 번역 (React 금지)
-│   ├── api/                # 엔드포인트 1:1 요청 함수 + 경로 상수
-│   ├── lib/                # 이 도메인의 순수 로직·파생 계산
-│   ├── types/              # 이 도메인의 서버 DTO·Row 타입
-│   └── enums/              # 이 도메인의 메시지·결과·구분 enum
-└── common/                 # 여러 도메인이 쓰는 것만. 도메인과 나란히 서는 유일한 비도메인 폴더
-    ├── components/<종류>/  # ui · layout · modal · data_table
-    └── hooks/ services/ api/ lib/ types/ utils/ enums/
+frontend/
+├── assets/                        # 아이콘·스플래시. 스토어 제출물이다 (docs/release.md)
+├── docs/                          # 선택 기능 안내(지도·광고)와 배포 절차. src 밖이다
+├── e2e/                           # Playwright 사용자 흐름 테스트 (frontend-e2e)
+├── src/
+│   ├── app/                       # 라우트 전용 — 이 안의 모든 파일이 라우트다
+│   │   ├── _layout.tsx            #   스택·스플래시 관문·확인 팝업 호스트
+│   │   ├── index.tsx              #   "/" — 사용자 화면
+│   │   └── map.tsx                #   "/map" — 지도 화면
+│   ├── components/                # 두 화면 이상이 쓰는 UI
+│   │   ├── kakao-map-view.tsx
+│   │   ├── kakao-map-view.web.tsx #   플랫폼별 변형
+│   │   └── kakao-map-view.types.ts#   두 변형이 공유하는 props
+│   ├── screens/                   # 라우트가 그리는 화면 본체
+│   │   ├── user/
+│   │   │   ├── components/        #   이 화면만 쓰는 컴포넌트
+│   │   │   ├── hooks/             #   이 화면만 쓰는 훅
+│   │   │   └── index.tsx
+│   │   └── map/index.tsx
+│   ├── hooks/                     # 두 화면 이상이 쓰는 훅
+│   ├── api/                       # 서버와 말하는 코드 — 자원마다 한 파일
+│   │   ├── client.ts              #   HTTP 창구 하나
+│   │   ├── user.ts                #   한 자원의 DTO·요청 함수·결과 번역
+│   │   └── app-info.ts
+│   ├── utils/                     # 순수 헬퍼 · 플랫폼 래퍼 · 나란한 테스트
+│   │   └── format-date.ts
+│   ├── constants/                 # 사용자 문장 — 화면·기능마다 한 파일
+│   │   ├── user.ts
+│   │   ├── map.ts
+│   │   └── index.ts               #   재노출. 부르는 쪽은 언제나 `@/constants`
+│   └── theme.ts                   # 색 두 벌(밝게·어둡게) + 간격·모서리 토큰
+├── app.json                       # 앱 이름·식별자·플러그인·스플래시
+├── eas.json                       # 빌드·제출 프로필 (development · preview · production)
+└── package.json
 ```
 
-**최상위에는 도메인과 `app`·`common` 만 둔다.** 공용 계층을 최상위에 흩어 놓으면 도메인 폴더 옆에 계층 폴더가 서서 한 줄에 두 기준이 섞여 보인다.
+폴더가 하는 일은 한 줄로 말해진다.
 
-이름은 `shared` 가 아니라 **`common`** 이다. `share` 도메인이 있는 앱에서 `shared/` 는 한 글자 차이로 헷갈린다.
+| 폴더 | 담는 것 | 담지 않는 것 |
+|---|---|---|
+| `app/` | 라우트 파일과 `_layout` 뿐 | 컴포넌트·타입·유틸·훅 — **하나도** |
+| `components/` | 두 화면 이상이 쓰는 UI | 서버 통신, 업무 규칙 |
+| `screens/` | 라우트가 그리는 화면 본체 | `useState`·`useEffect` |
+| `hooks/` | 두 화면 이상이 쓰는 훅 | JSX, HTTP 상태코드 |
+| `api/` | 서버 DTO·요청 함수·상태코드 번역 (자원마다 한 파일) | React import, JSX |
+| `utils/` | 순수 헬퍼·플랫폼 래퍼 | React import, JSX, 도메인 단어 |
+| `constants/` | 사용자 문장 (화면·기능마다 한 파일) | 계산·분기 |
+| `theme.ts` | 색 두 벌·간격·모서리 토큰, `useColors`·`useStyles` | 화면별 스타일 |
 
-**공용 안에도 도메인 폴더를 파지 않는다.** `common/` 에서 하위 폴더로 한 번 더 나누는 것은 `components/<종류>/` 뿐이고 나머지는 평면이다.
-`common/hooks/route/` 는 위반이다 — route 만 쓰면 `route/hooks/` 로 가야 하고, 여럿이 쓰면 `common/hooks/` 바로 아래다.
+### `server/` 와 `app/api/` — 이 저장소는 쓰지 않는다
 
-**enum 선언은 `enums/` 에만 둔다.** 한 도메인의 enum 은 `<도메인>/enums/`, 여럿이 쓰는 것과 인프라 enum 은 `src/common/enums/`.
-services·hooks·lib 파일 안 인라인 선언은 위반이다.
+Expo 는 `app/` 안의 파일 이름에 `+api` 를 붙이면 서버에서 도는 API 라우트가 되고, 그 전용 헬퍼를 `src/server/` 에 둔다.
 
-### 어느 도메인의 것인지 정하는 법
+**이 저장소의 서버는 Kotlin 백엔드 하나다.** 프론트에 서버 코드를 두지 않으므로 `app/api/`·`src/server/` 폴더를 만들지 않는다.
 
-**쓰는 쪽이 정한다.** 화면을 뿌리로 두고 import 를 거꾸로 따라간다 — 한 도메인만 쓰면 그 도메인이 갖고, 둘 이상이 쓰면 공용 평면에 남는다.
+만들어야 할 이유가 생기면 폴더를 짓기 전에 사람에게 보고한다 — 서버가 둘이 되는 결정이라 합의가 필요하다.
 
-손으로 정정하는 예외는 둘뿐이다.
-
-1. **이름이 도메인을 말하는데 다른 도메인도 쓰는 것** — 소유 도메인으로 보낸다. 쓰는 쪽이 그 도메인을 참조한다.
-
-2. **이름에 도메인이 없고 플랫폼 API 만 다루는 것**(`wakeLock`·`geo`·`localCache`) — 한 도메인만 써도 공용에 남는다.
-   `lib`·`utils` 는 어떤 도메인 단어도 몰라야 한다는 규칙이 이긴다.
-
-### 의존 방향
+## 의존 방향
 
 한 방향이다. **역방향과 건너뛰기를 둘 다 금지한다.**
 
 ```
-screens ──▶ hooks ──▶ services ──▶ api ──▶ lib
-   └─────▶ components ──▶ hooks
+app/ ──▶ screens/ ──▶ components/ ──▶ hooks/ ──▶ api/ ──▶ utils/ ──▶ constants/ · theme.ts
+             └──────────────────────────▶ hooks/
 ```
 
-- `services` 는 React 를 import 하지 않는다. `useState`·`useCallback` 이 보이면 위치가 틀렸다.
+- **아무도 `app/` 을 import 하지 않는다.** 라우트는 최상단이다 — `screens/` 가 `app/` 을 참조하면 방향이 뒤집힌 것이다.
 
-- `api` 는 업무 규칙을 모른다. 상태코드로 분기하거나 사용자 메시지를 만들면 `services` 로 내린다.
+- `utils/` 는 React 를 import 하지 않는다. `useState`·`useCallback` 이 보이면 위치가 틀렸다.
 
-- `lib` 은 어떤 도메인 단어도 모른다. 등장하면 그 도메인의 `services`/`lib` 로 옮긴다.
+- **`utils/` 에는 두 종류가 산다** — 헷갈리기 쉬우니 나눠 읽는다.
 
-- 화면이 `services`·`api` 를 직접 부르면 건너뛰기 위반이다. 반드시 훅을 통한다. 컴포넌트·훅·화면에서 `fetch`/`axios` 직접 호출 금지.
+  | 종류 | 예 | 알아도 되는 것 | 몰라야 하는 것 |
+  |---|---|---|---|
+  | 순수 헬퍼 | `format-date.ts`, `list-state.ts` | 없음 — 다른 프로젝트에 그대로 옮겨도 말이 된다 | 우리 도메인 단어 전부 |
+  | 플랫폼·SDK 래퍼 | `admob.ts`, `kakao-map-html.ts`, `notify.ts` | 그 SDK·플랫폼 이름(AdMob·Kakao) | **우리 업무 규칙** |
 
-**도메인끼리는 같은 계층만 가로지른다.** 남의 도메인 훅·서비스 안쪽을 파고들지 않는다 — 필요하면 그 도메인이 밖으로 내주는 것만 쓴다.
+  판정은 하나 — **"우리 서비스의 업무 규칙을 아는가."** `admob.ts` 가 AdMob 을 아는 것은 정상이고,
+  사용자 삭제 규칙을 아는 것은 위반이다. 업무 규칙이 등장하면 그 화면 폴더 안이나 `api/` 의 자원 모듈로 옮긴다.
 
-서버 상태 라이브러리(React Query 등)는 **미도입**이다. 서버 데이터는 훅 안의 `useState` + 로더 함수로 관리하고, HTTP 는 중앙 클라이언트를 경유한다.
+- 화면이 `api/` 의 요청 함수를 직접 부르면 건너뛰기 위반이다. 반드시 훅을 통한다. 컴포넌트·훅·화면에서 `fetch` 직접 호출 금지.
 
-### 옮길 때
+서버 상태 라이브러리(React Query 등)는 **미도입**이다. 서버 데이터는 훅 안의 `useState` + 로더 함수로 관리하고,
+HTTP 는 `api/client.ts` 하나를 경유한다. 도입을 검토한다면 `expo-data-fetching` 을 읽고 사람에게 보고한 뒤 정한다.
 
-1. import 는 손으로 고치지 않는다. **이동표(옛 경로 → 새 경로)를 만들어 상대 경로를 다시 계산**한다.
-   `TS2307` 을 이름으로 맞추면 같은 이름이 두 계층에 있을 때 틀린 곳을 가리킨다.
+## 파일 이름·export
 
-2. **`tsc` 통과가 끝이 아니다.** 부작용 전용 import(`import "./x"`)는 타입 검사를 빠져나간다 — 번들(`npm run build`·`expo export`)까지 돌려야 드러난다.
+**파일 이름은 전부 kebab-case 다**(`expo-project-structure`·`expo-router` 규칙). 특수문자를 쓰지 않는다.
 
-3. 폴더 이름이 파일명과 겹치면 `user/user/` 같은 중첩이 생긴다. 옮긴 뒤 평탄화한다.
-
-4. 옮긴 뒤 **빈 폴더를 지운다.** 남아 있으면 다음 사람이 그 계층이 아직 산다고 읽는다.
-
-## 파일 이름·확장자·export
-
-같은 구조를 만들어도 이름이 제각각이면 다른 코드베이스가 된다. **레이어는 파일 이름만 보고 판별되어야 한다.**
-
-| 레이어 | 파일 이름 | 확장자 | export |
+| 폴더 | 파일 이름 | 확장자 | export |
 |---|---|---|---|
-| `screens/` | 화면명 PascalCase — `User.tsx` | `.tsx` | **default** (+ 필요 시 named 병행) |
-| `components/` | 컴포넌트명 PascalCase — `UserTable.tsx` | `.tsx` | **default** |
-| `hooks/` | 훅명 그대로 — `useUserList.ts` | `.ts` | **named** |
-| `services/` | 하는 일 camelCase — `userService.ts` | `.ts` | **named** |
-| `api/` | 부르는 자원 — `user.ts` | `.ts` | **named** |
-| `lib/` | 역할명 camelCase — `apiClient.ts`, `notify.ts` | `.ts` | **named** |
-| `types/` | 담는 것 — `user.ts` | `.ts` | **named** |
+| `app/` | URL 조각 — `map.tsx`, `user/[id].tsx` | `.tsx` | **default** (Expo Router 요구) |
+| `components/` | 컴포넌트 역할 — `user-table.tsx` | `.tsx` | **named** |
+| `screens/` | 화면 이름 — `user/index.tsx` | `.tsx` | **named** |
+| `hooks/` | `use-` + 대상 — `use-user-list.ts` | `.ts` | **named** |
+| `api/` | 자원 — `user.ts`, `client.ts` | `.ts` | **named** |
+| `utils/` | 역할 — `format-date.ts`, `notify.ts` | `.ts` | **named** |
+| `constants/` | 화면·기능 — `user.ts`, `map.ts` | `.ts` | **named** |
 
-- **폴더가 이미 도메인을 말하므로 파일 이름에 도메인을 되풀이하지 않는다.**
+- **`app/` 안의 파일만 default export 다.** 그 밖에는 전부 named export — 자동완성·일괄 치환이 듣는다.
 
-- **JSX 를 포함하지 않는 파일은 반드시 `.ts`.** 확장자로 레이어를 판별할 수 없게 되기 때문이다.
+- **파일 이름은 kebab-case, 그 안의 컴포넌트·훅 이름은 원래 표기다.** `user-table.tsx` 가 `UserTable` 을, `use-user-list.ts` 가 `useUserList` 를 export 한다.
+  둘은 같은 낱말이어야 한다 — 다르면 검색이 끊긴다.
 
-- **화면(screens·components)만 default export, 나머지 레이어는 전부 named export.** named 로 통일해야 자동완성·일괄 치환이 듣는다.
+- **JSX 를 포함하지 않는 파일은 반드시 `.ts`.**
 
-- 한 파일에 하나의 주역만 둔다. 파일 이름과 주역 이름은 **정확히 같은 철자**여야 한다 — 다르면 검색이 끊긴다.
-
-**스타일은 컴포넌트와 나란한 `이름.styles.ts` 에 둔다(React Native).** `StyleSheet.create` 를 컴포넌트 파일 안에 두지 않고,
-색·간격은 `src/common/lib/theme.ts` 토큰만 쓴다(하드코딩 금지).
+- import 는 상대 경로가 아니라 별칭 `@/` 로 쓴다(`tsconfig.json` 의 `paths`). 같은 화면 폴더 안에서만 상대 경로를 쓴다.
 
 ## 줄 길이 — 100자 자제, import 만 120자 한 줄
 
-**일반 코드는 한 줄 100자를 넘지 않게 자제한다.** 하드 상한은 prettier `printWidth`(120)다.
+**일반 코드는 한 줄 100자를 넘지 않게 자제한다.** 하드 상한은 120자이고 `npm run lint` 의 `@stylistic/max-len` 이 강제한다.
 
 **import 는 예외다 — 120자까지는 반드시 한 줄로 쓴다.** 120자를 넘으면 딱 3줄로 래핑한다 — 여는 줄, 지정자 전부를 몰아 적은 한 줄(들여쓰기 2), `} from` 줄.
 지정자를 한 줄에 하나씩 세로로 펼치지 않는다(포맷터 기본 동작이어도 되돌린다).
@@ -136,18 +161,21 @@ screens ──▶ hooks ──▶ services ──▶ api ──▶ lib
 // O — 120자 초과라 3줄 래핑
 import {
   createShare, endShare, getShareWatching, isShareApiConfigured, isShareExpired, postShareRoute
-} from "../../share/services/shareSession";
+} from "@/utils/share-api";
 
 // X — 지정자를 한 줄에 하나씩 세로로 펼친 것(포맷터 기본 동작). 화면만 길어진다
 import {
   createShare,
   endShare,
   getShareWatching,
-} from "../../share/services/shareSession";
+} from "@/utils/share-api";
 ```
 
 **여러 줄 객체·return 객체·구조분해도 같은 채워 적기다** — 100자 근처까지 채워 적고 넘치면 다음 줄로 잇는다.
 예외: **항목마다 사유 주석이 붙는 블록(DTO 필드 등)은 세로를 유지한다** — 주석이 항목을 따라가야 한다.
+
+**이 배치만은 도구가 강제하지 않는다.** `eslint.config.js` 에 객체 줄바꿈 규칙을 일부러 넣지 않았다 —
+Prettier 를 쓰지 않는 이유도 같다(속성을 강제로 한 줄씩 펼치고 그 동작을 끌 수 없다). 나머지 포맷은 전부 도구가 잡는다.
 
 ## 람다는 관용구까지 — 판단은 풀어 쓴다
 
@@ -183,58 +211,69 @@ for (const order of orders) {
 
 판정 기준은 하나 — **람다 본문에 판단이나 누적이 들어 있는가.** 들어 있으면 푼다.
 
+## 포맷은 도구가 잡는다
+
+들여쓰기·따옴표·세미콜론·후행 쉼표·줄 길이는 **`npm run lint` 가 강제한다**(Expo 공식 `eslint-config-expo` + `@stylistic`).
+어긋나면 `npm run lint:fix` 가 고친다. PR 에서도 돈다(`.github/workflows/frontend-check.yml`).
+
+리뷰에서 포맷을 지적하지 않는다(rules.md "리뷰 범위 밖"). 도구가 통과시킨 것은 통과된 것이다.
+
+린트는 포맷만 보는 게 아니다 — React 훅·ref 규칙도 함께 잡는다. 실제로 이 저장소에서
+훅이 ref 를 담은 객체를 통째로 반환하던 자리 6곳을 린트가 찾아냈고, 호출부에서 구조분해하는 것으로 고쳤다.
+
 ## 이름 규칙
 
 원칙은 백엔드와 같다: **이름 = 대상 + 행위. 이름만 읽고 한 문장으로 설명되는가?**
 
-| 대상 | 규칙 | 예 |
-|---|---|---|
-| 화면 | PascalCase, 화면 이름 | `User` |
-| 컴포넌트 | PascalCase 명사, 무엇을 그리는지 | `UserTable`, `UserDetailModal` |
-| 조립 훅 | `use` + 화면/도메인복수 | `useUsers` |
-| 단일책임 훅 | `use` + 대상 + 행위 | `useUserList`, `useUserDelete` |
-| 서비스 함수 | 동사 + 대상 | `getUserList`, `deleteUser` |
-| api 객체 / 메서드 | 도메인 명사 / 짧은 동사 | `user.list()` |
-| 메시지 enum | `<도메인><용도>Messages` | `UserResultMessages` |
-| 결과 enum | `<행위>Outcome`, 멤버 UPPER_SNAKE | `DeleteUserOutcome.ALREADY_MISSING` |
-| 이벤트 핸들러 / 콜백 prop | `handle`+무엇을 / `on`+행위 | `handleDeleteClick` / `onClose` |
-| boolean | `is`/`has`/`can` 긍정형 | `isLoading`, `canSubmit` |
+| 대상 | 규칙 | 파일 | 안의 이름 |
+|---|---|---|---|
+| 라우트 | URL 조각 그대로 | `app/map.tsx` | `MapRoute` |
+| 화면 | 화면 이름 | `screens/user/index.tsx` | `User` |
+| 컴포넌트 | 무엇을 그리는지 | `components/user-table.tsx` | `UserTable` |
+| 조립 훅 | `use` + 화면/복수형 | `screens/user/hooks/use-users.ts` | `useUsers` |
+| 단일책임 훅 | `use` + 대상 + 행위 | `use-user-list.ts` | `useUserList` |
+| 요청 모듈 | 자원 이름 | `api/user.ts` | `getUserList`, `deleteUser` |
+| 메시지 enum | `<화면><용도>Messages` | `constants/user.ts` | `UserResultMessages` |
+| 결과 enum | `<행위>Outcome`, 멤버 UPPER_SNAKE | 요청 모듈 안 | `DeleteUserOutcome.ALREADY_MISSING` |
+| 이벤트 핸들러 / 콜백 prop | `handle`+무엇을 / `on`+행위 | — | `handleDeleteClick` / `onClose` |
+| boolean | `is`/`has`/`can` 긍정형 | — | `isLoading`, `canSubmit` |
 
 리뷰에서 잡아야 할 이름: `data`·`info`·`temp`(무엇인지 없음), `Comp1`·`Wrapper`, `useData()`·`useStuff()`, 부정형 `notDisabled`.
 **반드시 대안 이름을 함께 제시한다.**
 
-## 레퍼런스에서 베끼면 안 되는 것
-
-이 규칙들은 실제 운영 프로젝트에서 도출했지만, 그 프로젝트의 부채까지 규칙이 아니다. 따라 하지 않는다:
-테스트 0건 · HTTP 클라이언트 2개 공존 · Error 아닌 객체 throw · api 함수 반환 타입 미선언 · JSX 없는 `.tsx`.
-이 저장소에서는 신규 훅·서비스에 테스트를 동반하고(rules.md MUST), 클라이언트는 `apiClient` 하나만 쓴다.
-
-**이미 있는 공용 훅·컴포넌트가 하는 일을 다시 구현하지 않는다.** 쓰기 전에 먼저 찾는다.
-
-## 기존 코드를 이 구조로 옮길 때
-
-한 번에 전면 개편하지 않는다. 손대는 화면 단위로: 화면의 상태를 훅으로 → 단일책임 훅으로 쪼개고 조립 훅으로 묶기 →
-HTTP 호출부를 `api/` 로 분리 → 사용자 메시지를 메시지 enum 으로. 기존 테스트가 그대로 통과해야 한다 — 화면 출력·API 계약은 불변이다.
-
 ## 새 화면을 만들 때 — 순서
 
-이 순서대로 파일을 만들면 동봉 코드와 같은 모양이 나온다. `src/user/` 가 그대로 따라 쓸 본보기다.
+아래에서 위로 만든다. `src/screens/user/` 가 그대로 따라 쓸 본보기다.
 
 | 순서 | 파일 | 내용 |
 |---|---|---|
-| 1 | `types/user.ts` | 서버 DTO 를 서버 필드명 그대로. nullable 에 사유 주석 (`frontend-api`) |
-| 2 | `api/user.ts` | 경로 상수 + 요청 함수. 반환 타입 명시, 상태코드 분기 없음 (`frontend-api`) |
-| 3 | `enums/user.ts` | 메시지·결과 enum 전부 여기 (`frontend-service`) |
-| 4 | `services/userService.ts` | 상태코드를 결과/`ServiceError` 로 번역 (`frontend-service`) |
-| 5 | `hooks/useUserList.ts` 등 | 단일책임 훅 — `useState` 는 전부 여기 (`frontend-hooks`) |
-| 6 | `hooks/useUsers.ts` | 조립 훅 — 소비처별 그룹 반환 + 최초 로드 `useEffect` 하나 (`frontend-hooks`) |
-| 7 | `components/*.tsx` + `.styles.ts` | props 로 받은 값만 그린다 (`frontend-screen`) |
-| 8 | `screens/User.tsx` + `.styles.ts` | 훅 1개 호출 + JSX. **상태 0** (`frontend-screen`) |
-| 9 | `frontend/e2e/<도메인>.spec.ts` | 사용자 흐름 E2E (`frontend-e2e` 스킬) — 유닛 테스트는 두지 않는다 |
+| 1 | `src/api/<자원>.ts` | 서버 DTO 를 서버 필드명 그대로 + 요청 함수 + 상태코드 → 결과/`ServiceError` 번역 (`frontend-api`) |
+| 2 | `src/constants/<화면>.ts` + `index.ts` 재노출 | 그 화면의 사용자 문장 (`frontend-api`) |
+| 3 | `src/screens/<화면>/hooks/use-*.ts` | 단일책임 훅 — `useState` 는 전부 여기 (`frontend-hooks`) |
+| 4 | `src/screens/<화면>/hooks/use-<화면>s.ts` | 조립 훅 — 소비처별 그룹 반환 + 최초 로드 `useEffect` 하나 (`frontend-hooks`) |
+| 5 | `src/screens/<화면>/components/*.tsx` | props 로 받은 값만 그린다. 스타일은 파일 맨 아래, **색이 들어가면 `useStyles(createStyles)`** (`frontend-screen`) |
+| 6 | `src/screens/<화면>/index.tsx` | 상태 훅 1개 + `useStyles` + JSX. **화면 자체의 상태 0** (`frontend-screen`) |
+| 7 | `src/app/<라우트>.tsx` | 화면 하나 렌더 + `export default` (`frontend-route`) |
+| 8 | `frontend/e2e/<화면>.spec.ts` | 사용자 흐름 E2E (`frontend-e2e`) — 화면에 유닛 테스트는 두지 않는다 |
+
+두 화면 이상이 쓰게 된 컴포넌트·훅만 `src/components/`·`src/hooks/` 로 올린다(승격 조건 셋은 `expo-design-system`).
 
 마지막으로 **3상태 확인**: 로딩·에러(재시도)·빈 상태가 화면에 다 있는가.
 
-자주 나오는 이탈 두 가지 — 조립 훅 하나에 전부 몰아넣기(5번 생략), `api/` 없이 서비스가 HTTP 직접 호출(2번 생략).
+### 끝났는지 확인하는 법
+
+셋이 다 통과해야 끝난 것이다. 순서가 있다 — E2E 가 개발 서버를 띄우면서 라우트 타입을 만들고, 그래야 `tsc` 가 `<Link href>` 오타까지 잡는다.
+
+```bash
+npm run lint     # Expo 공식 규칙 + 포맷. 훅·ref 규칙도 함께 본다
+npm run e2e      # 사용자 흐름. .expo/types 라우트 타입이 여기서 생성된다
+npm run build    # tsc --noEmit + 웹 번들
+```
+
+PR 에서도 이 순서 그대로 돈다(`.github/workflows/frontend-check.yml`).
+
+자주 나오는 이탈 셋 — 조립 훅 하나에 전부 몰아넣기(3번 생략), `api/` 없이 훅이 HTTP 직접 호출(1번 생략),
+라우트 파일 안에 화면 본체를 그대로 쓰기(6번 생략).
 
 ## 코드 리뷰 절차
 
@@ -242,21 +281,25 @@ HTTP 호출부를 `api/` 로 분리 → 사용자 메시지를 메시지 enum �
 
 0. **이해가 먼저.** 변경된 파일 전부와 사용처를 읽는다. 읽지 않고 지적하지 않는다.
 
-1. **페이지 무상태** — 화면에 `useState`/`useEffect`/`useRef` 가 있는가 (`frontend-screen`)
+1. **`app/` 오염** — 라우트 아닌 파일이 `app/` 안에 있는가, 라우트가 화면 본체를 품고 있는가 (`frontend-route`)
 
-2. **위치·이름·export** — 모든 파일을 위 지도·표와 대조
+2. **화면 무상태** — 화면에 `useState`/`useEffect`/`useRef` 가 있는가 (`frontend-screen`)
 
-3. **의존 방향** — 역방향 import, 건너뛰기(화면 → 서비스 직접 호출)
+3. **위치·이름·export** — 모든 파일을 위 지도·표와 대조. kebab-case 인가, default export 가 `app/` 뿐인가
 
-4. **레이어 책임** — api 의 상태코드 분기, 훅의 상태코드, 서비스의 JSX·알림 (`frontend-service`·`frontend-api`)
+4. **의존 방향** — 역방향 import(`screens` 가 `app` 을), 건너뛰기(화면 → 요청 함수 직접 호출)
 
-5. **결과 표현** — 불리언·`null` 반환, 예상된 분기의 예외 던지기 (`frontend-service`)
+5. **콜로케이션** — 한 화면만 쓰는 것이 공용 폴더에 올라가 있는가 (`expo-design-system` 의 승격 조건 셋)
 
-6. **메시지·알림** — 인라인 한국어 문장, 알림 라이브러리 직접 호출 (`frontend-service`)
+6. **책임** — `utils/` 의 React import, 훅의 상태코드, 화면의 `try/catch` (`frontend-api`·`frontend-hooks`)
 
-7. **타입** — `any`, 사유 없는 nullable, 반환 타입 없는 api 함수, 개명된 DTO 필드 (`frontend-api`)
+7. **결과 표현** — 불리언·`null` 반환, 예상된 분기의 예외 던지기 (`frontend-api`)
 
-8. **이름·읽기 난이도** — 이름 표와 대조하고 대안을 제시. 삼항 중첩, index key, 이미 있는 공용 재구현
+8. **메시지·알림** — 인라인 한국어 문장, 알림 라이브러리 직접 호출 (`frontend-api`)
+
+9. **타입** — `any`, 사유 없는 nullable, 반환 타입 없는 요청 함수, 개명된 DTO 필드 (`frontend-api`)
+
+10. **이름·읽기 난이도** — 이름 표와 대조하고 대안을 제시. 삼항 중첩, index key, 이미 있는 공용 재구현
 
 지적만 하지 않는다. 각 항목에 "왜 문제인지 한 문장 + 고친 모습"까지 제시해야 리뷰가 끝난 것이다.
 
@@ -264,27 +307,34 @@ HTTP 호출부를 `api/` 로 분리 → 사용자 메시지를 메시지 enum �
 
 | 신호 | 문제 | 심각도 |
 |---|---|---|
-| 최상위에 계층 폴더가 도메인과 나란히 | `common/` 으로 모아야 한다 | Critical |
-| 공용 아래 도메인 폴더(`common/components/user/`) | 도메인 최상위 위반 — 그 도메인 폴더로 | Critical |
-| 컴포넌트·훅·화면에서 `fetch`/`axios`/서비스 직접 호출 | 의존 방향 위반 | Critical |
-| 역방향 import (`lib` 가 도메인을, `types` 가 `services` 를) | 계층 붕괴 | Critical |
-| JSX 없는 `.tsx`, 훅·서비스의 default export | 파일 규칙 위반 — 레이어 판별 불가 | Important |
-| enum 이 `enums/` 밖에 선언됨 | enum 분리 규칙 위반 | Important |
-| 판단·누적이 든 람다 체이닝(`reduce`·조건 든 `filter().map()`) | 흐름이 람다 안에 숨는다 — `if`/`for` 로 | Important |
+| `app/` 안의 컴포넌트·타입·유틸·훅 파일 | 라우트 전용 위반 — 그것도 라우트가 된다 | Critical |
+| 라우트 파일이 화면 본체를 직접 품고 있다 | `screens/` 로 빼고 라우트는 렌더만 | Critical |
+| `screens/`·`components/` 가 `app/` 을 import | 역방향 — 라우트는 최상단이다 | Critical |
+| 컴포넌트·훅·화면에서 `fetch`·요청 함수 직접 호출 | 의존 방향 위반 | Critical |
+| `api/`·`utils/` 파일의 React import·JSX | 밑바닥 계층 붕괴 | Critical |
+| 사용자 문장을 `constants/` 한 파일에 몰아 담음 | 화면마다 같은 파일을 건드려 머지 충돌 — 화면·기능당 한 파일 | Important |
+| 옮긴 뒤 남아 있는 옛 라우트 파일 | 그 URL 이 계속 산다 | Critical |
+| 사용처가 하나뿐인데 신설한 추상 계층·설정 옵션 | 요청받지 않은 추상화 | Critical |
+| Expo 공식 스킬의 규칙 본문을 이 폴더에 베껴 옴 | 단일 원본 위반 — 가리키기만 한다 | Critical |
+| 한 화면만 쓰는 컴포넌트·훅이 `components/`·`hooks/` 에 | 승격 조건 미달 — 화면 폴더로 | Important |
+| PascalCase·snake_case 파일 이름 | kebab-case 위반 | Important |
+| JSX 없는 `.tsx`, `app/` 밖의 default export | 파일 규칙 위반 | Important |
+| 별도 `.styles.ts` 파일, `__tests__/` 폴더 | 콜로케이션 위반 — 파일 아래·파일 옆 | Important |
+| 플랫폼 차이를 실행 시점 `if` 로 분기 | 웹 번들에서 네이티브 모듈이 안 빠진다 — 파일 분기로 | Important |
+| 판단·누적이 든 람다 체이닝 | 흐름이 람다 안에 숨는다 — `if`/`for` 로 | Important |
 | `data`·`info`·`temp`·`useStuff` 류 이름 | 무엇인지 없는 이름 | Important |
 | 이미 있는 공용 훅·컴포넌트의 재구현 | 중복 — 쓰기 전에 먼저 찾는다 | Important |
-| 사용처가 하나뿐인데 신설한 추상 계층·설정 옵션 (확장 지점 미리 두기) | 요청받지 않은 추상화 | Critical |
 
 ## 체크리스트
 
-- [ ] 최상위가 도메인 + `app`·`common` 뿐이고, 공용 안에 도메인 폴더가 없는가
+- [ ] `src/app` 안에 라우트와 `_layout` 말고 아무것도 없는가
 
-- [ ] 참조가 `screens → hooks → services → api → lib` 한 방향인가
+- [ ] 참조가 `app → screens → components·hooks → api → utils` 한 방향인가
 
-- [ ] JSX 없는 파일이 `.ts` 이고, default export 는 화면·컴포넌트뿐인가
+- [ ] 파일 이름이 전부 kebab-case 이고, default export 가 `app/` 안에만 있는가
 
-- [ ] enum 선언이 전부 `enums/` 에 있는가
+- [ ] 한 화면만 쓰는 컴포넌트·훅이 그 화면 폴더 안에 있는가
 
-- [ ] 판단·누적이 람다 체이닝이 아니라 `if`/`for` 로 풀려 있는가 (관용구 제외)
+- [ ] 프레임워크 규칙을 베끼지 않고 `expo/` 문서를 가리켰는가
 
-- [ ] 새 화면이 구축 순서(types → api → enums → services → hooks → components → screen)를 따랐는가
+- [ ] 새 화면이 구축 순서(api → constants → hooks → components → screen → route)를 따랐는가

@@ -13,10 +13,12 @@ description: TypeScript React Native 의 조건·분기·반복·비동기 문�
 
 **다루는 것** — 분기·반복·비동기에서 TS/RN 문법 때문에 달라지는 규칙.
 
-**다루지 않는 것** — 폴더·계층·람다 기준은 `frontend-common` 에, 페이지 무상태는 `frontend-screen` 에, 결과 표현(2분법)은 `frontend-service` 에,
+**다루지 않는 것** — 폴더·의존 방향·람다 기준은 `frontend-common` 에, 화면 무상태는 `frontend-screen` 에, 결과 표현(2분법)은 `frontend-api` 에,
 타입·DTO 규칙은 `frontend-api` 에, 서버-클라이언트 계약은 `api-contract` 에, 언어 무관 규칙은 공통 스킬(`.claude/skills/`)에 있다.
 
-이 스킬은 레이어 스킬들의 문법 보강이다. 충돌하면 레이어 스킬과 동봉 정답 코드(`frontend/src/`)가 우선한다.
+이 스킬은 폴더 스킬들의 문법 보강이다. 충돌하면 폴더 스킬과 동봉 정답 코드(`frontend/src/`)가 우선한다.
+
+Expo·React Native 쪽 관용구(플랫폼별 파일, 스타일 콜로케이션, 네이티브 컨트롤)는 벤더링된 [expo/](../expo/README.md) 문서가 정본이다.
 
 `kotlin-style`·`api-contract` 와 목표(유지보수성·정합성·가독성)를 공유한다 — 전문은 `api-contract` 의 "세 스킬이 공유하는 목표" 절.
 
@@ -40,7 +42,7 @@ description: TypeScript React Native 의 조건·분기·반복·비동기 문�
 **여러 갈래 상태를 새로 설계할 때는 판별 필드를 가진 union 으로 표현한다.** `loading`·`data`·`error` 를 나란히 두면
 "로딩 중인데 에러도 있음" 같은 조합이 표현 가능해지고, 그 조합을 막느라 화면마다 방어 분기가 생긴다.
 
-판별 필드의 값 집합은 문자열 리터럴이 아니라 **enum** 으로 선언한다(`frontend-api` 의 enum 규칙). 선언 자리는 `enums/` 다.
+판별 필드의 값 집합은 문자열 리터럴이 아니라 **enum** 으로 선언한다. 선언 자리는 그 타입을 소유한 파일 안이다(`frontend-api` 의 거처 표).
 
 ```ts
 // ❌ 8가지 조합 중 3가지만 유효 — 나머지는 화면이 방어해야 함
@@ -134,8 +136,8 @@ const sorted = [...items].sort(byDate);  // ✅ 원본 보존
 
 ## 4. 비동기와 예외 — 잡는 쪽 문법
 
-**결과 표현은 `frontend-service` 의 2분법이 기준이다.** 예상된 비정상은 결과 enum 반환, 진짜 실패는 `ServiceError` throw —
-상태코드 번역은 services 가 하고, 훅은 `useServiceErrorHandler` 로 받는다. 이 절은 그 위에서의 문법만 다룬다.
+**결과 표현은 `frontend-api` 의 2분법이 기준이다.** 예상된 비정상은 결과 enum 반환, 진짜 실패는 `ServiceError` throw —
+상태코드 번역은 `utils/` 의 요청 모듈이 하고, 훅은 `useServiceErrorHandler` 로 받는다. 이 절은 그 위에서의 문법만 다룬다.
 
 **`try`/`catch` 는 실제 `await` 경계에만 둔다.** 순수 계산까지 감싸면 버그가 "네트워크 오류" 메시지로 둔갑한다.
 

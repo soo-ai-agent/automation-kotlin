@@ -5,7 +5,7 @@ description: Playwright E2E 테스트 작성과 리뷰 규칙. frontend/e2e 의 
 
 # E2E 테스트 (Playwright)
 
-**자리:** `frontend/e2e/<도메인>.spec.ts`
+**자리:** `frontend/e2e/<화면>.spec.ts`
 
 ## 무엇을 하는 테스트인가
 
@@ -13,45 +13,32 @@ description: Playwright E2E 테스트 작성과 리뷰 규칙. frontend/e2e 의 
 
 그래서 "목록이 보이고 → 삭제를 누르고 → 확인을 눌렀더니 → 목록에서 사라졌다" 같은 **화면과 서버를 잇는 흐름**을 확인한다.
 
-한 파일에 한 도메인, 한 `test()` 에 한 흐름을 담는다. 흐름 하나가 길면 나누지 말고 그대로 둔다 — 중간을 잘라 놓으면 사용자 관점이 사라진다.
+한 파일에 한 화면, 한 `test()` 에 한 흐름을 담는다. 흐름 하나가 길면 나누지 말고 그대로 둔다 — 중간을 잘라 놓으면 사용자 관점이 사라진다.
 
-## 처음 한 번 — 설치와 설정
+## 설정은 이미 되어 있다
 
-사람이 프론트를 세팅할 때 한 번만 한다 (`frontend/README.md` 참고). 이미 되어 있으면 넘어간다.
+`@playwright/test`·`playwright.config.ts`·`npm run e2e` 가 저장소에 들어 있다. **새 프로젝트가 아니면 다시 만들지 않는다.**
+
+각자 한 번 브라우저 실행 파일만 내려받는다.
 
 ```bash
-cd frontend
-npm install -D @playwright/test
-npx playwright install chromium
+cd frontend && npx playwright install chromium && npm run e2e
 ```
 
-```json
-// package.json 의 scripts 에 추가
-"e2e": "playwright test",
-"e2e:ui": "playwright test --ui"
-```
+설정 파일이 정본이다 — 여기 베껴 두지 않는다. 지금 걸려 있는 것은 셋이다.
 
-```ts
-// frontend/playwright.config.ts
-import {defineConfig} from "@playwright/test";
+- `testDir: "./e2e"`, `baseURL: "http://localhost:8081"`, `trace: "on-first-retry"`(실패했을 때만 추적 파일)
 
-export default defineConfig({
-    testDir: "./e2e",
-    use: {
-        baseURL: "http://localhost:8081",
-        trace: "on-first-retry",   // 실패했을 때만 추적 파일을 남긴다
-    },
-    // 테스트를 돌리면 웹 개발 서버(react-native-web)를 알아서 띄우고, 끝나면 내린다
-    webServer: {
-        command: "npm run web",
-        url: "http://localhost:8081",
-        reuseExistingServer: true,
-        timeout: 120000,   // 첫 실행은 Metro 번들링 때문에 기본 60초를 넘길 수 있다
-    },
-});
-```
+- `webServer` 가 `npm run web` 을 자동으로 띄우고 끝나면 내린다. 첫 실행은 Metro 번들링 때문에 오래 걸려 `timeout` 이 넉넉하다
 
-`.gitignore` 에 `frontend/test-results/`, `frontend/playwright-report/` 를 넣는다.
+- `test-results/`·`playwright-report/` 는 `.gitignore` 에 있다
+
+## 동봉 정답이 있다
+
+`e2e/user.spec.ts`(8개 흐름)와 `e2e/map.spec.ts`(2개)가 아래 규칙을 그대로 지킨 한 벌이다. 새 spec 은 이것을 본보기로 삼는다.
+
+가짜 응답은 `e2e/fixtures.ts` 에 모여 있다 — **삭제하면 다음 목록 조회에서 빠지도록 상태를 가진다.**
+"삭제 → 재조회" 를 한 흐름으로 검증하려면 가짜 응답도 상태가 있어야 하기 때문이다.
 
 ## 이 앱은 RN 을 웹으로 띄운 것이다
 
