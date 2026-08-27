@@ -97,11 +97,11 @@ type User = {id: number; name: string};
 
 **양쪽 케이스 집합을 동일하게 유지한다.** 서버에 케이스가 늘면 `CONTRACT.md` 와 프론트 enum 이 **같은 변경 단위**에서 는다.
 
-**미지의 케이스는 경계 한 곳에서 정규화한다.** 화면과 서비스마다 `else`/`default` 로 방어하지 않는다.
+**미지의 케이스는 경계 한 곳에서 정규화한다.** 화면과 훅마다 `else`/`default` 로 방어하지 않는다.
 프론트의 닫힌 값 집합은 enum 으로 선언하므로(`frontend-api`), `UNKNOWN` 멤버를 가진 enum + 판정 함수 하나로 흡수한다.
 
 ```ts
-// <도메인>/enums/order.ts — 서버 집합 + UNKNOWN
+// src/utils/order-api.ts — 서버 집합 + UNKNOWN
 export enum OrderStatus {
     PENDING = "PENDING",
     PAID = "PAID",
@@ -109,7 +109,7 @@ export enum OrderStatus {
     UNKNOWN = "UNKNOWN",
 }
 
-// <도메인>/api/order.ts — 경계 한 곳, 여기서만 미지의 값을 흡수
+// 같은 파일, 경계 한 곳 — 여기서만 미지의 값을 흡수
 function parseOrderStatus(raw: string): OrderStatus {
     if ((Object.values(OrderStatus) as string[]).includes(raw)) {
         return raw as OrderStatus;
@@ -154,7 +154,7 @@ function parseOrderStatus(raw: string): OrderStatus {
 | 3 | 구현 레이어 변환 함수 | 매핑 한 줄 |
 | 4 | 응답 DTO + `from(result)` | 필드 한 줄 + 매핑 한 줄 |
 | 5 | `CONTRACT.md` | 엔드포인트 표에 행 하나 |
-| 6 | 프론트 타입 (`<도메인>/types/`) | 필드 한 줄 — 서버 이름 그대로 |
+| 6 | 프론트 타입 (`src/api/<자원>.ts`) | 필드 한 줄 — 서버 이름 그대로 |
 | 7 | 그 값을 실제로 쓰는 화면·훅 | 쓰는 곳만 |
 
 요청 필드면 4·6 이 요청 DTO(`toCommand`)·Command 와 화면 입력으로 바뀔 뿐, 원리는 같다.

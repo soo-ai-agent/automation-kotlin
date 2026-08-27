@@ -155,6 +155,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |
 | 광고를 넣을지 정하기 (스토어 체크리스트) | [docs/ads.md](docs/ads.md) |
+| 앱스토어·플레이스토어 배포 준비 | [frontend/docs/release.md](frontend/docs/release.md) |
 | 새 기능의 스펙 쓰기 | [docs/sdd-guide.md](docs/sdd-guide.md) |
 | 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |

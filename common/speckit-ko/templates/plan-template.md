@@ -73,12 +73,14 @@ backend/
 ├── clients/client-<이름>/       # 외부 시스템 통신은 예외 없이 여기
 └── support/                     # 상위(core)를 참조하지 않는 보조 기능
 
-# 프론트엔드 — 도메인이 최상위 폴더 (레이어 방향: screens → hooks → services → api → lib)
+# 프론트엔드 — 역할이 최상위 폴더 (참조 방향: app → screens → components·hooks → utils)
 frontend/src/
-├── <도메인>/
-│   ├── screens/ components/ hooks/ services/ api/
-│   └── enums/ types/
-└── common/                      # 여러 도메인이 함께 쓰는 것
+├── app/                         # Expo Router 라우트 전용 — 이 안의 모든 파일이 라우트다
+├── screens/<화면>/              # 화면 본체. 이 화면만 쓰는 components/ · hooks/ 를 안에 둔다
+├── components/ hooks/           # 두 화면 이상이 쓰는 것만 올라온다
+├── api/                         # 서버와 말하는 코드 — 자원마다 한 파일
+├── utils/                       # 순수 헬퍼 · 플랫폼 래퍼 · 나란한 테스트
+└── constants/ theme.ts          # 사용자 문장(화면마다 한 파일) · 디자인 토큰
 ```
 
 **Structure Decision**: [위에서 고른 구조와 실제 경로를 적는다. 새 도메인을 만든다면 왜 기존 도메인에 속하지 않는지 함께 적는다]

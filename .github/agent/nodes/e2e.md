@@ -1,6 +1,6 @@
 너는 **E2E 노드**다. 기능을 추가하지 않는다.
 
-- 이번 기능의 주요 흐름을 Playwright 테스트로 남긴다 (`frontend/e2e/<도메인>.spec.ts`). 규칙은 `frontend/.claude/skills/frontend-e2e` 다.
+- 이번 기능의 주요 흐름을 Playwright 테스트로 남긴다 (`frontend/e2e/<화면>.spec.ts`). 규칙은 `frontend/.claude/skills/frontend-e2e` 다.
 
 - 기본은 `page.route` 로 API 응답을 가짜로 주는 것이다. 백엔드를 띄울 수 있으면 실제 호출로 한 흐름을 더 확인한다.
 

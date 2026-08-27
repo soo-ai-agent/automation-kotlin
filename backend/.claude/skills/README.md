@@ -50,6 +50,6 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 
 - **체크리스트** — 작업을 끝내기 전 확인할 것
 
-지금 예시는 가상 Todo 코드다. **첫 도메인이 완성되면 그 실코드 인용으로 바꾼다** — 프론트 스킬이 `src/user/` 를 인용하듯, 글과 코드가 어긋날 수 없게 한다.
+지금 예시는 가상 Todo 코드다. **첫 도메인이 완성되면 그 실코드 인용으로 바꾼다** — 프론트 스킬이 `src/screens/user/` 를 인용하듯, 글과 코드가 어긋날 수 없게 한다.
 
 머지를 막는 기준 전체는 [common/docs/code-review/rules.md](../../../common/docs/code-review/rules.md) 에 있다.

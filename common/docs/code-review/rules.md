@@ -26,9 +26,9 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 **경계와 방향**
 
-- 레이어 방향은 상위 → 하위 단방향이다. 건너뛰기·역참조 금지. 백엔드는 controller → domain service → implement → repository, 프론트는 screens → hooks → services → api → lib 이고, 도메인이 최상위 폴더다(`src/<도메인>/<계층>`, 공용은 `src/common/`).
+- 레이어 방향은 상위 → 하위 단방향이다. 건너뛰기·역참조 금지. 백엔드는 controller → domain service → implement → repository, 프론트는 `app → screens → components·hooks → api → utils` 이고, 역할이 최상위 폴더다(`src/<역할>/`).
 
-  이 저장소의 프론트는 Expo(React Native) 라 화면 폴더가 `screens/` 다. 웹 프로젝트면 같은 자리가 `pages/` 가 된다.
+  프론트는 Expo Router 를 쓰므로 **`src/app` 은 라우트 전용**이다 — 컴포넌트·타입·유틸·훅을 그 안에 두면 차단 사유다. 화면 본체는 `src/screens/` 에 둔다.
 
 - 엔티티는 **구현 레이어(Finder·Appender 등) 위로 올라가지 않는다.** 구현 레이어가 지역변수로 다루고 도메인 모델로 바꿔 올리는 것까지가 허용이다. 서비스·컨트롤러 시그니처, **도메인 모델의 필드나 변환 파라미터**에 엔티티가 나타나면 차단 사유다 — `Result.from(entity)` 를 도메인 모델에 두면 모델이 storage 를 import 하게 된다. 변환은 구현 레이어 안의 확장 함수로 한다.
 
@@ -40,7 +40,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 - **답을 기다리지 않는 도메인 간 통지·명령은 이벤트로 발행하고, 그 리스너는 무조건 비동기(`@Async`)다.** 발행 도메인의 스레드가 받는 도메인의 일에 묶이면 차단 사유다.
 
-- enum 은 지정 위치에만 선언한다: 백엔드는 **여러 모듈이 공유하면 `core:core-enum`, 한 모듈만 쓰면 그 모듈**(개별 파일), 프론트는 `<도메인>/enums/`(여럿이 쓰면 `src/common/enums/`). 사용처 파일 안 인라인 선언은 차단 사유다.
+- enum 은 지정 위치에만 선언한다: 백엔드는 **여러 모듈이 공유하면 `core:core-enum`, 한 모듈만 쓰면 그 모듈**(개별 파일), 프론트는 **그 값을 소유한 파일 안**이다 — 결과 enum 은 `src/api/<자원>.ts`, 상태 enum 은 그 상태 타입 파일. 사용자에게 보이는 문장은 `src/constants/<화면>.ts`(화면·기능마다 한 파일)에 모으고 `constants/index.ts` 가 재노출한다.
 
 **트랜잭션과 예외**
 
@@ -137,7 +137,7 @@ MUST 위반은 CHANGES_REQUESTED 사유가 되고, SHOULD 위반은 참고 코�
 
 ## 리뷰 범위 밖 — 지적 금지
 
-- 포매팅, 줄 길이, import 순서 (ktlint·포매터가 처리).
+- 포매팅, 줄 길이, import 순서 (백엔드는 ktlint, 프론트는 `npm run lint` 의 ESLint 가 처리).
 
 - 스타일 취향과 네이밍 선호.
 

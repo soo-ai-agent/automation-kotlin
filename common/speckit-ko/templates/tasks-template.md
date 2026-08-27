@@ -22,7 +22,7 @@ description: "기능 구현용 작업 목록 템플릿"
 ## 경로 규약
 
 - **백엔드**: `backend/core/core-<도메인>/`, `backend/storage/db-core/`, `backend/clients/client-<이름>/`
-- **프론트엔드**: `frontend/src/<도메인>/<계층>/`, 공용은 `frontend/src/common/`
+- **프론트엔드**: `frontend/src/screens/<화면>/`, 라우트는 `frontend/src/app/`, 공용은 `frontend/src/{components,hooks,utils}/`
 - 파일을 어느 모듈에 둘지는 `backend/.claude/skills/kotlin-module-layout` 이 정한다
 
 <!--

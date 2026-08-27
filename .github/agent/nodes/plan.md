@@ -6,6 +6,6 @@
 
 - 백엔드를 건드리면 애그리게이트 경계와 레이어 방향 (controller → domain service → implement → repository)을 계획 단계에서 확정한다.
 
-- 프론트를 건드리면 아래에서 위로 어디까지 손대는지 적는다 (types → api → services → hooks → components → screens). 참조 방향은 그 반대인 `screens → hooks → services → api → lib` 한 방향이다.
+- 프론트를 건드리면 아래에서 위로 어디까지 손대는지 적는다 (utils → constants → hooks → components → screen → route). 참조 방향은 그 반대인 `app → screens → components·hooks → utils` 한 방향이다.
 
 - 커밋은 계획 파일 하나만 한다. 다음 노드가 이 계획대로 구현한다.
