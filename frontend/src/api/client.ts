@@ -57,21 +57,27 @@ async function send<T>(method: HttpMethod, path: string, body: unknown): Promise
     });
 
     const isSuccess: boolean = response.status >= 200 && response.status < 300;
-    const payload: ApiResponseDTO<T> | undefined = await readPayload<T>(response);
+    const text: string = await response.text();
 
-    // 래퍼가 통째로 비었거나 result 가 ERROR 면 계약 위반이므로 성공으로 보지 않는다.
+    // 본문 없는 성공 — 204 다(rules.md MUST "본문 없는 삭제 204"). 래퍼가 없으니 data 도 없고,
+    // 호출부는 이런 요청을 ApiResult<void> 로 받는다. 여기서 실패로 보면 삭제가 늘 실패한다.
+    if (text === "") {
+        return isSuccess
+            ? {ok: true, status: response.status, data: undefined as T}
+            : {ok: false, status: response.status};
+    }
+
+    const payload: ApiResponseDTO<T> | undefined = parseWrapper<T>(text);
+
+    // 래퍼가 아니거나(프록시의 HTML 오류 페이지 등) result 가 ERROR 면 계약 위반이므로 성공으로 보지 않는다.
     if (!isSuccess || payload === undefined || payload.result !== ResultType.SUCCESS) {
         return {ok: false, status: response.status};
     }
     return {ok: true, status: response.status, data: payload.data};
 }
 
-/** 본문이 비었거나(204) JSON 이 아니면(프록시의 HTML 오류 페이지 등) 래퍼 없음으로 본다. */
-async function readPayload<T>(response: Response): Promise<ApiResponseDTO<T> | undefined> {
-    const text: string = await response.text();
-    if (!text) {
-        return undefined;
-    }
+/** JSON 이 아니면 래퍼 없음으로 본다 — 서버가 아니라 앞단(프록시·게이트웨이)이 답한 경우다. */
+function parseWrapper<T>(text: string): ApiResponseDTO<T> | undefined {
     try {
         return JSON.parse(text) as ApiResponseDTO<T>;
     } catch {

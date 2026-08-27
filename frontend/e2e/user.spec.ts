@@ -48,8 +48,12 @@ test("전체 선택 후 선택 삭제하면 목록이 빈다", async ({page}) =>
     await page.goto("/");
     await expect(page.getByText("홍길동")).toBeVisible();
 
+    await expect(page.getByRole("checkbox", {name: "홍길동 선택"})).not.toBeChecked();
+
     await page.getByRole("checkbox", {name: "전체 선택"}).click();
     await expect(page.getByText("선택 2건")).toBeVisible();
+    // 체크 상태가 실제로 화면에 나가는지 본다 — accessibilityState 는 웹으로 안 나간다(aria-checked 를 쓴다)
+    await expect(page.getByRole("checkbox", {name: "홍길동 선택"})).toBeChecked();
 
     await page.getByRole("button", {name: "선택 삭제"}).click();
     await expect(page.getByText("선택한 사용자를 모두 삭제할까요?")).toBeVisible();

@@ -70,9 +70,9 @@ export async function deleteUser(id: number): Promise<DeleteUserOutcome> {
 }
 
 export async function deleteUsers(ids: number[]): Promise<DeleteUserOutcome> {
-    const result: ApiResult<void> = await apiClient.post<void>({
-        path: `${USERS}/bulk-delete`,
-        body: {ids},
+    // 경로에 동사를 넣지 않는다(rules.md MUST) — 지울 대상은 질의 문자열로 고른다.
+    const result: ApiResult<void> = await apiClient.delete<void>({
+        path: `${USERS}?ids=${ids.join(",")}`,
     });
 
     if (result.ok) {

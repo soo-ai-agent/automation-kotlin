@@ -49,15 +49,6 @@ export async function stubUserApi(page: Page, initialUsers: UserRow[]): Promise<
             return;
         }
 
-        if (path === "/api/v1/users/bulk-delete") {
-            const body = request.postDataJSON() as {ids: number[]};
-            for (const id of body.ids) {
-                removeUser(users, id);
-            }
-            await route.fulfill({json: success(null)});
-            return;
-        }
-
         const detailPath: RegExpMatchArray | null = path.match(/^\/api\/v1\/users\/(\d+)$/);
         if (detailPath) {
             await fulfillOneUser(route, users, Number(detailPath[1]), request.method());
@@ -65,6 +56,15 @@ export async function stubUserApi(page: Page, initialUsers: UserRow[]): Promise<
         }
 
         if (path === "/api/v1/users") {
+            // 여럿 삭제는 경로가 아니라 질의 문자열로 대상을 고른다 — DELETE /api/v1/users?ids=1,2
+            if (request.method() === "DELETE") {
+                const ids: string = new URL(request.url()).searchParams.get("ids") ?? "";
+                for (const id of ids.split(",")) {
+                    removeUser(users, Number(id));
+                }
+                await route.fulfill({status: 204, body: ""});
+                return;
+            }
             await route.fulfill({json: success(users)});
             return;
         }
@@ -88,7 +88,8 @@ async function fulfillOneUser(
 ): Promise<void> {
     if (method === "DELETE") {
         removeUser(users, id);
-        await route.fulfill({json: success(null)});
+        // 본문 없는 삭제는 204 다(rules.md MUST). 클라이언트가 이걸 성공으로 받아야 한다.
+        await route.fulfill({status: 204, body: ""});
         return;
     }
     const found: UserRow | undefined = users.find((eachUser: UserRow) => eachUser.id === id);

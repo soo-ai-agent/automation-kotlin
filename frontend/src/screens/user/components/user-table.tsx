@@ -113,7 +113,9 @@ function SelectBox({label, checked, onToggle}: SelectBoxProps) {
         <Pressable
             accessibilityRole="checkbox"
             accessibilityLabel={label}
-            accessibilityState={{checked}}
+            // accessibilityState 는 react-native-web 이 웹으로 내보내지 않는다(forwardedProps 에 없음).
+            // aria-checked 는 RN 0.86 과 웹이 둘 다 지원해 한 줄로 양쪽을 만족한다.
+            aria-checked={checked}
             style={[styles.selectBox, checked && styles.selectBoxChecked]}
             onPress={onToggle}
         >
