@@ -1,0 +1,33 @@
+# 웹 이미지를 만드는 데 필요 없는 것은 컨텍스트에 넣지 않는다.
+#
+# 특히 node_modules 를 빼는 것이 중요하다 — Dockerfile 이 `npm ci` 로 리눅스용
+# 의존성을 깐 뒤 `COPY . .` 를 하는데, 호스트 것이 들어오면 그 결과를 덮어쓴다.
+# 지금은 CI 가 리눅스라 우연히 동작하지만, 맥에서 빌드하면 macOS 네이티브
+# 바이너리가 리눅스 이미지에 들어가 깨진다.
+
+node_modules
+.expo
+dist
+
+# prebuild 산출물 — 웹 빌드와 무관하다
+ios
+android
+
+# 테스트·문서·규칙 — 이미지에 들어갈 이유가 없다
+e2e
+playwright.config.ts
+test-results
+playwright-report
+.claude
+docs
+*.md
+
+# 배포 자격증명 — 이미지에 절대 넣지 않는다
+google-service-account.json
+*.p8
+*.p12
+*.keystore
+credentials.json
+
+.git
+.gitignore
