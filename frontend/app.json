@@ -5,20 +5,50 @@
     "scheme": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "backgroundColor": "#ffffff",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "bundleIdentifier": "com.example.frontend",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.example.frontend",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2563eb"
+      }
+    },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "관련성 높은 광고를 보여 주기 위해 사용됩니다. 허용하지 않아도 앱은 그대로 동작합니다."
         }
-      ]
+      ],
+      "expo-router",
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#0f172a"
+          }
+        }
+      ],
+      "expo-status-bar"
     ],
     "extra": {
       "apiBaseUrl": "http://localhost:8080",
@@ -26,6 +56,10 @@
       "kakaoWebBaseUrl": "http://localhost",
       "admobBannerId": "",
       "admobInterstitialId": ""
+    },
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
     }
   }
 }
