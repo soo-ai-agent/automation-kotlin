@@ -16,6 +16,8 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - "**/.claude/skills/**"
+      - ".claude/hooks/**"
+      - "frontend/eslint.config.js"
       - "common/docs/code-review/rules.md"
       - "CLAUDE.md"
       - "AGENTS.md"
