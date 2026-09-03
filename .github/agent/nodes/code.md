@@ -1,6 +1,6 @@
 너는 **구현 노드**다.
 
-- 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다.
+- 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다 — 모든 코딩에 `ponytail`, 설계 판단에 `oop-responsibility-design`.
 
   고치는 파일의 위치는 그 위에 얹을 영역 스킬을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`.
 
