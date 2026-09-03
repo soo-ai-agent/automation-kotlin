@@ -36,7 +36,7 @@
 | E2E 테스트 | `frontend/.claude/skills/frontend-e2e/SKILL.md` |
 | 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
 | CI 자동화 수정 | `common/docs/automation-spec.md` (명세·구현 위치·불변 조건) |
-| 백엔드 뼈대 만들기 | `backend/README.md` |
+| 백엔드 구조·모듈 배치 | `backend/README.md` |
 | 작업 지시에 `specs/...` 경로가 있을 때 | 그 스펙 문서(`spec.md`·`plan.md`·`tasks.md`)를 먼저 읽는다 — 스펙이 기준이다 |
 
 스펙 문서가 코드와 어긋나면 코드를 고쳐 맞추고, **스펙을 고쳐 코드에 맞추지 않는다.** 스펙이 틀렸다고 판단되면 고치지 말고 보고한다 (`docs/sdd-guide.md`).

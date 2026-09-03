@@ -16,7 +16,7 @@
 
 - **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 32종 (백엔드 17 · 프론트 7 · 공통 8)
 
-- **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, Spring 멀티모듈을 채워 넣을 백엔드 자리
+- **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, 첫 도메인까지 들어 있는 Spring 멀티모듈 백엔드
 
 사람이 하는 일은 둘뿐이다 — **무엇을 만들지 쓰기**, 그리고 **완성된 PR 을 머지할지 결정하기.**
 
@@ -64,9 +64,11 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 
 토큰 발급 방법과 각각이 왜 필요한지는 [docs/setup.md](docs/setup.md) 에 있다. 저장소 파일은 고칠 게 없다.
 
-**3. 백엔드 뼈대 만들기** — `backend/` 는 지금 규칙 문서만 있는 빈 자리다. Spring 멀티모듈을 채워 커밋한다.
+**3. 백엔드 확인** — Spring 멀티모듈 뼈대와 첫 도메인(`todo`)이 동봉돼 있어 바로 뜬다.
 
-방법은 [backend/README.md](backend/README.md) 에 명령어까지 적혀 있다.
+    cd backend && ./gradlew ktlintCheck unitTest && ./gradlew :api:bootRun
+
+구조와 새 도메인 추가법은 [backend/README.md](backend/README.md) 에 있다. JDK 25 가 필요하다.
 
 **4. 프론트엔드 확인** — 완성된 앱이 동봉돼 있어 바로 뜬다.
 
@@ -157,7 +159,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 광고를 넣을지 정하기 (스토어 체크리스트) | [docs/ads.md](docs/ads.md) |
 | 앱스토어·플레이스토어 배포 준비 | [frontend/docs/release.md](frontend/docs/release.md) |
 | 새 기능의 스펙 쓰기 | [docs/sdd-guide.md](docs/sdd-guide.md) |
-| 백엔드 뼈대 만들기 | [backend/README.md](backend/README.md) |
+| 백엔드 구조·새 도메인 추가 | [backend/README.md](backend/README.md) |
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |
 | 빌려온 것의 원본·라이선스 | [docs/upstream.md](docs/upstream.md) |
