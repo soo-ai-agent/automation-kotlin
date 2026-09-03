@@ -102,11 +102,13 @@ fun `todo 생성 테스트`() {
 
 **(1) 테스트 실계수를 센다.** Gradle 은 캐시로 태스크를 건너뛰고도 성공이라 말한다.
 
+폴더 이름은 **태스크 이름**이다 — `unitTest` 는 `build/test-results/unitTest` 에 쌓인다. `test` 로 훑으면 조용히 0 이 나온다(실측).
+
 ```bash
 python3 -c "
 import pathlib,re
 tot=0
-for d in pathlib.Path('.').rglob('build/test-results/test'):
+for d in pathlib.Path('.').rglob('build/test-results/unitTest'):
     tot+=sum(int(re.search(r'tests=\"(\d+)\"', f.read_text()[:400]).group(1)) for f in d.glob('*.xml'))
 print(tot)"
 ```

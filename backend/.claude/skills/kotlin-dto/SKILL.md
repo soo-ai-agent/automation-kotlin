@@ -27,9 +27,9 @@ Spring 템플릿(`team-dodn/spring-boot-kotlin-template`)의 규약을 그대로
 
 ```kotlin
 data class TodoCreateRequest(
+    // 필드를 안 보낸 요청에서 null 이 가능함
     @field:NotBlank(message = "제목은 필수입니다")
     @field:Size(max = 200, message = "제목은 200자를 넘을 수 없습니다")
-    // 필드를 안 보낸 요청에서 null 이 가능함
     val title: String?,
 ) {
     fun toCommand(): TodoCreateCommand {
@@ -80,7 +80,8 @@ data class TodoResponse(
 
 - 필드 타입을 명시하고 nullable 을 최소화한다. 없을 수 있는 값만 `?`.
 
-- **`?` 필드는 선언 바로 위에 사유를 적는다.** 문장은 `<언제> null 이 가능함` 꼴로 끝낸다.
+- **`?` 필드는 선언 바로 위에 사유를 적는다.** 애너테이션이 붙는 필드는 **애너테이션보다 위**에 둔다 —
+  애너테이션과 `val` 사이에 두면 ktlint 가 막는다(`standard:value-parameter-comment`, 실측). 문장은 `<언제> null 이 가능함` 꼴로 끝낸다.
   클래스 위에 한 줄로 몰아 적으면 어느 필드 이야기인지 흐려진다.
 
   ```kotlin
