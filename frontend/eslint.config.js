@@ -30,4 +30,29 @@ module.exports = defineConfig([
             // Prettier 를 쓰지 않는 이유도 같다 — Prettier 는 이 배치를 강제로 한 줄씩 펼치고 끌 수 없다.
         },
     },
+    {
+        // 저장소 고유 규칙 중 **기계가 셀 수 있는 둘**만 여기서 막는다.
+        // 규칙이 있으면 그것을 강제할 장치가 있어야 한다(core-principles) — 나머지는 리뷰어의 일이다.
+        // 타입만 빌려 오는 import 까지 막히는 규칙은 넣지 않았다. 오탐이 나는 규칙은 곧 꺼지기 때문이다.
+        files: ["src/screens/**/index.tsx", "src/screens/*.tsx"],
+        rules: {
+            "no-restricted-syntax": ["error", {
+                selector: "CallExpression[callee.name=/^use(State|Effect|Ref)$/]",
+                message: "화면은 상태를 갖지 않는다 — useState·useEffect·useRef 는 훅으로 옮긴다 (frontend-screen).",
+            }],
+        },
+    },
+    {
+        // HTTP 창구는 api/client.ts 하나다. 두 번째가 생기면 인증과 에러 처리가 두 갈래로 갈라진다.
+        files: ["src/**/*.ts", "src/**/*.tsx"],
+        ignores: ["src/api/client.ts"],
+        rules: {
+            "no-restricted-imports": ["error", {
+                paths: [{
+                    name: "expo/fetch",
+                    message: "HTTP 는 api/client.ts 만 부른다 — 자원별 요청 함수를 통한다 (frontend-api).",
+                }],
+            }],
+        },
+    },
 ]);

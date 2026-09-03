@@ -218,7 +218,7 @@ for (const order of orders) {
 
 리뷰에서 포맷을 지적하지 않는다(rules.md "리뷰 범위 밖"). 도구가 통과시킨 것은 통과된 것이다.
 
-린트는 포맷만 보는 게 아니다 — React 훅·ref 규칙도 함께 잡는다. 실제로 이 저장소에서
+린트는 포맷만 보는 게 아니다 — React 훅·ref 규칙과 저장소 고유 규칙 둘(화면 무상태·HTTP 창구 하나)을 함께 잡는다. 실제로 이 저장소에서
 훅이 ref 를 담은 객체를 통째로 반환하던 자리 6곳을 린트가 찾아냈고, 호출부에서 구조분해하는 것으로 고쳤다.
 
 ## 이름 규칙
@@ -265,7 +265,7 @@ for (const order of orders) {
 셋이 다 통과해야 끝난 것이다. 순서가 있다 — E2E 가 개발 서버를 띄우면서 라우트 타입을 만들고, 그래야 `tsc` 가 `<Link href>` 오타까지 잡는다.
 
 ```bash
-npm run lint     # Expo 공식 규칙 + 포맷. 훅·ref 규칙도 함께 본다
+npm run lint     # Expo 공식 규칙 + 포맷. 훅·ref 와 화면 무상태·HTTP 창구도 함께 본다
 npm run e2e      # 사용자 흐름. .expo/types 라우트 타입이 여기서 생성된다
 npm run build    # tsc --noEmit + 웹 번들
 ```
