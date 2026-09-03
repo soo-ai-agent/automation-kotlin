@@ -29,7 +29,7 @@
 
 **우리가 바꾼 것은 없다.** 원본 그대로 두었고, 각 파일 frontmatter 의 `license: MIT` 로 출처가 표시돼 있다.
 
-`.claude/skills/LICENSE` 는 **이 네 스킬에만** 적용된다. 같은 폴더의 다른 스킬(`oop-responsibility-design`·`algorithm-implementation`·`md-doc`)은 이 저장소의 자체 문서다.
+`.claude/skills/LICENSE` 는 **이 네 스킬에만** 적용된다. 같은 폴더의 다른 스킬(`oop-responsibility-design`·`md-doc`)은 이 저장소의 자체 문서다.
 
 ## spec-kit — 스펙 먼저 쓰기(SDD) 도구
 

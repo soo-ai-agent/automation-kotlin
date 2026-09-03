@@ -179,8 +179,6 @@ val amount: BigDecimal = coupon.applyTo(order.total)
 차이는 코드 길이가 아니라 **규칙이 사는 곳**이다. 위쪽은 최소주문·음수 금지 규칙이 호출부마다 복사되고,
 쿠폰을 쓰는 두 번째 서비스가 생기는 순간 한쪽만 고쳐져 결제 금액이 갈라진다. 아래쪽은 규칙이 한 곳에 있다.
 
-같은 예가 **algorithm-implementation** 에도 있다 — 거기서는 이 메서드를 입출력 표와 테스트로 잠그는 절차를 다룬다.
-
 > 판별법: 그 클래스에서 필드와 getter 를 지웠을 때 아무것도 남지 않으면 데이터다.
 >
 > 엔티티의 컬럼과 DTO 의 필드 자체는 구조상 공개가 정상이다. 숨기라는 뜻이 아니라, **판단·대입을 바깥에서 하지 말라**는 뜻이다.
@@ -360,7 +358,7 @@ class NoneDiscountPolicy : DiscountPolicy(emptyList()) {   // 할인 없음도 �
 | 계층 | 이 문서의 관점에서 |
 |---|---|
 | 엔티티 (`storage/db-core`) | 상태 전이와 불변식이 사는 곳 — `protected set` + 행위 메서드 (kotlin-entity) |
-| 도메인 모델 (`domain/model/`) | 조회 결과로 하는 판단·계산 — 순수 메서드 (algorithm-implementation) |
+| 도메인 모델 (`domain/model/`) | 조회 결과로 하는 판단·계산 — 순수 메서드 |
 | 도메인 서비스 (`domain/service/XxxService`) | 흐름 조립과 트랜잭션. 도메인 판단을 여기서 하지 않는다 (kotlin-domain-service) |
 | 구현 레이어 (`Finder`·`Appender`) | 재사용 단위와 엔티티↔모델 변환. 규칙 없음 (kotlin-implement) |
 | 리포지토리 (`storage/db-core`) | 저장과 조회만. 규칙 없음 (kotlin-repository) |
