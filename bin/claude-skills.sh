@@ -85,22 +85,29 @@ fi
 # 어느 자리를 고르든 claude 는 저장소 루트에서 연다.
 # 하위 폴더에서 열면 루트 CLAUDE.md 의 @import(3대 원칙·리뷰 규칙 MUST)가 펼쳐지지 않아
 # 최상위 규칙이 통째로 빠진다 — 실측으로 확인했다. 영역은 cwd 가 아니라 아래 FOCUS 로 좁힌다.
+# 하위 폴더의 .claude/skills 는 --add-dir 로 열어 줘야 스킬 목록에 뜬다.
+# 붙이지 않으면 루트의 공통 스킬만 보이고 kotlin-*·frontend-* 는 하나도 안 보인다 — 실측으로 확인했다
+# (루트만: kotlin 0개 / --add-dir backend: 17개). 폴더는 이미 저장소 안이라 접근 범위는 넓어지지 않는다.
 FOCUS=""
+DIRS=()
 case "$AREA" in
     backend | be)
         LABEL="백엔드 — kotlin-* 가 주로 적용"
+        DIRS=(--add-dir "$REPO_ROOT/backend")
         FOCUS="이번 세션의 작업 영역은 backend/ 다. 코드 변경은 backend/ 안에서만 한다.
 적용할 영역 스킬은 backend/.claude/skills/ 의 kotlin-* 이고, 색인은 backend/.claude/skills/README.md 다.
 frontend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     frontend | fe)
         LABEL="프론트엔드 — frontend-* 가 주로 적용"
+        DIRS=(--add-dir "$REPO_ROOT/frontend")
         FOCUS="이번 세션의 작업 영역은 frontend/ 다. 코드 변경은 frontend/ 안에서만 한다.
 적용할 영역 스킬은 frontend/.claude/skills/ 의 frontend-* 이고, 색인은 frontend/.claude/skills/README.md 다.
 backend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     all | root)
         LABEL="저장소 전체 — 모든 스킬"
+        DIRS=(--add-dir "$REPO_ROOT/backend" --add-dir "$REPO_ROOT/frontend")
         ;;
     install)
         install_links
@@ -130,6 +137,6 @@ echo "  저장소: $REPO_ROOT"
 cd "$REPO_ROOT"
 
 if [ -z "$FOCUS" ]; then
-    exec claude "$@"
+    exec claude "${DIRS[@]}" "$@"
 fi
-exec claude --append-system-prompt "$FOCUS" "$@"
+exec claude "${DIRS[@]}" --append-system-prompt "$FOCUS" "$@"

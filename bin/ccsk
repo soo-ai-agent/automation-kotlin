@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# 이 저장소의 규칙 스킬 **본문**을 통째로 얹은 Claude 세션을, 지금 서 있는 디렉터리에서 연다.
+#
+#   ln -sf /경로/automation-kotlin/bin/ccsk ~/.local/bin/ccsk   # 한 번만
+#   ccsk be      백엔드 규칙(kotlin-*)을 싣고 연다
+#   ccsk fe      프론트 규칙(frontend-*)을 싣고 연다
+#   ccsk         영역 인자 없음 = 둘 다
+#
+# 뒤에 붙인 인자는 claude 로 그대로 넘어간다 — `ccsk be -c` 는 이어서 대화하기다.
+#
+# claude-skills.sh(claude-be·claude-fe·claude-all)와 다른 점은 둘이다.
+#   ① 스킬을 이름·설명만 올리지 않고 SKILL.md 전문을 미리 싣는다.
+#      --add-dir 은 세션 목록에 이름만 올리므로, 본문까지 켜려면 이 번들이 필요하다.
+#   ② 저장소 루트로 cd 하지 않는다 — 규칙은 이 저장소에서 가져오고, 작업 대상은 지금 서 있는 디렉터리다.
+#      그래서 다른 폴더에서 열면 루트 CLAUDE.md 와 그 import(리뷰 규칙 rules.md)는 붙지 않는다.
+#      3대 원칙은 번들에 들어 있어 그대로 붙는다.
+set -eu
+
+# 심볼릭 링크를 풀어 저장소 원본 위치를 찾는다.
+# readlink -f 를 쓰지 않는 이유는 macOS(BSD) 에 그 옵션이 없기 때문이다 — 직접 따라간다.
+resolve_link() {
+    path="$1"
+    while [ -L "$path" ]; do
+        target="$(readlink "$path")"
+        case "$target" in
+            /*) path="$target" ;;
+            *) path="$(dirname "$path")/$target" ;;
+        esac
+    done
+    printf '%s/%s' "$(cd "$(dirname "$path")" && pwd)" "$(basename "$path")"
+}
+
+SCRIPT_PATH="$(resolve_link "${BASH_SOURCE[0]}")"
+REPO="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+
+usage() {
+    cat << USAGE
+사용법
+  ccsk be                 백엔드 규칙(kotlin-*) 전문을 싣고 현재 디렉터리에서 연다
+  ccsk fe                 프론트 규칙(frontend-*) 전문을 싣고 연다
+  ccsk                    영역 인자 없음 = 둘 다
+
+뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: ccsk be -c 는 이어서 대화).
+저장소 루트에서 열고 싶으면 claude-be · claude-fe (bin/claude-skills.sh) 를 쓴다.
+규칙 저장소: $REPO
+USAGE
+}
+
+case "${1-}" in
+    -h | --help | help)
+        usage
+        exit 0
+        ;;
+    backend | be)
+        AREAS="backend"
+        SUFFIX=be
+        SCOPE="공통 + 백엔드(kotlin-*)"
+        DIRS=(--add-dir "$REPO/backend")
+        shift
+        ;;
+    frontend | fe)
+        AREAS="frontend"
+        SUFFIX=fe
+        SCOPE="공통 + 프론트엔드(frontend-*)"
+        DIRS=(--add-dir "$REPO/frontend")
+        shift
+        ;;
+    "" | -*)
+        AREAS="backend frontend"
+        SUFFIX=all
+        SCOPE="공통 + 백엔드(kotlin-*) + 프론트엔드(frontend-*)"
+        DIRS=(--add-dir "$REPO/backend" --add-dir "$REPO/frontend")
+        ;;
+    *)
+        echo "모르는 자리: $1" >&2
+        echo >&2
+        usage >&2
+        exit 2
+        ;;
+esac
+
+command -v claude > /dev/null || {
+    echo "claude CLI 가 없어요. 설치: npm install -g @anthropic-ai/claude-code" >&2
+    echo "설치 후 로그인: claude setup-token" >&2
+    exit 1
+}
+
+# 공통 스킬은 셋만 싣는다. 앞의 둘은 색인('언제' 열)이 모든 작업에 적용된다고 못박은 것이고,
+# oop-responsibility-design 은 3대 원칙이 책임 배치를 그것에 위임하므로 함께 싣는다 — 다만 셋 중 가장 커서
+# (약 15k 토큰) 본문 상주가 부담이면 여기서 빼도 된다. 목록에는 남아 있어 필요할 때 열린다.
+# 나머지 공통 스킬(ponytail-review·speckit-* 등)은 필요할 때 부르는 것이라 넣지 않는다.
+# 연관배열을 쓰지 않는 이유는 macOS 기본 bash 3.2 가 지원하지 않기 때문이다.
+SKILLS=(
+    "$REPO/.claude/skills/core-principles"
+    "$REPO/.claude/skills/ponytail"
+    "$REPO/.claude/skills/oop-responsibility-design"
+)
+for area in $AREAS; do
+    [ -d "$REPO/$area/.claude/skills" ] || continue # 아직 없는 영역은 건너뛴다
+    SKILLS+=("$REPO/$area"/.claude/skills/*)
+done
+
+# SKILL.md 가 없는 항목은 아래에서 걸러진다 — README.md 와 벤더링된 expo/ 가 그렇다.
+# expo 하위 18종은 프레임워크 사용법이라 분량이 커서, 필요할 때 그 자리에서 연다.
+BUNDLE="${TMPDIR:-/tmp}/ccsk-skills-${USER:-$UID}-$SUFFIX.md"
+{
+    echo '# 저장소 규칙 스킬 — 세션 시작 시 전문 로드됨'
+    echo
+    echo '아래는 이 저장소의 규칙 스킬 전문이다. 이미 적용된 상태이므로 Skill 도구로 다시 부르거나 SKILL.md 를 다시 읽지 않는다.'
+    echo '충돌 시 우선순위는 CLAUDE.md 가 정한 대로 core-principles 의 3대 원칙이 가장 앞선다.'
+    for skill in "${SKILLS[@]}"; do
+        [ -f "$skill/SKILL.md" ] || continue
+        printf '\n\n===== SKILL: %s (%s/SKILL.md) =====\n\n' \
+            "$(basename "$skill")" "${skill#"$REPO"/}"
+        cat "$skill/SKILL.md"
+    done
+} > "$BUNDLE"
+
+# 헤드리스(-p) 출력과 섞이지 않게 stderr 로 알린다
+printf '\033[1;36m▶ 스킬 %d개 전문 로드 (%s, %dKB) · 작업 폴더 %s\033[0m\n' \
+    "$(grep -c '^===== SKILL:' "$BUNDLE")" "$SCOPE" "$(($(wc -c < "$BUNDLE") / 1024))" "$PWD" >&2
+
+exec claude "${DIRS[@]}" --append-system-prompt-file "$BUNDLE" "$@"
