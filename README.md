@@ -14,7 +14,7 @@
 
 - **스펙 먼저 쓰기(SDD)** — 새 기능은 `specs/` 에 스펙을 먼저 쓰고 그 스펙으로 구현한다. 산출물은 한국어로 나온다
 
-- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 33종 (백엔드 17 · 프론트 8 · 공통 8)
+- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 33종 (백엔드 17 · 프론트 7 · 공통 9)
 
 - **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, Spring 멀티모듈을 채워 넣을 백엔드 자리
 
@@ -150,7 +150,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 |---|---|
 | 전체 구조를 한 장으로 | [docs/architecture.html](docs/architecture.html) — 브라우저로 연다 |
 | 처음 켜기 (한 번) | [docs/setup.md](docs/setup.md) |
-| 내 컴퓨터에서 같은 규칙으로 Claude 열기 | `claude-be` · `claude-fe` ([docs/local-claude.md](docs/local-claude.md)) |
+| 내 컴퓨터에서 같은 규칙으로 Claude 열기 | `claude-be` · `claude-fe` · `ccsk be` ([docs/local-claude.md](docs/local-claude.md)) |
 | 일 시키기 — 이슈 쓰는 법, 라벨 고르기 | [docs/issue-guide.md](docs/issue-guide.md) |
 | 동작 원리 알기, 설정 바꾸기 | [docs/agent-guide.md](docs/agent-guide.md) |
 | 서버 배포 붙이기 | [docs/deploy.md](docs/deploy.md) |

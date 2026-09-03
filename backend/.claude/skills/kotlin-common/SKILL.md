@@ -20,7 +20,7 @@ description: Kotlin + Spring Boot 백엔드 전 레이어 공통 규칙. 자료�
 
 ## 최상위 원칙 — 3대 원칙이 정본이다
 
-저장소 전체의 최상위 원칙은 공통 스킬 [core-principles](../../../.claude/skills/core-principles/SKILL.md)(3대 원칙)가 정본으로 갖는다
+저장소 전체의 최상위 원칙은 공통 스킬 [core-principles](../../../../.claude/skills/core-principles/SKILL.md)(3대 원칙)가 정본으로 갖는다
 — 단순함 최우선, 최소 수정·무파괴, 데이터의 흐름과 통제.
 
 이 문서의 모든 규칙은 그 원칙에 종속된다. 여기에는 요약을 두지 않는다 — 두 곳에 적히면 한쪽만 고쳐진다.

@@ -32,7 +32,7 @@
 | API 문서(REST Docs) | `backend/.claude/skills/kotlin-api-docs` |
 | 쿼리 | `backend/.claude/skills/kotlin-repository` |
 | 테스트 (모든 기능 작업에 동반) | `backend/.claude/skills/kotlin-test` |
-| 프론트엔드 | `frontend/.claude/skills/README.md` 색인 — 저장소 규칙 7종 + 벤더링된 Expo 공식 스킬 17종(`frontend/.claude/skills/expo/`), `frontend/README.md` |
+| 프론트엔드 | `frontend/.claude/skills/README.md` 색인 — 저장소 규칙 7종 + 벤더링된 Expo 공식 스킬 18종(`frontend/.claude/skills/expo/`), `frontend/README.md` |
 | TS/RN 조건·분기·리스트 문법 | `frontend/.claude/skills/frontend-style/SKILL.md` |
 | E2E 테스트 | `frontend/.claude/skills/frontend-e2e/SKILL.md` |
 | 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
