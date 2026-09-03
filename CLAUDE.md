@@ -55,7 +55,7 @@
 
 스킬을 고치면 `.claude/hooks/review-skill-edit.sh` 가 그 자리에서 불변식(이름·description·필수 절·링크)을 검사하고, **skill-creator 로 되돌아보라고 지시한다.**
 
-세는 것으로 되는 것은 훅이 잡고, description 이 실제로 걸리는지 같은 판단은 skill-creator 가 본다. 훅은 Write·Edit 도구로 고칠 때만 걸린다 — Bash 나 편집기로 고쳤으면 skill-creator 를 직접 부른다.
+세는 것으로 되는 것은 훅이 잡고, description 이 실제로 걸리는지 같은 판단은 사람·에이전트가 본다 — skill-creator 가 있으면 그것으로, 없으면 직접(개인 플러그인이라 이 저장소와 CI 에는 없다). 훅은 Write·Edit 도구로 고칠 때만 걸린다 — Bash 나 편집기로 고쳤으면 skill-creator 를 직접 부른다.
 
 ## 시작 전에 승인을 받는 작업
 

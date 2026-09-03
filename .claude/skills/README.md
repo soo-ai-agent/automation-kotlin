@@ -31,7 +31,7 @@
 
 그래서 `.claude/hooks/review-skill-edit.sh` 를 걸어 두었다. 에이전트가 Write·Edit 도구로 `SKILL.md` 를 고치면 넷을 세고, 이어서 `skill-creator` 호출을 지시한다.
 
-| 훅이 세는 것 | skill-creator 가 보는 것 |
+| 훅이 세는 것 | 세는 것으로 안 돼 사람·에이전트가 보는 것 (skill-creator 가 있으면 그것으로) |
 |---|---|
 | frontmatter `name` 이 폴더 이름과 같은가 | description 이 이 스킬을 써야 할 상황에서 실제로 걸리는가 |
 | description 이 트리거를 잡을 만큼 있는가 | 구조·분량이 읽기에 맞는가 |

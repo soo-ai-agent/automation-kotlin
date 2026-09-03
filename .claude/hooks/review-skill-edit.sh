@@ -7,7 +7,9 @@
 #
 # 하는 일은 둘이다.
 #   ① 기계가 셀 수 있는 불변식(이름·description·필수 절·링크)을 그 자리에서 검사한다.
-#   ② 에이전트에게 skill-creator 호출을 지시한다 — 트리거 정확도처럼 세는 것으로 안 되는 것을 맡긴다.
+#   ② 트리거 정확도처럼 세는 것으로 안 되는 점검을 에이전트에게 지시한다.
+#      skill-creator 로 하면 좋지만 그것은 개인 플러그인이라 이 저장소에도 CI 에도 없다 —
+#      없는 환경에서는 직접 보라고 함께 적는다.
 #
 # 한계 둘. Write·Edit 도구로 고칠 때만 걸린다 — Bash(sed) 로 고치거나 사람이 편집기로 고치면 지나간다.
 # 그리고 세션·스킬당 한 번만 말한다 — 같은 파일을 연달아 고칠 때 같은 말을 반복하지 않기 위해서다.
@@ -78,13 +80,13 @@ EOF
 
 if [ -n "$problems" ]; then
     head="$skill 에 불변식 위반이 있다:$problems\n"
-    label="스킬 점검 — 위반이 있습니다. skill-creator 로 되돌아봅니다."
+    label="스킬 점검 — 불변식 위반이 있습니다. 트리거·경계도 함께 되돌아봅니다."
 else
     head=""
-    label="스킬을 고쳤습니다 — skill-creator 로 되돌아봅니다."
+    label="스킬을 고쳤습니다 — 트리거·경계를 되돌아봅니다."
 fi
 
-printf '{"systemMessage":"%s","hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"%s방금 %s 를 고쳤다. 이 변경을 끝내기 전에 skill-creator 스킬을 호출해 이 파일을 점검하고, 나온 지적 중 고칠 것을 같은 변경에 반영하라. 특히 description 이 이 스킬을 써야 할 상황에서 실제로 걸리는지 본다. 위 불변식 위반이 있으면 그것부터 고친다. 점검 결과는 사용자에게 한 줄로 알린다."}}\n' \
+printf '{"systemMessage":"%s","hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"%s방금 %s 를 고쳤다. 이 변경을 끝내기 전에 세는 것으로 안 되는 둘을 점검하라 — description 이 이 스킬을 써야 할 상황에서 실제로 걸리는가, 겹치는 스킬과 경계가 갈리는가. skill-creator 스킬을 쓸 수 있으면 그것으로 점검하고(이 저장소에는 없다. 개인 플러그인이라 없는 환경도 있다), 없으면 직접 본다. 위 불변식 위반이 있으면 그것부터 고친다. 점검 결과와 고친 것을 사용자에게 한 줄로 알린다."}}\n' \
     "$label" "$head" "$path"
 
 exit 0
