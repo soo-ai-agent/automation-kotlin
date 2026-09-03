@@ -23,6 +23,14 @@ set -o pipefail
 # 이슈·PR·라벨 같은 API 호출은 셸이 하고 Claude 에게 토큰을 주지 않는다.
 ALLOWED="Bash(git add:*),Bash(git commit:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(./gradlew:*),Bash(npm:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*)"
 
+# 하위 폴더의 .claude/skills 는 --add-dir 로 열어 줘야 스킬 목록에 뜬다.
+# 붙이지 않으면 루트의 공통 스킬만 보이고 kotlin-*·frontend-* 는 이름조차 안 보인다 —
+# 실측했다(루트만 kotlin 0개, --add-dir backend 17개). 폴더를 들어낸 저장소도 있으니 있는 것만 붙인다.
+SKILL_DIRS=()
+for d in backend frontend; do
+  [ -d "$d/.claude/skills" ] && SKILL_DIRS+=(--add-dir "$d")
+done
+
 build_prompt() { # $1=역할 파일, $2=출력 파일
   : > "$2"
   [ -s "$1" ] && printf '%s\n\n' "$(cat "$1")" >> "$2"
@@ -53,6 +61,7 @@ build_prompt() { # $1=역할 파일, $2=출력 파일
 run_claude() { # $1=프롬프트 파일 → 종료코드를 STATUS 에
   STATUS=0
   claude -p "$(cat "$1")" \
+    "${SKILL_DIRS[@]}" \
     --permission-mode acceptEdits \
     --allowedTools "$ALLOWED" \
     --output-format stream-json --verbose \
