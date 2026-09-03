@@ -2,7 +2,7 @@
 
 > **이 폴더는 에이전트가 읽습니다.** 스택과 무관하게 모든 코드에 적용되는 규칙입니다.
 
-스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(저장소 규칙 7종 + 벤더링된 Expo 공식 스킬 17종).
+스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(저장소 규칙 7종 + 벤더링된 Expo 공식 스킬 18종).
 
 이 폴더의 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 스택 스킬(`kotlin-*` · `frontend-*`)을 고른다.
 
@@ -25,6 +25,21 @@
 - **[SKILL.md](oop-responsibility-design/SKILL.md)** — 규칙 요약. 코드 작성·리뷰 판단에는 이것만으로 충분하다.
 
 - **[reference.md](oop-responsibility-design/reference.md)** — 영화 예매 도메인 코틀린 예제로 절차적 코드가 객체지향으로 바뀌는 8단계를 따라간다. 설계 근거를 설명하거나 개념을 배울 때만 읽는다.
+
+## 스킬을 고치면 무엇이 검사하나
+
+스킬은 고쳐도 아무것도 실패하지 않는다. 컴파일도 테스트도 스킬 문서를 읽지 않아서, 이름이 폴더와 어긋나거나 링크가 깨져도 조용히 지나간다.
+
+그래서 `.claude/hooks/review-skill-edit.sh` 를 걸어 두었다. 에이전트가 Write·Edit 도구로 `SKILL.md` 를 고치면 넷을 세고, 이어서 `skill-creator` 호출을 지시한다.
+
+| 훅이 세는 것 | skill-creator 가 보는 것 |
+|---|---|
+| frontmatter `name` 이 폴더 이름과 같은가 | description 이 이 스킬을 써야 할 상황에서 실제로 걸리는가 |
+| description 이 트리거를 잡을 만큼 있는가 | 구조·분량이 읽기에 맞는가 |
+| `kotlin-*`·`frontend-*` 이면 '적발 신호'와 '체크리스트' 절이 있는가 | 겹치는 스킬과 경계가 갈리는가 |
+| 문서 안 상대 링크가 실제로 있는가 | |
+
+벤더링본(`expo/`·`speckit-*`)은 상류 사본이라 건너뛴다. 세션·스킬당 한 번만 말하므로, 같은 파일을 연달아 고쳐도 같은 말을 반복하지 않는다.
 
 ## 이 폴더에 `speckit-*` 이 보인다면
 

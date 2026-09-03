@@ -22,6 +22,12 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/warn-speckit-preset-stale.sh\"",
             "timeout": 10,
             "statusMessage": "\ud55c\uad6d\uc5b4 \ud504\ub9ac\uc14b \ub3d9\uae30\ud654 \ud655\uc778"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/review-skill-edit.sh\"",
+            "timeout": 10,
+            "statusMessage": "\uc2a4\ud0ac \uc810\uac80"
           }
         ]
       }
