@@ -45,8 +45,23 @@ claude-all     # 저장소 전체
 
 > **확정** — `backend/` 에서 열어 리뷰 규칙 본문을 물었을 때 "모름", 루트에서는 정확히 답하는 것을 확인 (2026-08-26).
 
-셋의 차이는 **작업 영역**이다. `claude-be` 는 "backend/ 안에서만 고치고 kotlin-* 스킬을 따른다"를,
+셋의 차이는 **작업 영역과 붙는 스킬**이다. `claude-be` 는 "backend/ 안에서만 고치고 kotlin-* 스킬을 따른다"를,
 `claude-fe` 는 그 반대를 세션 시작부터 지시해 둔다. 반대편은 계약 확인용으로 읽기만 한다.
+
+| 명령 | 붙는 스킬 | 개수 |
+|---|---|---|
+| `claude-be` | 공통 + `kotlin-*` | 9 + 17 |
+| `claude-fe` | 공통 + `frontend-*` | 9 + 8 |
+| `claude-all` | 공통 + `kotlin-*` + `frontend-*` | 34 전부 |
+
+**그냥 `claude` 로 열면 세션이 시작될 때 공통 9종만 붙는다.** claude 는 연 자리의 `.claude/skills/` 부터 뒤지므로
+루트에서 열면 `backend/`·`frontend/` 아래 스킬 25종은 목록에 없다. 그 폴더의 파일을 한 번 읽고 나면 뒤늦게 붙지만,
+그때는 **이미 규칙 없이 첫 판단을 내린 뒤**다. launcher 는 `--add-dir` 로 그 폴더를 처음부터 붙여 이 구멍을 막는다.
+
+> **확정** — 루트에서 그냥 열어 물었을 때 `kotlin-*`·`frontend-*` 가 목록에 하나도 없고, `--add-dir backend --add-dir frontend` 를 붙이면
+> 25종이 전부 목록에 뜨는 것을 확인 (2026-09-07, CLI 2.1.220).
+>
+> `settings.json` 의 `permissions.additionalDirectories` 로는 안 붙는다 — 같은 폴더를 넣어도 목록은 그대로였다. `--add-dir` 플래그여야 한다.
 
 뒤에 붙인 것은 claude 로 그대로 넘어간다. `claude-be -c` 는 백엔드 작업으로 이전 대화를 이어서 여는 것이다.
 
@@ -120,7 +135,7 @@ claude-be                 # 실제로 열어 본다
 | 3대 원칙(`core-principles`) 전문 | 명령 즉시 — `CLAUDE.md` 가 import 로 끌어온다 |
 | 리뷰 규칙 `rules.md`(MUST/SHOULD) 전문 | 명령 즉시 — 같은 import |
 | 작업 영역 지시 (backend/ 만 고친다 등) | 명령 즉시 — `claude-be`·`claude-fe` 만 |
-| 스킬 34종의 이름·설명 | 명령 즉시 |
+| 스킬의 이름·설명 (영역에 따라 26·17·34종) | 명령 즉시 — launcher 가 `--add-dir` 로 하위 스킬 폴더를 붙인다 |
 | 개별 스킬 **본문** | 그 작업이 시작될 때 |
 
 여기서 import 는 `CLAUDE.md` 안의 `@경로` 한 줄로, 그 파일 내용을 통째로 끌어와 함께 읽게 하는 표시다.

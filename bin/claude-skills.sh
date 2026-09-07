@@ -42,9 +42,9 @@ BIN_DIR="${CLAUDE_SKILLS_BIN_DIR:-$HOME/.local/bin}"
 usage() {
     cat << USAGE
 사용법
-  claude-be                     백엔드 작업 — kotlin-* 스킬, 변경은 backend/ 안에서만
-  claude-fe                     프론트 작업 — frontend-* 스킬, 변경은 frontend/ 안에서만
-  claude-all                    저장소 전체 — 모든 스킬
+  claude-be                     백엔드 작업 — 공통 + kotlin-* 스킬, 변경은 backend/ 안에서만
+  claude-fe                     프론트 작업 — 공통 + frontend-* 스킬, 변경은 frontend/ 안에서만
+  claude-all                    저장소 전체 — 공통 + kotlin-* + frontend-* 전부
 
   $(basename "$SCRIPT_PATH") install     위 세 명령어를 $BIN_DIR 에 깐다 (한 번만)
   $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
@@ -85,22 +85,31 @@ fi
 # 어느 자리를 고르든 claude 는 저장소 루트에서 연다.
 # 하위 폴더에서 열면 루트 CLAUDE.md 의 @import(3대 원칙·리뷰 규칙 MUST)가 펼쳐지지 않아
 # 최상위 규칙이 통째로 빠진다 — 실측으로 확인했다. 영역은 cwd 가 아니라 아래 FOCUS 로 좁힌다.
+#
+# 다만 루트에서 열면 claude 가 스킬을 루트 .claude/skills/ 에서만 찾는다.
+# 하위 폴더의 스킬은 --add-dir 로 그 폴더를 붙여야 세션 스킬 목록에 오른다 — 안 붙이면
+# kotlin-*·frontend-* 가 통째로 빠져서 이름조차 뜨지 않는다 (CLI 2.1.220 에서 실측).
+# settings.json 의 permissions.additionalDirectories 로는 안 되고 --add-dir 플래그여야 한다.
 FOCUS=""
+ADD_DIRS=""
 case "$AREA" in
     backend | be)
-        LABEL="백엔드 — kotlin-* 가 주로 적용"
+        LABEL="백엔드 — 공통 스킬 + kotlin-*"
+        ADD_DIRS="--add-dir backend"
         FOCUS="이번 세션의 작업 영역은 backend/ 다. 코드 변경은 backend/ 안에서만 한다.
 적용할 영역 스킬은 backend/.claude/skills/ 의 kotlin-* 이고, 색인은 backend/.claude/skills/README.md 다.
 frontend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     frontend | fe)
-        LABEL="프론트엔드 — frontend-* 가 주로 적용"
+        LABEL="프론트엔드 — 공통 스킬 + frontend-*"
+        ADD_DIRS="--add-dir frontend"
         FOCUS="이번 세션의 작업 영역은 frontend/ 다. 코드 변경은 frontend/ 안에서만 한다.
 적용할 영역 스킬은 frontend/.claude/skills/ 의 frontend-* 이고, 색인은 frontend/.claude/skills/README.md 다.
 backend/ 는 계약 확인(CONTRACT.md·응답 DTO 대조)을 위해 읽기만 하고 고치지 않는다."
         ;;
     all | root)
         LABEL="저장소 전체 — 모든 스킬"
+        ADD_DIRS="--add-dir backend --add-dir frontend"
         ;;
     install)
         install_links
@@ -129,7 +138,8 @@ echo "  저장소: $REPO_ROOT"
 
 cd "$REPO_ROOT"
 
+# ADD_DIRS 는 따옴표 없이 펼친다 — 폴더 이름에 공백이 없어 낱말 분리가 그대로 인자가 된다.
 if [ -z "$FOCUS" ]; then
-    exec claude "$@"
+    exec claude $ADD_DIRS "$@"
 fi
-exec claude --append-system-prompt "$FOCUS" "$@"
+exec claude $ADD_DIRS --append-system-prompt "$FOCUS" "$@"
