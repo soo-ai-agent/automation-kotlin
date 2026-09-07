@@ -1,4 +1,5 @@
 # expect: CHANGES_REQUESTED
+# loop: converge
 --- /dev/null
 +++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/DiscountPolicy.kt
 @@ -0,0 +1,4 @@

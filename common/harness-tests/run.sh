@@ -40,6 +40,9 @@ usage() {
 
 케이스를 늘리려면 해당 영역 폴더에 .diff 를 더하고, 첫 줄에
 '# expect: PASS' 또는 '# expect: CHANGES_REQUESTED' 를 적는다.
+
+차단 기대 케이스에는 둘째 줄에 루프 대상 여부도 적는다 (loop.sh 참고):
+'# loop: converge' 또는 '# loop: skip — <이유>'
 USAGE
 }
 
@@ -75,6 +78,12 @@ command -v claude >/dev/null || { echo "claude CLI 가 필요해요: claude setu
 # shellcheck source=/dev/null
 . "$SETTINGS_FILE"
 
+# 케이스 파일 머리의 '#' 로 시작하는 줄(expect·loop)을 걷어내고 diff 본문만 남긴다.
+# 줄 수를 세어 자르지 않는 이유는 머리 줄이 하나가 아니기 때문이다.
+case_body() {
+    awk 'body == 0 && /^#/ { next } { body = 1; print }' "$1"
+}
+
 echo "▶ 하네스 회귀 — $AREA"
 
 PASS=0
@@ -93,7 +102,7 @@ for case_dir in $CASE_DIRS; do
       find "$CLAUDE_REVIEW_RULES_DIR" -name '*.md' -type f -print0 2>/dev/null | sort -z | xargs -0 -r cat
       printf '\n\n## 통과 기준\n\n%s\n' "$CLAUDE_REVIEW_BAR"
       printf '\n\n## DIFF\n\n'
-      tail -n +2 "$case_file"
+      case_body "$case_file"
     } > /tmp/harness-input.txt
 
     # --add-dir 은 하위 폴더의 스킬을 세션 스킬 목록에 올린다. 여러 폴더를 받는 옵션이라

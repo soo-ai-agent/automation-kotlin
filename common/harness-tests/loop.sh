@@ -20,7 +20,9 @@
 #   리뷰어 .github/agent/review-role.md   — 실제 PR 리뷰어와 같은 파일
 #   작성자 .github/agent/nodes/fix.md     — 실제 fix 노드와 같은 파일
 #
-# 대상 케이스: '# expect: CHANGES_REQUESTED' 인 것만. 통과 기대 케이스는 고칠 것이 없다.
+# 대상 케이스: 파일 머리에 '# loop: converge' 라고 적힌 것만. 차단 기대 케이스라도
+# 고치는 데 배포가 여러 번 필요하면 diff 하나로 끝낼 수 없어 대상이 아니다.
+# 그런 케이스는 '# loop: skip — <이유>' 로 적어 둔다.
 #
 # 준비물: claude CLI 로그인 (`claude setup-token`)
 #
@@ -42,9 +44,12 @@ usage() {
     cat << USAGE
 사용법: bash common/harness-tests/loop.sh [backend|frontend|all] [--rounds N] [--yes]
 
-  backend      common/harness-tests/cases/backend/ 의 차단 기대 케이스
-  frontend     common/harness-tests/cases/frontend/ 의 차단 기대 케이스
+  backend      common/harness-tests/cases/backend/ 의 루프 대상 케이스
+  frontend     common/harness-tests/cases/frontend/ 의 루프 대상 케이스
   all          둘 다 (기본값)
+
+루프 대상은 파일 머리에 '# loop: converge' 라고 적힌 케이스다.
+diff 하나로 끝낼 수 없는 변경은 '# loop: skip — <이유>' 로 빼 둔다.
 
   --rounds N   작성자가 고쳐 볼 최대 횟수 (기본 2)
   --yes        예상 호출이 ${APPROVAL_THRESHOLD}건 이상이어도 진행
@@ -93,12 +98,21 @@ done
 # shellcheck source=/dev/null
 . "$SETTINGS_FILE"
 
-# 차단 기대 케이스만 모은다. 통과 기대 케이스는 작성자가 고칠 것이 없다.
+# 케이스 파일 머리의 '#' 로 시작하는 줄(expect·loop)을 걷어내고 diff 본문만 남긴다.
+case_body() {
+    awk 'body == 0 && /^#/ { next } { body = 1; print }' "$1"
+}
+
+# '# loop: converge' 라고 적힌 케이스만 모은다.
+#
+# 차단 기대 케이스라고 다 여기 오지는 않는다. 고치는 데 배포가 여러 번 필요한 변경은
+# diff 하나로 끝낼 수 없어서, 라운드를 아무리 늘려도 통과에 닿지 않는다. 그런 케이스는
+# '# loop: skip — <이유>' 로 적어 둔다. 이유를 함께 적게 해 조용히 빠지는 것을 막는다.
 TARGETS=""
 for case_dir in $CASE_DIRS; do
     for case_file in "$case_dir"/*.diff; do
         [ -e "$case_file" ] || continue
-        head -n 1 "$case_file" | grep -qx '# expect: CHANGES_REQUESTED' && TARGETS="$TARGETS $case_file"
+        grep -qx '# loop: converge' "$case_file" && TARGETS="$TARGETS $case_file"
     done
 done
 
@@ -166,7 +180,7 @@ CALLS=0
 for case_file in $TARGETS; do
     name=$(basename "$case_file" .diff)
     work="/tmp/loop-diff.txt"
-    tail -n +2 "$case_file" > "$work"
+    case_body "$case_file" > "$work"
 
     verdict=""
     result=""

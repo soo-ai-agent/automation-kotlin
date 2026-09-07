@@ -103,12 +103,26 @@ bash common/harness-tests/run.sh            #    전부
 `loop.sh` 는 판정 → 수정 → 재판정을 반복해 그것을 본다. 리뷰어와 작성자는 **서로 다른 claude 세션**이다 — 한 세션이 자기가 쓴 코드를 자기가 심사하면 통과가 쉬워져 검사가 되지 않는다.
 
 ```bash
-bash common/harness-tests/loop.sh frontend            # 프론트 차단 케이스 1건
-bash common/harness-tests/loop.sh backend --rounds 2  # 백엔드 차단 케이스 4건
-bash common/harness-tests/loop.sh                     # 전부 (5건, 최대 25 호출)
+bash common/harness-tests/loop.sh frontend            # 프론트 루프 대상만
+bash common/harness-tests/loop.sh backend --rounds 3  # 백엔드 루프 대상만, 라운드 지정
+bash common/harness-tests/loop.sh                     # 전부
 ```
 
 비용이 커서 CI 에는 넣지 않았다. 예상 호출이 30건을 넘으면 `--yes` 없이는 돌지 않는다 — 저장소 규칙이 대량 호출은 시작 전에 승인을 받으라고 정하기 때문이다.
+
+**차단 기대 케이스가 다 대상은 아니다.** 고치는 데 배포가 여러 번 필요한 변경은 diff 하나로 끝낼 수 없어, 라운드를 늘려도 통과에 닿지 않는다.
+
+그런 케이스는 파일 머리에 `# loop: skip — <이유>` 로 빼 두고, 도는 것은 `# loop: converge` 인 것뿐이다.
+
+> **확정** — 백엔드 4건을 2라운드로 돌려 1건만 수렴하는 것을 확인 (2026-09-08, claude 호출 18건).
+>
+> 수렴 못 한 셋은 도구 문제가 아니었다.
+>
+> `double-money-no-test` 에서 작성자는 89줄짜리 diff 로 `Double` 을 `BigDecimal` 로 바꾸고 Flyway 마이그레이션까지 붙였는데, 리뷰어가 그 마이그레이션에서 기본값 없는 `NOT NULL` 컬럼 추가·한 배포에서의 컬럼 이름 변경·데이터 이관 누락을 다시 잡았다.
+>
+> `kotlin-migration` 이 요구하는 대로 하려면 배포가 셋으로 갈리므로 diff 하나로는 끝나지 않는다. 그래서 이 셋을 `# loop: skip` 으로 두었다.
+>
+> 셋을 뺀 뒤 `loop.sh all --rounds 2` 는 2건 모두 수렴한다 — `speculative-abstraction` 1라운드, `contract-field-renamed` 2라운드, 호출 8건 (2026-09-08).
 
 ## 맥에서 (macOS)
 

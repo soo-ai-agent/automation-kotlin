@@ -162,8 +162,33 @@ check_loop_roles_separated() {
     fi
 }
 
+# ── ⑧ 차단 기대 케이스가 루프 대상 여부를 밝혔는가 ───────────────────
+# loop.sh 는 '# loop: converge' 인 케이스만 돌린다. 표시가 없으면 아무 말 없이 빠진다.
+# 빼는 것 자체는 정당할 수 있으나(배포가 여러 번 필요한 변경은 diff 하나로 못 끝낸다),
+# 이유 없이 빠지면 "수렴 못 해서 슬쩍 뺀 것"과 구별되지 않는다. 그래서 이유를 요구한다.
+check_loop_marker_declared() {
+    bad=""
+    for f in common/harness-tests/cases/*/*.diff; do
+        [ -e "$f" ] || continue
+        head -n 1 "$f" | grep -qx '# expect: CHANGES_REQUESTED' || continue
+        if grep -qx '# loop: converge' "$f"; then
+            continue
+        elif grep -qE '^# loop: skip — .+' "$f"; then
+            continue
+        else
+            bad="$bad $f"
+        fi
+    done
+    if [ -z "$bad" ]; then
+        ok "차단 기대 케이스가 모두 루프 대상 여부를 이유와 함께 밝혔다"
+    else
+        ng "루프 대상 여부가 없거나 skip 이유가 빠진 케이스가 있다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
+check_loop_marker_declared
 check_skill_index_links
 check_harness_paths_filter
 check_rules_path_agreement

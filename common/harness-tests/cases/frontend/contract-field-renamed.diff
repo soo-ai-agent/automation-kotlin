@@ -1,4 +1,5 @@
 # expect: CHANGES_REQUESTED
+# loop: converge
 --- a/frontend/src/todo/types/todo.ts
 +++ b/frontend/src/todo/types/todo.ts
 @@ -1,6 +1,9 @@

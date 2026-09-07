@@ -1,4 +1,5 @@
 # expect: CHANGES_REQUESTED
+# loop: skip — Double 을 BigDecimal 로 바꾸면 컬럼 추가·백필·삭제가 배포 셋으로 갈린다. diff 하나로 끝낼 수 없다
 --- a/backend/storage/db-core/src/main/kotlin/.../storage/db/core/CouponEntity.kt
 +++ b/backend/storage/db-core/src/main/kotlin/.../storage/db/core/CouponEntity.kt
 @@ -18,4 +18,11 @@ class CouponEntity(

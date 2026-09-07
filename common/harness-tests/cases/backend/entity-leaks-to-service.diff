@@ -1,4 +1,5 @@
 # expect: CHANGES_REQUESTED
+# loop: skip — 레이어 분리·트랜잭션 밖 발송·도메인 경계를 한꺼번에 바꿔야 해 diff 하나에 담기지 않는다
 --- a/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderService.kt
 +++ b/backend/core/core-order/src/main/kotlin/.../order/domain/service/OrderService.kt
 @@ -12,6 +12,14 @@ class OrderService(
