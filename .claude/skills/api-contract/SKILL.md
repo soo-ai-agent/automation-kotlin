@@ -64,8 +64,8 @@ snake_case 응답이 필요해지는 순간이 오면 그 변환은 직렬화 �
 **미러링은 대조로 끝맺는다.** 스키마 생성 도구가 없으므로, 프론트 타입을 만들었으면 백엔드 응답 DTO 의 필드 목록(이름·타입·nullable)과
 나란히 놓고 **차집합이 0** 인지 실제로 센다. 엔드포인트 목록의 대조는 `frontend-api` 가 담당한다.
 
-리뷰어가 미러링 위반(개명)을 여전히 잡는지는 `common/harness-tests/cases/contract-field-renamed.diff` 가 회귀로 확인한다 —
-이 규칙을 고치면 그 케이스도 함께 돌린다.
+리뷰어가 미러링 위반(개명)을 여전히 잡는지는 `common/harness-tests/cases/frontend/contract-field-renamed.diff` 가 회귀로 확인한다 —
+이 규칙을 고치면 `bash common/harness-tests/run.sh frontend` 로 그 케이스도 함께 돌린다.
 
 ## 2. Nullability 대칭
 

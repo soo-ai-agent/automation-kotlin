@@ -19,7 +19,7 @@
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
 | 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
-| 하네스 케이스 | `common/harness-tests/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh`) |
+| 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
 | 설정 | `.github/agent/settings.env` | — |
 | 노드 지시문 | `.github/agent/nodes/<이름>.md` | — |
 | 서버 세팅 | `.github/agent/setup-agent.sh` | 사용자가 1회 실행 |
@@ -220,5 +220,10 @@
 
 - 하네스의 `paths` 필터는 **규칙을 담은 파일 목록**이다 — 규칙 문서를 새 경로에 만들면 이 목록에 더할 것.
   빠뜨리면 규칙이 바뀌어도 회귀가 돌지 않아 조용히 통과한다.
+
+- **하네스는 영역별로 갈린다** — 케이스는 `cases/backend/`·`cases/frontend/` 에 나눠 두고,
+  리뷰어도 그 영역의 스킬만 물고 돈다(`--add-dir`). CI 는 영역 구분 없이 `all` 로 전부 돌린다.
+
+  영역마다 **PASS 기대 케이스를 최소 하나** 남긴다. 차단 기대 케이스만 있으면 "전부 막는 리뷰어"도 만점을 받는다.
 
 - 문서를 추가할 때 독자를 정하고 위치를 고른다: 사용자 → `docs/`, 에이전트 → `common/docs/` 또는 스킬. `docs/README.md` 머리의 경계 선언을 유지할 것.
