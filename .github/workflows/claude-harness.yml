@@ -1,5 +1,5 @@
-# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 케이스를 늘리려면 common/harness-tests/cases/ 에
-#    .diff 파일을 더하고, 첫 줄에 `# expect: PASS` 또는 `# expect: CHANGES_REQUESTED` 를 적어요.
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 케이스를 늘리려면 common/harness-tests/cases/backend/ 나
+#    cases/frontend/ 에 .diff 파일을 더하고, 첫 줄에 `# expect: PASS` 또는 `# expect: CHANGES_REQUESTED` 를 적어요.
 #    이 파일은 기능 자체를 개조할 때만 열고, 수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
 #
 # 하네스 회귀 테스트 — 규칙 문서를 고친 PR 에서, 리뷰어가 "심어 둔 위반"을 여전히 잡는지 확인해요.
@@ -8,7 +8,11 @@
 # (case: CHANGES_REQUESTED 기대), 멀쩡한 변경을 막게 되거나(case: PASS 기대) 둘 다 사고예요.
 # 규칙을 안 건드린 PR 에서는 돌지 않아요 — 판정 기준이 그대로면 결과도 그대로니까요.
 #
-# 비용: 케이스 하나당 claude 호출 1건. 지금 6건이고, 케이스를 늘리면 그만큼 늘어나요.
+# 검사는 둘로 나뉘어요.
+#   ① static.sh  모델을 안 부르는 형식 검사 — 링크·경로·케이스 형식. 공짜라서 먼저 돌려요.
+#   ② run.sh     판정 회귀 — 케이스 하나당 claude 호출 1건. 지금 7건(백엔드 5 · 프론트 2)이에요.
+#
+# CI 는 영역 구분 없이 전부 돌려요 — 손으로 한 영역만 볼 때는 `run.sh backend` 처럼 영역을 붙여요.
 name: claude-harness
 
 on:
@@ -20,6 +24,9 @@ on:
       - "CLAUDE.md"
       - "AGENTS.md"
       - "common/harness-tests/**"
+      # 리뷰어의 역할 지시문과 통과 기준도 판정 기준이다 — 고치면 판정이 흔들린다
+      - ".github/agent/review-role.md"
+      - ".github/agent/settings.env"
 
 permissions:
   contents: read
@@ -36,6 +43,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      # 모델을 안 부르는 검사부터 — 여기서 깨지면 claude 를 한 번도 안 부르고 끝나요.
+      - name: 형식 검사
+        run: bash common/harness-tests/static.sh
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -43,7 +54,7 @@ jobs:
       - name: claude CLI 설치
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: 하네스 회귀
+      - name: 판정 회귀
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         # run.sh 는 FAIL 이 하나라도 있으면 0 이 아닌 코드로 끝나요 — 그대로 잡 실패가 되어 머지를 막아요.

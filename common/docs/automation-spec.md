@@ -19,9 +19,11 @@
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
 | 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
-| 하네스 케이스 | `common/harness-tests/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh`) |
+| 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
+| 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
 | 설정 | `.github/agent/settings.env` | — |
 | 노드 지시문 | `.github/agent/nodes/<이름>.md` | — |
+| 리뷰어 역할 지시문 | `.github/agent/review-role.md` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 서버 세팅 | `.github/agent/setup-agent.sh` | 사용자가 1회 실행 |
 
 라벨 규약: `claude`(착수 동의) · `claude-split`(분할 요청) · `claude-sent`(착수됨 마커) · `claude-made`(에이전트가 만든 하위 이슈 — **자동 머지 대상 판별 키**).
@@ -220,5 +222,22 @@
 
 - 하네스의 `paths` 필터는 **규칙을 담은 파일 목록**이다 — 규칙 문서를 새 경로에 만들면 이 목록에 더할 것.
   빠뜨리면 규칙이 바뀌어도 회귀가 돌지 않아 조용히 통과한다.
+
+- **하네스는 영역별로 갈린다** — 케이스는 `cases/backend/`·`cases/frontend/` 에 나눠 둔다.
+  영역은 **어느 케이스를 돌릴지만** 고르고, CI 는 영역 구분 없이 `all` 로 전부 돌린다.
+
+  영역마다 **PASS 기대 케이스를 최소 하나** 남긴다. 차단 기대 케이스만 있으면 "전부 막는 리뷰어"도 만점을 받는다.
+
+- **리뷰어 역할은 `.github/agent/review-role.md` 한 곳에만 적는다.** 실제 리뷰어(`claude-review.yml`)와
+  하네스(`run.sh`)가 같은 파일을 읽고, 규칙 전문·통과 기준(`CLAUDE_REVIEW_BAR`)·`--add-dir` 까지 같은 것을 쓴다.
+
+  하네스가 자기 프롬프트를 따로 쓰면 **하네스가 통과해도 실제 리뷰어의 회귀를 못 잡는다.** 실제로 그 상태였다 —
+  `CLAUDE_REVIEW_BAR` 를 망가뜨려도 하네스는 그 문자열을 아예 안 읽어 초록불이었다. `static.sh` 가 이 공유를 검사한다.
+
+- **검사는 둘로 나눈다** — `static.sh` 는 모델을 부르지 않는 형식 검사(링크·경로·케이스 형식)라 공짜고,
+  `run.sh` 는 케이스당 claude 호출 1건이다. CI 는 싼 것을 먼저 돌려 걸러낸다.
+
+  "규칙이 옳은가"는 `run.sh` 가, **"규칙이 읽히기는 하는가"** 는 `static.sh` 가 본다. 링크가 죽거나 경로가
+  어긋나면 규칙은 파일에 남아 있어도 아무도 안 읽는데, 이건 모델을 안 불러도 잡힌다.
 
 - 문서를 추가할 때 독자를 정하고 위치를 고른다: 사용자 → `docs/`, 에이전트 → `common/docs/` 또는 스킬. `docs/README.md` 머리의 경계 선언을 유지할 것.
