@@ -101,7 +101,9 @@ for case_dir in $CASE_DIRS; do
     #
     # 출력은 파일로 받고 나서 고른다. grep -m1 로 바로 파이프하면 grep 이 첫 줄에서
     # 파이프를 닫아 claude 가 SIGPIPE 로 죽고, 그다음 케이스부터 줄줄이 빈 응답이 된다.
+    # 리뷰어는 코드를 고치지 않는다 — 지시문에만 맡기지 않고 도구로 막는다 (워크플로와 같다)
     claude --add-dir backend --add-dir frontend \
+      --disallowedTools "Write,Edit,NotebookEdit,Bash" \
       --output-format text -p "$(cat "$ROLE_FILE")" \
       < /tmp/harness-input.txt > /tmp/harness-output.txt 2> /tmp/harness-error.txt
     verdict=$(grep -m1 "VERDICT:" /tmp/harness-output.txt)

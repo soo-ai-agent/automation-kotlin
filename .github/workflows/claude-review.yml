@@ -51,7 +51,19 @@ jobs:
           # 리뷰어 역할 지시문 — 하네스(common/harness-tests/run.sh)도 같은 파일을 읽는다.
           # 여기 인라인으로 두면 하네스가 자기 프롬프트를 따로 쓰게 되고, 그러면 하네스가
           # 통과해도 실제 리뷰어의 회귀는 못 잡는다.
-          git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md
+          #
+          # 이 파일도 기준 브랜치 것을 쓴다 — PR 이 "무조건 통과"로 역할을 고쳐 자기 심사를
+          # 무력화하지 못하게. 다만 이 파일을 처음 들여오는 PR 에서는 기준 브랜치에 아직
+          # 없어서, 있는지 먼저 보고 없을 때만 PR 것으로 받는다. set -e 아래라 확인 없이
+          # git show 를 부르면 그 PR 의 리뷰 잡이 통째로 죽는다.
+          # 머지되고 나면 기준 브랜치에 늘 있으므로 아래 폴백은 다시 타지 않는다.
+          ROLE_IN_BASE=".github/agent/review-role.md"
+          if git cat-file -e "origin/$BASE_REF:$ROLE_IN_BASE" 2>/dev/null; then
+            git show "origin/$BASE_REF:$ROLE_IN_BASE" > /tmp/review-role.md
+          else
+            echo "::warning::기준 브랜치에 $ROLE_IN_BASE 가 없어 이번만 PR 것을 씁니다"
+            cp "$ROLE_IN_BASE" /tmp/review-role.md
+          fi
           . /tmp/settings.env
           {
             echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
@@ -127,7 +139,9 @@ jobs:
           # 역할 지시문은 파일에서 읽는다 — 하네스와 같은 원본을 쓰기 위해서다.
           # --add-dir 은 하위 폴더의 스킬을 세션 스킬 목록에 올린다. 없으면 루트에서 연
           # claude 가 공통 스킬만 잡고, 영역 스킬 25종은 파일을 직접 읽기 전까지 안 보인다.
+          # 리뷰어는 코드를 고치지 않는다(재작업 루프 방지). 지시문에만 맡기지 않고 도구로 막는다.
           claude --add-dir backend --add-dir frontend \
+            --disallowedTools "Write,Edit,NotebookEdit,Bash" \
             --output-format text -p "$(cat /tmp/review-role.md)" < /tmp/review-input.txt | tee /tmp/review.md
 
       - name: 코멘트 게시
