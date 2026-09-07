@@ -83,15 +83,18 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 
 ## 하네스도 영역별로 돈다
 
-규칙 문서(스킬·리뷰 규칙)를 고쳤으면 리뷰어 판정이 흔들리지 않았는지 하네스로 확인한다. 영역 갈래는 위 세 명령과 같다.
+규칙 문서(스킬·리뷰 규칙)를 고쳤으면 리뷰어 판정이 흔들리지 않았는지 하네스로 확인한다. 검사는 둘이고, **싼 것부터** 돌린다.
 
 ```bash
-bash common/harness-tests/run.sh backend    # 백엔드 케이스만 (5건)
-bash common/harness-tests/run.sh frontend   # 프론트 케이스만 (2건)
-bash common/harness-tests/run.sh            # 전부
+bash common/harness-tests/static.sh         # ① 형식 검사 — 공짜, 1초
+bash common/harness-tests/run.sh backend    # ② 판정 회귀 — 백엔드 케이스만 (5건)
+bash common/harness-tests/run.sh frontend   #    프론트 케이스만 (2건)
+bash common/harness-tests/run.sh            #    전부
 ```
 
-케이스 하나가 claude 호출 1건이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다.
+**①은 모델을 부르지 않는다.** 스킬 색인의 링크가 죽지 않았는지, 하네스가 돌아야 할 경로가 워크플로 필터에 다 들어 있는지 같은 것을 본다. 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 검사한다.
+
+**②는 케이스 하나가 claude 호출 1건**이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다. 영역은 어느 케이스를 돌릴지만 고르고, 리뷰어는 언제나 실제 PR 리뷰어와 똑같은 방식으로 불린다.
 
 ## 맥에서 (macOS)
 
