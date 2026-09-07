@@ -117,6 +117,10 @@ check_rules_path_agreement() {
 check_review_role_shared() {
     # 파일 이름이 어딘가 적혀 있는 것만으로는 부족하다 — 실제로 프롬프트로 넘기는지 본다.
     # (이름만 검사하면 '가져오기만 하고 안 쓰는' 상태를 놓친다. 변이로 확인했다.)
+    #
+    # 아래 대조 문자열은 다른 파일의 소스 조각이다. 거기서 변수 이름이나 줄 모양을 바꾸면
+    # 이 검사가 거짓 실패한다 — 그때는 코드가 아니라 이 문자열을 함께 고친다.
+    # 느슨하게 만들면 위의 '가져오기만 하고 안 씀'을 다시 놓치므로 일부러 빡빡하게 둔다.
     role=".github/agent/review-role.md"
     missing=""
     [ -f "$role" ] || missing="$missing $role(없음)"
@@ -133,12 +137,38 @@ check_review_role_shared() {
     fi
 }
 
+# ── ⑦ 루프 회귀에서 리뷰어와 작성자가 갈라져 있는가 ──────────────────
+# 한 세션이 자기가 쓴 코드를 자기가 심사하면 통과 판정이 쉬워져 검사가 되지 않는다.
+# 역할 지시문도 각자 실제 워크플로가 쓰는 파일에서 와야 한다.
+check_loop_roles_separated() {
+    loop="common/harness-tests/loop.sh"
+    missing=""
+    [ -f "$loop" ] || missing="$missing $loop(없음)"
+    if [ -f "$loop" ]; then
+        grep -qF 'REVIEWER_ROLE=".github/agent/review-role.md"' "$loop" \
+            || missing="$missing 리뷰어역할이_실제_리뷰어_파일이_아님"
+        grep -qF 'AUTHOR_ROLE=".github/agent/nodes/fix.md"' "$loop" \
+            || missing="$missing 작성자역할이_실제_fix노드_파일이_아님"
+        grep -qF 'run_agent "$REVIEWER_ROLE"' "$loop" \
+            || missing="$missing 리뷰어를_따로_안부름"
+        grep -qF 'run_agent "$AUTHOR_PROMPT"' "$loop" \
+            || missing="$missing 작성자를_따로_안부름"
+    fi
+    [ -f ".github/agent/nodes/fix.md" ] || missing="$missing .github/agent/nodes/fix.md(없음)"
+    if [ -z "$missing" ]; then
+        ok "루프 회귀의 리뷰어와 작성자가 서로 다른 역할 파일로 갈라져 있다"
+    else
+        ng "루프 회귀의 역할 분리가 깨졌다" "$missing"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
 check_harness_paths_filter
 check_rules_path_agreement
 check_review_role_shared
+check_loop_roles_separated
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
