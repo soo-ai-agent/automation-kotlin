@@ -145,7 +145,18 @@ cd "$REPO_ROOT"
 
 # 권한 확인 창을 띄우지 않는다 — 이 저장소 작업은 매번 승인을 누르는 값이 없다고 보고 끈 것이다.
 # 대신 세션이 하는 일을 사람이 보고 있어야 한다. 낯선 저장소나 남의 코드에는 이 launcher 를 쓰지 않는다.
+#
+# 되돌리는 길을 남긴다 — CLAUDE_SKILLS_ASK=1 을 붙이면 확인 창이 살아난다.
+# 영역 스킬은 그대로 붙으므로, 확인 창을 받자고 launcher 를 포기할 필요가 없다.
+#   CLAUDE_SKILLS_ASK=1 claude-be
+#
+# if 로 쓴다 — `[ ... ] && 대입` 꼴은 조건이 거짓일 때 AND 목록 전체가 실패로 끝나서
+# 이 스크립트 맨 위의 set -e 가 거기서 세션을 죽인다.
 SKIP_PERMISSIONS="--dangerously-skip-permissions"
+if [ "${CLAUDE_SKILLS_ASK:-0}" = "1" ]; then
+    SKIP_PERMISSIONS=""
+    echo "  권한 확인 창: 켜짐 (CLAUDE_SKILLS_ASK=1)"
+fi
 
 # ADD_DIRS 는 따옴표 없이 펼친다 — 폴더 이름에 공백이 없어 낱말 분리가 그대로 인자가 된다.
 if [ -z "$FOCUS" ]; then
