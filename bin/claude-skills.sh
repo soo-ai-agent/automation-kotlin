@@ -7,6 +7,8 @@
 #   claude-be / claude-fe / claude-all                       # 깐 뒤에는 이렇게만 친다
 #
 # 뒤에 붙인 인자는 claude 로 그대로 넘어간다 — `claude-be -c` 는 백엔드 자리에서 이어서 대화하기다.
+#
+# 셋 다 권한 확인 창 없이 연다 (--dangerously-skip-permissions).
 set -euo pipefail
 
 # 심볼릭 링크를 풀어 저장소 원본 위치를 찾는다.
@@ -50,8 +52,11 @@ usage() {
   $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
 
 셋 다 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(3대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
+셋 다 권한 확인 창 없이 연다(--dangerously-skip-permissions) — 세션이 하는 일을 사람이 보고 있어야 한다.
 뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
+
+하네스: bash common/harness-tests/run.sh [backend|frontend|all]
 USAGE
 }
 
@@ -138,8 +143,12 @@ echo "  저장소: $REPO_ROOT"
 
 cd "$REPO_ROOT"
 
+# 권한 확인 창을 띄우지 않는다 — 이 저장소 작업은 매번 승인을 누르는 값이 없다고 보고 끈 것이다.
+# 대신 세션이 하는 일을 사람이 보고 있어야 한다. 낯선 저장소나 남의 코드에는 이 launcher 를 쓰지 않는다.
+SKIP_PERMISSIONS="--dangerously-skip-permissions"
+
 # ADD_DIRS 는 따옴표 없이 펼친다 — 폴더 이름에 공백이 없어 낱말 분리가 그대로 인자가 된다.
 if [ -z "$FOCUS" ]; then
-    exec claude $ADD_DIRS "$@"
+    exec claude $ADD_DIRS $SKIP_PERMISSIONS "$@"
 fi
-exec claude $ADD_DIRS --append-system-prompt "$FOCUS" "$@"
+exec claude $ADD_DIRS $SKIP_PERMISSIONS --append-system-prompt "$FOCUS" "$@"
