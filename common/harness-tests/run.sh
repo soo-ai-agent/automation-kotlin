@@ -6,8 +6,12 @@
 #   bash common/harness-tests/run.sh backend     # 백엔드 케이스만
 #   bash common/harness-tests/run.sh frontend    # 프론트 케이스만
 #
-# 영역 갈래는 launcher(bin/claude-skills.sh) 의 claude-be·claude-fe·claude-all 과 같다.
-# 리뷰어도 그 영역의 스킬만 물고 돈다 — 하네스가 실제 세션과 다른 조건으로 돌면 회귀를 놓친다.
+# 영역은 **어느 케이스를 돌릴지**만 고른다. 리뷰어를 부르는 방식은 영역과 무관하게
+# 언제나 .github/workflows/claude-review.yml 과 똑같다 — 역할 지시문·리뷰 규칙 전문·
+# 통과 기준·--add-dir 까지 같은 것을 쓴다. 하네스가 자기만의 리뷰어를 만들면
+# 하네스가 통과해도 실제 리뷰어의 회귀는 못 잡는다.
+#
+# 모델을 부르지 않는 형식 검사는 static.sh 가 따로 한다. 그쪽을 먼저 돌리면 싸게 걸러진다.
 #
 # 언제 돌리나: 스킬·리뷰 규칙·헌법을 고친 뒤. 규칙을 고쳤는데 판정이 그대로인지,
 # 반대로 멀쩡하던 변경이 갑자기 막히지는 않는지 본다. 백엔드 스킬만 고쳤으면 backend 만 돌려도 된다.
@@ -21,40 +25,36 @@ set -u
 
 cd "$(dirname "$0")/../.."
 
+ROLE_FILE=".github/agent/review-role.md"
+SETTINGS_FILE=".github/agent/settings.env"
+
 usage() {
     cat << USAGE
 사용법: bash common/harness-tests/run.sh [backend|frontend|all]
 
-  backend    common/harness-tests/cases/backend/  — 리뷰어가 공통 + kotlin-* 스킬을 문다
-  frontend   common/harness-tests/cases/frontend/ — 리뷰어가 공통 + frontend-* 스킬을 문다
+  backend    common/harness-tests/cases/backend/
+  frontend   common/harness-tests/cases/frontend/
   all        둘 다 (기본값)
+
+영역은 어느 케이스를 돌릴지만 고른다. 리뷰어는 언제나 실제 리뷰어와 같은 방식으로 불린다.
 
 케이스를 늘리려면 해당 영역 폴더에 .diff 를 더하고, 첫 줄에
 '# expect: PASS' 또는 '# expect: CHANGES_REQUESTED' 를 적는다.
 USAGE
 }
 
-# 영역마다 케이스 폴더와, 리뷰어에게 물릴 스킬이 다르다.
-# --add-dir 이 없으면 하위 폴더의 스킬이 세션 스킬 목록에 오르지 않는다 — launcher 와 같은 이유다.
 AREA="${1:-all}"
 case "$AREA" in
     backend | be)
         AREA="backend"
         CASE_DIRS="common/harness-tests/cases/backend"
-        ADD_DIRS="--add-dir backend"
-        SKILL_SOURCES="- backend/.claude/skills/ — 백엔드 규칙 (kotlin-*)"
         ;;
     frontend | fe)
         AREA="frontend"
         CASE_DIRS="common/harness-tests/cases/frontend"
-        ADD_DIRS="--add-dir frontend"
-        SKILL_SOURCES="- frontend/.claude/skills/ — 프론트엔드 규칙 (frontend-*)"
         ;;
     all)
         CASE_DIRS="common/harness-tests/cases/backend common/harness-tests/cases/frontend"
-        ADD_DIRS="--add-dir backend --add-dir frontend"
-        SKILL_SOURCES="- backend/.claude/skills/ — 백엔드 규칙 (kotlin-*)
-- frontend/.claude/skills/ — 프론트엔드 규칙 (frontend-*)"
         ;;
     -h | --help | help)
         usage
@@ -69,6 +69,11 @@ case "$AREA" in
 esac
 
 command -v claude >/dev/null || { echo "claude CLI 가 필요해요: claude setup-token"; exit 1; }
+[ -f "$ROLE_FILE" ] || { echo "리뷰어 역할 지시문이 없어요: $ROLE_FILE"; exit 1; }
+
+# 통과 기준과 규칙 위치는 워크플로와 같은 곳에서 읽는다 — 여기 베껴 적으면 둘이 어긋난다.
+# shellcheck source=/dev/null
+. "$SETTINGS_FILE"
 
 echo "▶ 하네스 회귀 — $AREA"
 
@@ -81,28 +86,33 @@ for case_dir in $CASE_DIRS; do
     name=$(basename "$case_file" .diff)
     expected=$(head -n 1 "$case_file" | sed 's/^# expect: //')
 
-    # ADD_DIRS 는 따옴표 없이 펼친다 — 폴더 이름에 공백이 없어 낱말 분리가 그대로 인자가 된다.
-    # --add-dir 은 폴더를 여러 개 받는 옵션이라 바로 뒤에 플래그가 아닌 것이 오면 그것까지 폴더로 먹는다.
-    # 그래서 프롬프트 앞이 아니라 --output-format 앞에 둔다 — 순서를 바꾸면 프롬프트가 통째로 사라진다.
-    verdict=$(claude $ADD_DIRS --output-format text -p "너는 이 저장소의 코드 리뷰어다. 아래 근거만 보고 판정하라.
+    # 입력 구조는 claude-review.yml 의 '리뷰' 스텝과 같다 (기준 스펙 절만 없다 —
+    # 케이스가 이슈에 딸린 스펙을 갖지 않기 때문이다).
+    {
+      printf '## 리뷰 규칙\n\n'
+      find "$CLAUDE_REVIEW_RULES_DIR" -name '*.md' -type f -print0 2>/dev/null | sort -z | xargs -0 -r cat
+      printf '\n\n## 통과 기준\n\n%s\n' "$CLAUDE_REVIEW_BAR"
+      printf '\n\n## DIFF\n\n'
+      tail -n +2 "$case_file"
+    } > /tmp/harness-input.txt
 
-근거 (이 순서로 읽는다):
-- common/docs/code-review/rules.md — MUST 를 어기면 머지 차단
-$SKILL_SOURCES
-- .claude/skills/ — 공통 규칙
-- 동작을 깨뜨리는 버그·처리되지 않은 엣지 케이스, diff 가 인용한 스펙(specs/)과 어긋나는 구현도 차단 사유다
-- 스타일 취향·있으면 좋을 리팩터링은 차단하지 말고 PASS + 참고 코멘트로 남긴다
-
-첫 줄에 'VERDICT: PASS' 또는 'VERDICT: CHANGES_REQUESTED' 만 쓰고,
-차단 사유가 있으면 근거가 된 규칙을 인용하라.
-
-$(tail -n +2 "$case_file")" 2>/dev/null | grep -m1 "VERDICT:")
+    # --add-dir 은 하위 폴더의 스킬을 세션 스킬 목록에 올린다. 여러 폴더를 받는 옵션이라
+    # 바로 뒤에 플래그가 아닌 것이 오면 그것까지 폴더로 먹으니 순서를 바꾸지 않는다.
+    #
+    # 출력은 파일로 받고 나서 고른다. grep -m1 로 바로 파이프하면 grep 이 첫 줄에서
+    # 파이프를 닫아 claude 가 SIGPIPE 로 죽고, 그다음 케이스부터 줄줄이 빈 응답이 된다.
+    claude --add-dir backend --add-dir frontend \
+      --output-format text -p "$(cat "$ROLE_FILE")" \
+      < /tmp/harness-input.txt > /tmp/harness-output.txt 2> /tmp/harness-error.txt
+    verdict=$(grep -m1 "VERDICT:" /tmp/harness-output.txt)
 
     if printf '%s' "$verdict" | grep -q "$expected"; then
       printf 'PASS  %-28s %s\n' "$name" "$verdict"
       PASS=$((PASS + 1))
     else
       printf 'FAIL  %-28s 기대=%s 실제=%s\n' "$name" "$expected" "${verdict:-응답 없음}"
+      # 빈 응답일 때 원인을 남긴다 — "응답 없음"만 보면 무엇이 틀렸는지 알 수 없다
+      [ -n "$verdict" ] || head -n 3 /tmp/harness-error.txt | sed 's/^/     └ /'
       FAIL=$((FAIL + 1))
     fi
   done
