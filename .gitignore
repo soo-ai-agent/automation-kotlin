@@ -40,10 +40,6 @@ frontend/.env
 !.specify/memory/constitution.md
 .claude/skills/speckit-*/
 
-# Hermes 저장소 스킬 — 우리 스킬을 가리키는 링크는 커밋한다 (clone 하면 바로 붙는다).
-# speckit 링크는 무시한다: 가리키는 대상이 설치물이라 커밋되지 않기 때문이다.
-.agents/skills/speckit-*
-
 # 노드 역할의 원본은 .github/agent/nodes/ 다. launcher 가 여기로 복사해 로컬 세션과
 # 워크플로가 `--agent`·`agentType` 으로 쓸 수 있게 한다. 커밋하면 작업 브랜치가
 # 자기 역할을 고칠 수 있게 되므로 무시한다 (common/docs/automation-spec.md 4절).
