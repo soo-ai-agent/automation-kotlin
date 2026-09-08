@@ -1,0 +1,6 @@
+# 머지된 PR 이 있고 열린 PR 은 없다 — 닫는다.
+# expect: close
+# decision: close-issue
+# labels: claude claude-sent
+# pr-open: false
+# pr-merged: true

@@ -45,7 +45,7 @@ check_case_expectations() {
         grep -qE '^# expect: (PASS|FAIL)$' "$f" || bad="$bad $f(expect없음)"
         grep -q '^# graph: ' "$f" || bad="$bad $f(graph없음)"
     done
-    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case common/harness-tests/cases/plan/*.case; do
+    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case common/harness-tests/cases/plan/*.case common/harness-tests/cases/dispatch/*.case; do
         [ -e "$f" ] || continue
         grep -q '^# expect: ' "$f" || bad="$bad $f(expect없음)"
     done
@@ -102,7 +102,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh" ".github/agent/plan-stage.sh"; do
+    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh" ".github/agent/plan-stage.sh" ".github/agent/dispatch_rules.py" ".github/agent/dispatch.py"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -352,6 +352,60 @@ check_case_area_match() {
     fi
 }
 
+# ── ⑬ 실행 코드에 문법 오류가 없는가 ────────────────────────────────
+# 셸과 js 는 컴파일이 없어서 문법 오류가 실행 시점에야 드러난다. 노드가 40분 돌다가
+# 마지막 줄에서 깨지는 것보다, 여기서 1초에 잡는 편이 낫다.
+#
+# 문법만 본다. 무엇을 하는지는 각 도구의 회귀 검사(graph.sh·loop.sh·state.sh·
+# next-role.sh·plan.sh)가 값을 넣어 답을 대조한다.
+check_syntax() {
+    bad=""
+    for f in .github/agent/*.sh common/harness-tests/*.sh; do
+        [ -e "$f" ] || continue
+        bash -n "$f" 2>/dev/null || bad="$bad $(basename "$f")"
+    done
+    for f in .github/agent/*.js; do
+        [ -e "$f" ] || continue
+        node --check "$f" >/dev/null 2>&1 || bad="$bad $(basename "$f")"
+    done
+    for f in .github/agent/*.py; do
+        [ -e "$f" ] || continue
+        python3 -m py_compile "$f" 2>/dev/null || bad="$bad $(basename "$f")"
+    done
+    rm -rf .github/agent/__pycache__
+
+    if [ -z "$bad" ]; then
+        ok "실행 코드에 문법 오류가 없다"
+    else
+        ng "문법 오류가 있다" "$bad"
+    fi
+}
+
+# ── ⑭ 디스패처가 판단을 규칙에 맡기는가 ──────────────────────────────
+# 이슈를 닫고 PR 을 닫고 브랜치를 지우는 판단이다. 틀리면 사람이 만든 것이 사라진다.
+# 판단이 dispatch.py 안으로 되돌아가면 하네스가 못 재고, 그 상태로 10분마다 돈다.
+check_dispatch_rules_shared() {
+    rules=".github/agent/dispatch_rules.py"
+    dp=".github/agent/dispatch.py"
+    bad=""
+    [ -f "$rules" ] || bad="$bad $rules(없음)"
+    grep -qF 'import dispatch_rules' "$dp" || bad="$bad dispatch.py(규칙을_안가져옴)"
+    for fn in start_issue close_issue close_pr delete_branch issue_of; do
+        grep -qF "dispatch_rules.$fn" "$dp" || bad="$bad dispatch.py(${fn}_를_안물음)"
+    done
+    grep -qF 'RULES=".github/agent/dispatch_rules.py"' common/harness-tests/dispatch.sh \
+        || bad="$bad harness-tests/dispatch.sh(같은_파일을_안가리킴)"
+    # 규칙 안에서 바깥을 부르면 하네스가 못 돌린다
+    grep -qE '^[[:space:]]*(import (urllib|requests|subprocess)|from (urllib|subprocess))' "$rules" \
+        && bad="$bad dispatch_rules.py(바깥을_부름)"
+
+    if [ -z "$bad" ]; then
+        ok "디스패처가 지우는 판단을 규칙에 맡기고, 그 규칙은 바깥을 안 부른다"
+    else
+        ng "디스패처 판단이 한 곳에서 관리되지 않는다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -364,6 +418,8 @@ check_loop_decision_shared
 check_state_shared
 check_next_role_testable
 check_case_area_match
+check_syntax
+check_dispatch_rules_shared
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

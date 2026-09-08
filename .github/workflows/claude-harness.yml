@@ -15,7 +15,8 @@
 #   ④ state.sh   상태 회귀 — 코멘트에 남긴 루프 상태를 읽고 갱신하는 것이 맞는지.
 #   ⑤ next-role.sh 전이 회귀 — 리뷰 뒤에 어느 역할을 부를지.
 #   ⑥ plan.sh    계획 루프 회귀 — 계획이 첫 단계부터 끝까지 도는지 (여러 바퀴를 이어 돌린다).
-#   ⑦ run.sh     판정 회귀 — 케이스 하나당 claude 호출 1건. 지금 7건(백엔드 5 · 프론트 2)이에요.
+#   ⑦ dispatch.sh 디스패처 회귀 — 이슈를 착수시킬지, 끝난 이슈·PR·브랜치를 치울지.
+#   ⑧ run.sh     판정 회귀 — 케이스 하나당 claude 호출 1건. 지금 7건(백엔드 5 · 프론트 2)이에요.
 #
 # CI 는 영역 구분 없이 전부 돌려요 — 손으로 한 영역만 볼 때는 `run.sh backend` 처럼 영역을 붙여요.
 name: claude-harness
@@ -50,6 +51,9 @@ on:
       - ".github/agent/next-role.sh"
       # 계획의 한 단계를 정하는 계산 — 계획 루프 회귀(⑥)가 잰다
       - ".github/agent/plan-stage.sh"
+      # 이슈·PR·브랜치를 치우는 판단 — 디스패처 회귀(⑦)가 잰다
+      - ".github/agent/dispatch_rules.py"
+      - ".github/agent/dispatch.py"
 
 permissions:
   contents: read
@@ -93,6 +97,10 @@ jobs:
       # 계획 루프도 모델도 GitHub 도 안 부른다 — 첫 단계부터 끝까지 이어 돌린다.
       - name: 계획 루프 회귀
         run: bash common/harness-tests/plan.sh
+
+      # 디스패처 회귀도 모델도 GitHub 도 안 부른다 — 치울지 말지를 상황마다 잰다.
+      - name: 디스패처 회귀
+        run: bash common/harness-tests/dispatch.sh
 
       - name: claude CLI 설치
         run: npm install -g @anthropic-ai/claude-code

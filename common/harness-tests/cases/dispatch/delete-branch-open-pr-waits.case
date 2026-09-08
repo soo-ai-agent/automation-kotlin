@@ -1,0 +1,6 @@
+# 열린 PR 이 있으면 두고 본다.
+# expect: keep
+# decision: delete-branch
+# branch: claude/issue-42
+# pr-open: true
+# ahead-by: 0

@@ -1,0 +1,5 @@
+# claude 라벨만 붙었다 — 기본 그래프로 착수한다.
+# expect: code
+# decision: start
+# has-pat: true
+# labels: claude

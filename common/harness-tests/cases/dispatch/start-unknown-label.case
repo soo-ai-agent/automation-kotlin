@@ -1,0 +1,5 @@
+# 모르는 라벨만 붙었다 — 건드리지 않는다.
+# expect: skip
+# decision: start
+# has-pat: true
+# labels: bug

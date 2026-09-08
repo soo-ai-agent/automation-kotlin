@@ -1,0 +1,6 @@
+# 기본 브랜치에 다 들어갔고 열린 PR 도 없다 — 지운다.
+# expect: delete
+# decision: delete-branch
+# branch: claude/issue-42
+# pr-open: false
+# ahead-by: 0

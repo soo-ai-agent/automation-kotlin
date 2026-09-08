@@ -1,0 +1,5 @@
+# 이슈가 닫혔다 — 폐기된 작업이라 PR 도 닫는다.
+# expect: close
+# decision: close-pr
+# head-ref: claude/issue-42
+# issue-state: closed

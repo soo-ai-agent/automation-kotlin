@@ -1,0 +1,5 @@
+# PAT 이 없으면 워크플로가 깨어나지 않는다 — 부르지 않는다.
+# expect: skip
+# decision: start
+# has-pat: false
+# labels: claude

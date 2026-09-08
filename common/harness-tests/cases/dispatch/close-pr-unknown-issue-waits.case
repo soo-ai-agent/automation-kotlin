@@ -1,0 +1,5 @@
+# 이슈를 조회하지 못했다 — 못 물어본 것이 닫혔다는 뜻은 아니다.
+# expect: keep
+# decision: close-pr
+# head-ref: claude/issue-42
+# issue-state: unknown

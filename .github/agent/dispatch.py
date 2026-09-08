@@ -19,6 +19,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+# "이걸 건드릴까"는 dispatch_rules 가 정하고, 여기서는 묻고 그대로 실행한다.
+# 판단을 이 파일에 되돌려 놓으면 하네스가 그것을 돌려 볼 수 없게 된다.
+import dispatch_rules
+
 REPO = os.environ["REPO"]
 TOKEN = os.environ["GH_TOKEN"]
 DEF = os.environ["DEF"]
@@ -74,30 +78,21 @@ def trigger_worker(number, extra):
 
 
 def start():
+    """1·2) 라벨이 붙은 열린 이슈마다 착수할지 묻고, 답대로 일꾼을 부른다."""
     if not CAN_START:
         print("AGENT_PAT 없음 — 착수를 건너뜁니다 (정리는 그대로 돕니다)")
         return
 
     checked = sent = 0
-
-    # 1) 분할 요청 — split 노드가 하위 이슈들을 만든다
-    for it in issues("claude-split"):
+    for it in issues("claude,claude-split"):
         checked += 1
-        if "claude-sent" in labels_of(it):
+        number = it["number"]
+        decision = dispatch_rules.start_issue(CAN_START, labels_of(it))
+        if decision == "skip":
             continue
-        trigger_worker(it["number"], {"node": "split"})
+        trigger_worker(number, {"node": "split"} if decision == "split" else {})
         sent += 1
-        print(f'issue #{it["number"]} 분할 착수')
-
-    # 2) 개발 착수 — claude-split 이 같이 붙어 있으면 분할이 우선
-    for it in issues("claude"):
-        checked += 1
-        names = labels_of(it)
-        if "claude-sent" in names or "claude-split" in names:
-            continue
-        trigger_worker(it["number"], {})
-        sent += 1
-        print(f'issue #{it["number"]} 착수')
+        print(f'issue #{number} {"분할 " if decision == "split" else ""}착수')
 
     print(f"검사 {checked}건, 착수 {sent}건")
 
@@ -153,14 +148,13 @@ def report_split_parents():
 def close_merged_issues():
     """4) 마감 청소 — 머지된 PR 이 있는데 열려 있는 이슈를 닫는다."""
     for it in issues("claude,claude-sent"):
-        if "claude-split" in labels_of(it):
-            continue   # 상위 이슈는 3)이 담당
         number = it["number"]
         found = prs(f"claude/issue-{number}")
-        if any(p["state"] == "open" for p in found):
-            continue   # 재작업 PR 이 열려 있다 — 아직 끝난 게 아니다
-        if not any(p.get("merged_at") for p in found):
-            continue   # 머지된 적 없음 — 사람이 판단할 몫
+        if dispatch_rules.close_issue(
+                labels_of(it),
+                any(p["state"] == "open" for p in found),
+                any(p.get("merged_at") for p in found)) != "close":
+            continue
         api(f"issues/{number}/comments",
             data={"body": "✅ 연결된 PR 이 머지되어 있어 이슈를 닫아요."}, method="POST")
         api(f"issues/{number}", data={"state": "closed"}, method="PATCH")
@@ -172,16 +166,14 @@ def close_orphan_prs():
     변경 내용은 닫힌 PR 화면에 그대로 보존되므로 브랜치도 함께 지운다."""
     for pr in api("pulls?state=open&per_page=100") or []:
         src = pr["head"]["ref"]
-        if not src.startswith("claude/issue-"):
+        ref = dispatch_rules.issue_of(src)
+        if ref is None:
             continue   # 사람 브랜치의 PR 은 건드리지 않는다
-        ref = src[len("claude/issue-"):]
-        if not ref.isdigit():
-            continue
         try:
-            issue = api(f"issues/{ref}")
+            state = api(f"issues/{ref}")["state"]
         except urllib.error.HTTPError:
-            continue   # 이슈 조회 실패 — 판단 불가, 보류
-        if issue["state"] != "closed":
+            state = "unknown"   # 조회 실패 — 판단은 규칙이 한다
+        if dispatch_rules.close_pr(src, state) != "close":
             continue
         api(f"issues/{pr['number']}/comments",
             data={"body": f"🧹 연결된 이슈 #{ref} 가 닫혀 있어 PR 도 닫아요. 변경 내용은 이 PR 에 보존돼요."},
@@ -200,15 +192,14 @@ def delete_merged_branches():
     for br in api("branches?per_page=100") or []:
         name = br["name"]
         if not name.startswith("claude/"):
-            continue
-        if any(p["state"] == "open" for p in prs(name)):
-            continue   # 열린 PR 이 있으면 두고 본다
+            continue   # 남의 브랜치는 PR 조회조차 하지 않는다
         try:
-            cmp = api(f"compare/{urllib.parse.quote(DEF)}...{urllib.parse.quote(name)}")
+            ahead = api(f"compare/{urllib.parse.quote(DEF)}...{urllib.parse.quote(name)}").get("ahead_by")
         except urllib.error.HTTPError:
+            ahead = None   # 조회 실패 — 판단은 규칙이 한다
+        if dispatch_rules.delete_branch(
+                name, any(p["state"] == "open" for p in prs(name)), ahead) != "delete":
             continue
-        if cmp.get("ahead_by", 1) != 0:
-            continue   # 기본 브랜치에 없는 커밋이 남아 있다 — 지우지 않는다
         try:
             api("git/refs/heads/" + urllib.parse.quote(name), method="DELETE")
             print(f"브랜치 {name} 삭제 (머지 완료)")

@@ -1,0 +1,5 @@
+# 이미 착수했으면 분할 라벨이 있어도 다시 부르지 않는다.
+# expect: skip
+# decision: start
+# has-pat: true
+# labels: claude-split claude-sent

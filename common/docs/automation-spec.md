@@ -15,6 +15,8 @@
 | 노드 본체 | `.github/workflows/claude-node.yml` | `workflow_call` (진입점이 호출) |
 | 그래프 펼치기 | `.github/agent/graph.js` | 진입점의 `graph` 잡이 실행 |
 | 디스패처 로직 | `.github/agent/dispatch.py` | `claude-dispatch.yml` 이 `start`·`cleanup` 두 번 실행 |
+| 디스패처 판단 | `.github/agent/dispatch_rules.py` | 착수·마감·삭제를 정한다 — 디스패처와 하네스가 **같은 파일**을 읽음 |
+| 하네스 디스패처 회귀 | `common/harness-tests/dispatch.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `dispatch.sh table`) |
 | 노드의 Claude 실행 | `.github/agent/run-claude.sh` | 노드가 기본 브랜치에서 꺼내 씀 |
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
@@ -209,7 +211,15 @@
 
 ### 수정 시 불변 조건
 
+- **치우는 판단은 `dispatch_rules.py` 에만 둔다.** `dispatch.py` 는 묻고 그대로 실행한다.
+  판단이 `dispatch.py` 안으로 되돌아가면 하네스가 못 재고, 그 상태로 10분마다 돈다 — `static.sh` 가 막는다.
+
+  그 규칙은 GitHub 을 부르지 않는다. `urllib`·`subprocess` 를 가져오는 순간 하네스가 돌릴 수 없게 된다.
+
 - 게이트 순서를 유지할 것: 판별 불가(브랜치명 불일치, 이슈 조회 실패)면 **머지하지 않는 쪽**으로 떨어져야 한다.
+
+  같은 원칙이 정리에도 적용된다 — 이슈 조회 실패는 `unknown` 이고, `compare` 실패는 `ahead_by=None` 이다.
+  둘 다 건드리지 않는 쪽으로 떨어진다. **못 물어봤다는 것이 없다는 뜻은 아니다.**
 
 - 에이전트 토큰으로 기본 브랜치에 직접 push 하는 코드를 만들지 말 것 — 보호가 막는 것이 정상이다.
 
@@ -267,8 +277,9 @@
   하네스가 자기 프롬프트를 따로 쓰면 **하네스가 통과해도 실제 리뷰어의 회귀를 못 잡는다.** 실제로 그 상태였다 —
   `CLAUDE_REVIEW_BAR` 를 망가뜨려도 하네스는 그 문자열을 아예 안 읽어 초록불이었다. `static.sh` 가 이 공유를 검사한다.
 
-- **검사는 일곱으로 나눈다** — `static.sh`(형식) · `graph.sh`(그래프 펼치기) · `loop.sh`(머지 판단) · `state.sh`(루프 상태) ·
-  `next-role.sh`(전이 규칙) · `plan.sh`(계획 루프)는 모델을 안 불러 공짜고, `run.sh` 만 케이스당 claude 호출 1건이다.
+- **검사는 여덟으로 나눈다** — `static.sh`(형식) · `graph.sh`(그래프 펼치기) · `loop.sh`(머지 판단) · `state.sh`(루프 상태) ·
+  `next-role.sh`(전이 규칙) · `plan.sh`(계획 루프) · `dispatch.sh`(착수·정리 판단)는 모델을 안 불러 공짜고,
+  `run.sh` 만 케이스당 claude 호출 1건이다.
 
 - **`plan.sh` 만 여러 바퀴를 이어 돌린다.** 나머지는 규칙 하나에 값을 넣어 답 하나를 본다.
   한 바퀴씩은 맞는데 이어 돌리면 안 되는 결함이 있고, 그것은 이어 돌려야만 보인다.

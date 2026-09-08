@@ -1,0 +1,5 @@
+# claude 와 claude-split 이 함께 붙으면 쪼개는 쪽이 먼저다.
+# expect: split
+# decision: start
+# has-pat: true
+# labels: claude claude-split

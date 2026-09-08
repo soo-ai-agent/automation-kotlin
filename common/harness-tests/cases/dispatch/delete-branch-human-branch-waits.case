@@ -1,0 +1,6 @@
+# 에이전트가 만든 브랜치만 지운다.
+# expect: keep
+# decision: delete-branch
+# branch: feat/hand-written
+# pr-open: false
+# ahead-by: 0

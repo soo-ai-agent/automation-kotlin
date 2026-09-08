@@ -83,8 +83,8 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 
 ## 하네스로 확인한다
 
-규칙이나 자동화를 고쳤으면 하네스로 확인한다. 검사는 일곱이고, **싼 것부터** 돌린다.
-앞의 여섯은 모델을 부르지 않아 공짜이고, 마지막 하나만 claude 호출을 쓴다.
+규칙이나 자동화를 고쳤으면 하네스로 확인한다. 검사는 여덟이고, **싼 것부터** 돌린다.
+앞의 일곱은 모델을 부르지 않아 공짜이고, 마지막 하나만 claude 호출을 쓴다.
 
 ```bash
 bash common/harness-tests/static.sh      # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
@@ -93,16 +93,17 @@ bash common/harness-tests/loop.sh        # ③ 리뷰 통과 뒤 머지할지 �
 bash common/harness-tests/state.sh       # ④ 코멘트에 남긴 루프 상태를 읽고 갱신하는지
 bash common/harness-tests/next-role.sh   # ⑤ 다음에 어느 역할을 부를지
 bash common/harness-tests/plan.sh        # ⑥ 계획이 첫 단계부터 끝까지 도는지
-bash common/harness-tests/run.sh backend # ⑦ 판정 회귀 — 백엔드 케이스만 (claude 5회)
+bash common/harness-tests/dispatch.sh    # ⑦ 이슈를 착수시킬지, 끝난 것을 치울지
+bash common/harness-tests/run.sh backend # ⑧ 판정 회귀 — 백엔드 케이스만 (claude 5회)
 ```
 
-**①~⑥은 모델을 부르지 않는다.** ①은 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 본다 —
+**①~⑦은 모델을 부르지 않는다.** ①은 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 본다 —
 스킬 색인의 링크가 죽지 않았는지, 하네스가 돌아야 할 경로가 워크플로 필터에 다 들어 있는지.
 
-②~⑥은 **동작을 재지만 모델이 필요 없다.** 그래프·머지·상태·전이·계획이 값을 받아 값을 내는
+②~⑦은 **동작을 재지만 모델이 필요 없다.** 그래프·머지·상태·전이·계획·정리가 값을 받아 값을 내는
 스크립트로 나와 있기 때문이다. 그것이 워크플로 셸로 되돌아가면 이 검사들이 죽고, ①이 그것을 막는다.
 
-**⑦만 케이스 하나가 claude 호출 1건**이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다.
+**⑧만 케이스 하나가 claude 호출 1건**이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다.
 영역은 어느 케이스를 돌릴지만 고르고, 리뷰어는 언제나 실제 PR 리뷰어와 똑같은 방식으로 불린다.
 
 고치기 전에 결과를 미리 보고 싶으면 아래를 쓴다. 워크플로를 돌리지 않아도 된다.
@@ -113,6 +114,7 @@ bash common/harness-tests/plan.sh 'plan>code>test' # 이 계획이 몇 바퀴에
 bash common/harness-tests/loop.sh table            # 상황별 머지 결정
 bash common/harness-tests/next-role.sh table       # 상황별 다음 역할
 bash common/harness-tests/state.sh show            # 상태를 읽고 갱신해 다시 쓰는 과정
+bash common/harness-tests/dispatch.sh table         # 상황별 착수·정리 결정
 ```
 
 ## 맥에서 (macOS)

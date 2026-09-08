@@ -48,6 +48,7 @@ bash .github/agent/setup-speckit.sh
 | [agent/loop-decision.sh](agent/loop-decision.sh) | 리뷰를 통과한 PR 을 머지할지 — 리뷰어와 하네스가 **같은 파일**을 읽는다 |
 | [agent/state.sh](agent/state.sh) | 루프 상태를 코멘트 안 숨은 블록으로 읽고 쓴다 |
 | [agent/dispatch.py](agent/dispatch.py) | 디스패처 본체 — `start`(이슈 착수) · `cleanup`(정리) 두 모드 |
+| [agent/dispatch_rules.py](agent/dispatch_rules.py) | 착수·마감·삭제 판단 — 디스패처와 하네스가 **같은 파일**을 읽는다 |
 | [agent/run-claude.sh](agent/run-claude.sh) | 노드가 Claude 를 돌리는 부분 — 프롬프트 조립·실행·수습 |
 | [agent/stream.js](agent/stream.js) | 실행 로그 정리기 |
 | [workflows/claude-review.yml](workflows/claude-review.yml) | 리뷰어 — PR diff 판정, 자동 머지, 재작업 트리거 |
