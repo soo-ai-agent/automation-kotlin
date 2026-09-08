@@ -323,6 +323,33 @@ check_next_role_testable() {
     fi
 }
 
+# ── ⑫ 판정 케이스가 자기 영역 파일만 건드리는가 ─────────────────────
+# 영역 폴더는 `run.sh backend` 처럼 어느 케이스를 돌릴지 고르는 데 쓴다.
+# cases/backend/ 에 프론트 diff 가 들어 있으면 `run.sh frontend` 를 돌린 사람은
+# 그 케이스가 조용히 빠진 것을 모른다.
+check_case_area_match() {
+    bad=""
+    for dir in common/harness-tests/cases/backend common/harness-tests/cases/frontend; do
+        area=$(basename "$dir")
+        for f in "$dir"/*.diff; do
+            [ -e "$f" ] || continue
+            # diff 머리말에서 파일 경로를 뽑아 영역 이름으로 시작하는지 본다
+            for path in $(sed -n 's|^+++ b/||p;s|^--- a/||p' "$f" | sort -u); do
+                case "$path" in
+                    "$area"/*) ;;
+                    /dev/null) ;;
+                    *) bad="$bad $(basename "$f")->$path" ;;
+                esac
+            done
+        done
+    done
+    if [ -z "$bad" ]; then
+        ok "판정 케이스가 자기 영역 파일만 건드린다"
+    else
+        ng "케이스가 다른 영역 파일을 건드린다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -334,6 +361,7 @@ check_graph_stage_jobs
 check_loop_decision_shared
 check_state_shared
 check_next_role_testable
+check_case_area_match
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

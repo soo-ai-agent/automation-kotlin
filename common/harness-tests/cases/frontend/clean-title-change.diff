@@ -1,11 +1,11 @@
 # expect: PASS
---- a/frontend/src/todo/pages/TodoPage.tsx
-+++ b/frontend/src/todo/pages/TodoPage.tsx
-@@ -12,7 +12,7 @@ export default function TodoPage() {
+--- a/frontend/src/todo/screens/Todo.tsx
++++ b/frontend/src/todo/screens/Todo.tsx
+@@ -12,7 +12,7 @@ export default function Todo({navigation}: TodoProps) {
    return (
-     <main>
--      <h1>Todo</h1>
-+      <h1>할 일 관리</h1>
+     <SafeAreaView style={styles.container}>
+-      <Text style={styles.title}>Todo</Text>
++      <Text style={styles.title}>할 일 관리</Text>
        <TodoList />
-     </main>
+     </SafeAreaView>
    );
