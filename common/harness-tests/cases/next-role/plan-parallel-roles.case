@@ -1,0 +1,10 @@
+# 이번 단계에 둘이면 둘 다 낸다 — 병렬은 여기서 살아 있다.
+# expect: api web
+# verdict: 
+# rounds: 0
+# max-rounds: 3
+# has-pat: true
+# step: 1
+# max-steps: 12
+# broken: 0
+# stage-roles: api web

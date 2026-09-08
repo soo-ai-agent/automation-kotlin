@@ -38,7 +38,7 @@ bash .github/agent/setup-speckit.sh
 | 파일 | 역할 |
 |---|---|
 | [workflows/claude-dispatch.yml](workflows/claude-dispatch.yml) | 디스패처 — 라벨 이슈 감지·착수, 완료 후 정리(상위 이슈 완료 보고, 이슈·PR·브랜치 청소) |
-| [workflows/claude-agent.yml](workflows/claude-agent.yml) | 진입점 — 그래프를 단계 잡(s1..s4)으로 펼쳐 노드들을 돌린다 |
+| [workflows/claude-agent.yml](workflows/claude-agent.yml) | 진입점 — 계획의 한 단계를 돌리고, 남았으면 자기를 다시 부른다 |
 | [workflows/claude-node.yml](workflows/claude-node.yml) | 노드 하나 — 코드 작성·커밋·push, 명세/하위 이슈/PR 생성 |
 | [workflows/claude-harness.yml](workflows/claude-harness.yml) | 하네스 — 규칙 문서를 고친 PR 에서 형식 검사(공짜) 뒤 판정 회귀를 돌린다 |
 | [agent/graph.js](agent/graph.js) | `CLAUDE_GRAPH` 펼치기 (`>` 순차 · `+` 병렬 · `?` 수습) |
@@ -57,7 +57,7 @@ bash .github/agent/setup-speckit.sh
 
 | | GitLab | 여기 |
 |---|---|---|
-| 그래프 실행 | 자식 파이프라인을 잡마다 생성 | 단계 잡 s1..s4 를 **미리 선언**하고 매트릭스로 채운다 — Actions 는 잡을 실행 중에 만들 수 없다. 그래서 **순차 단계는 최대 4개**다 (병렬 수는 무제한) |
+| 그래프 실행 | 자식 파이프라인을 잡마다 생성 | 잡 하나가 한 단계를 돌리고 자기를 다시 부른다 — Actions 는 잡을 실행 중에 만들 수 없어서다. 단계 수에 제한은 없고, 대신 `CLAUDE_MAX_STEPS` 가 루프를 멈춘다 |
 | 수습(`?`) | 별도 잡 + 아티팩트로 상태 전달 | **같은 잡 안에서** 이어 실행 — 잡을 두 벌씩 선언할 필요가 없고, 같은 브랜치를 이어받는다는 의미도 더 정확하다 |
 | 노드 간 호출 | 트리거 토큰 | `AGENT_PAT`. **선택이 아니다** — 기본 `GITHUB_TOKEN` 으로 만든 PR·커밋은 다른 워크플로를 깨우지 못한다 |
 

@@ -1,0 +1,10 @@
+# 계획을 밟는 중이다 — 판정이 없다. 이번 단계의 역할을 그대로 돌린다.
+# expect: code
+# verdict: 
+# rounds: 0
+# max-rounds: 3
+# has-pat: true
+# step: 1
+# max-steps: 12
+# broken: 0
+# stage-roles: code

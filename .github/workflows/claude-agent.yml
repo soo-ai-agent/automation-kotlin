@@ -2,21 +2,28 @@
 #    노드 지시문은 .github/agent/nodes/*.md. 이 파일은 기능 자체를 개조할 때만 열고,
 #    수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
 #
-# Claude 일꾼 — 지시를 받아 그래프를 펼치고, 노드들이 같은 브랜치에서 코딩한 뒤 PR 을 연다.
+# Claude 일꾼 — 지시를 받아 계획의 한 단계를 돌리고, 남은 단계가 있으면 자기를 다시 부른다.
 #
 # 호출 계약 (디스패처·리뷰어·사람이 workflow_dispatch 로 전달):
 #   prompt        작업 지시. @TASK.md 처럼 @경로를 주면 그 파일이 명세가 된다.
 #                 비우고 issue 를 주면 그 이슈의 제목+본문이 지시가 된다.
 #   graph         (선택) 이번 작업만 다른 노드 구성으로 — 예: api+web>e2e
-#   node          (선택) 그래프 없이 이 노드 하나만 — 리뷰어의 fix 재작업이 쓴다
+#   node          (선택) 그래프 없이 이 노드 하나만 — 리뷰어의 재작업이 쓴다
 #   branch        (선택) 이어서 작업할 브랜치. 비우면 새로 만든다
 #   task_code     (선택) PR 제목 앞에 붙일 코드
 #   issue         (선택) 연결할 이슈/PR 번호 — 결과를 여기에 회신한다
 #   context_type  (선택) issue | pr
+#   stage         (선택) 계획의 몇 번째 단계인지. 루프가 자기를 부를 때 채운다
+#   step          (선택) 지금까지 노드가 돈 횟수. 루프가 자기를 부를 때 채운다
 #
-# 그래프 실행 구조 — GitHub Actions 는 잡을 실행 중에 만들어 낼 수 없다.
-# 그래서 단계 잡(s1..s4)을 미리 선언해 두고, graph 잡이 단계별 매트릭스를 계산해 넘긴다.
-# 빈 단계는 매트릭스가 [] 라서 통째로 건너뛴다. 앞 단계가 실패하면 뒤 단계는 자동으로 안 돈다.
+# 루프 구조 — 잡 셋이 한 단계를 처리하고, 남았으면 자기를 다시 부른다.
+#   plan  계획을 펼쳐 이번 단계의 역할들을 정한다 (next-role.sh 가 계속할지도 함께 정한다)
+#   run   그 역할들을 나란히 돌린다 (matrix). 병렬은 여기서 살아 있다
+#   next  남은 단계가 있으면 stage+1 로 자기를 다시 부른다
+#
+# **단계 수에 상한이 없다.** 예전에는 단계마다 잡(s1..s4)을 미리 선언해야 해서 4개가 한계였다.
+# 대신 루프가 스스로 멈춰야 한다 — CLAUDE_MAX_STEPS 가 그 상한이고, next-role.sh 가 잰다.
+# GITHUB_TOKEN 재귀는 Actions 가 막아 주지만 PAT 재귀는 막아 주지 않는다.
 name: claude-agent
 
 on:
@@ -36,6 +43,10 @@ on:
         description: "연결할 이슈/PR 번호"
       context_type:
         description: "issue | pr"
+      stage:
+        description: "계획의 몇 번째 단계인지 (0부터). 루프가 채운다 — 손으로 줄 일은 없다"
+      step:
+        description: "지금까지 노드가 돈 횟수. 루프가 채운다 — 손으로 줄 일은 없다"
 
 permissions:
   contents: write
@@ -43,31 +54,37 @@ permissions:
   issues: write
 
 jobs:
-  graph:
-    name: 그래프 펼치기
+  plan:
+    name: 이번 단계 정하기
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      s1: ${{ steps.expand.outputs.s1 }}
-      s2: ${{ steps.expand.outputs.s2 }}
-      s3: ${{ steps.expand.outputs.s3 }}
-      s4: ${{ steps.expand.outputs.s4 }}
-      branch: ${{ steps.expand.outputs.branch }}
-      runner: ${{ steps.expand.outputs.runner }}
-      java_version: ${{ steps.expand.outputs.java_version }}
-      node_version: ${{ steps.expand.outputs.node_version }}
+      roles: ${{ steps.pick.outputs.roles }}
+      matrix: ${{ steps.pick.outputs.matrix }}
+      has_next: ${{ steps.pick.outputs.has_next }}
+      branch: ${{ steps.pick.outputs.branch }}
+      runner: ${{ steps.pick.outputs.runner }}
+      java_version: ${{ steps.pick.outputs.java_version }}
+      node_version: ${{ steps.pick.outputs.node_version }}
     env:
       IN_GRAPH: ${{ inputs.graph }}
       IN_NODE: ${{ inputs.node }}
       IN_BRANCH: ${{ inputs.branch }}
       ISSUE: ${{ inputs.issue }}
+      STAGE: ${{ inputs.stage }}
+      STEP: ${{ inputs.step }}
+      HAS_PAT: ${{ secrets.AGENT_PAT != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }} # 설정과 그래프 도구는 항상 기본 브랜치 것
+          ref: ${{ github.event.repository.default_branch }} # 설정과 도구는 항상 기본 브랜치 것
 
-      - name: 설정 읽고 그래프 펼치기
-        id: expand
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 계획을 펼쳐 이번 단계를 고른다
+        id: pick
         run: |
           set -e
           . .github/agent/settings.env
@@ -83,33 +100,53 @@ jobs:
           else BRANCH="claude/work-${{ github.run_id }}"; fi
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
+          STAGE="${STAGE:-0}"
+          STEP="${STEP:-0}"
+
+          # 계획 전체를 펼친다. graph.js 는 단계 배열 하나를 낸다 — 단계 수에 상한은 없다.
           CLAUDE_GRAPH="${IN_GRAPH:-$CLAUDE_GRAPH}" CLAUDE_NODE="$IN_NODE" \
-            node .github/agent/graph.js
+            node .github/agent/graph.js > /tmp/graph.txt
+          STAGES=$(sed -n 's/^stages=//p' /tmp/graph.txt)
 
-  # ── 단계 잡 s1..s4 ────────────────────────────────────────
-  #
-  # 아래 네 잡은 **세 줄만 다르고 나머지 18줄은 완전히 같다.** 다른 세 줄은 이것뿐이다:
-  #
-  #   needs:  앞 단계를 기다린다 (s1 은 graph 만, s2 는 s1, s3 은 s2, s4 는 s3)
-  #   if:     자기 단계의 매트릭스가 비어 있으면 통째로 건너뛴다
-  #   include: 자기 단계의 매트릭스를 읽는다
-  #
-  # 이렇게 베껴 쓴 이유는 GitHub Actions 가 잡을 실행 중에 만들어 낼 수 없고,
-  # 워크플로 YAML 에서는 앵커(&·*)도 못 쓰기 때문이다. 단계마다 미리 선언하는 수밖에 없다.
-  # 그래서 순차 단계가 최대 4개로 제한된다 (graph.js 의 MAX_STAGES).
-  #
-  # **`with:` 를 고칠 때는 네 잡을 모두 같이 고쳐야 한다.** 하나만 고치면 그 단계만 다르게 돈다.
-  # 단계를 늘리려면 같은 모양의 잡을 하나 더 붙이고 graph.js 의 MAX_STAGES 를 함께 올린다.
-  #
-  # fail-fast: false 는 병렬 노드가 서로를 중도 취소하지 않게 한다 — 넷 다 필요하다.
+          # 이번 단계와 다음 단계를 꺼낸다. 다음이 비어 있으면 이번이 마지막이다.
+          THIS=$(printf '%s' "$STAGES" | node -e '
+            const all = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            process.stdout.write(JSON.stringify(all[Number(process.env.STAGE)] || []));
+          ')
+          NEXT=$(printf '%s' "$STAGES" | node -e '
+            const all = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            process.stdout.write(JSON.stringify(all[Number(process.env.STAGE) + 1] || []));
+          ')
+          STAGE_ROLES=$(printf '%s' "$THIS" | node -e '
+            const s = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            process.stdout.write(s.map((n) => n.node).join(" "));
+          ')
 
-  s1:
-    needs: graph
-    if: needs.graph.outputs.s1 != '[]'
+          # 계속할지는 next-role.sh 가 정한다 — 상한도 상태도 거기서 잰다.
+          # 계획을 밟는 중이라 판정(VERDICT)은 없다.
+          ROLES=$(STAGE_ROLES="$STAGE_ROLES" STEP="$STEP" MAX_STEPS="$CLAUDE_MAX_STEPS" \
+                  HAS_PAT="$HAS_PAT" bash .github/agent/next-role.sh 2>/tmp/why.txt || true)
+          echo "단계 $STAGE · 실행 $STEP/$CLAUDE_MAX_STEPS · 이번 역할: ${ROLES}"
+          [ -s /tmp/why.txt ] && echo "::warning::$(cat /tmp/why.txt)"
+
+          case "$ROLES" in
+            done | human | loop-off) MATRIX="[]"; HAS_NEXT=false ;;
+            *) MATRIX="$THIS"; [ "$NEXT" = "[]" ] && HAS_NEXT=false || HAS_NEXT=true ;;
+          esac
+          {
+            echo "roles=$ROLES"
+            echo "matrix=$MATRIX"
+            echo "has_next=$HAS_NEXT"
+          } >> "$GITHUB_OUTPUT"
+
+  run:
+    name: ${{ matrix.label }}
+    needs: plan
+    if: needs.plan.outputs.matrix != '[]'
     strategy:
-      fail-fast: false
+      fail-fast: false # 병렬 노드가 서로를 중도 취소하지 않게 한다 — 다 필요하다
       matrix:
-        include: ${{ fromJSON(needs.graph.outputs.s1) }}
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     uses: ./.github/workflows/claude-node.yml
     secrets: inherit
     with:
@@ -118,79 +155,41 @@ jobs:
       rescue: ${{ matrix.rescue }}
       make_pr: ${{ matrix.make_pr }}
       prompt: ${{ inputs.prompt }}
-      branch: ${{ needs.graph.outputs.branch }}
+      branch: ${{ needs.plan.outputs.branch }}
       task_code: ${{ inputs.task_code }}
       issue: ${{ inputs.issue }}
       context_type: ${{ inputs.context_type }}
-      runner: ${{ needs.graph.outputs.runner }}
-      java_version: ${{ needs.graph.outputs.java_version }}
-      node_version: ${{ needs.graph.outputs.node_version }}
+      runner: ${{ needs.plan.outputs.runner }}
+      java_version: ${{ needs.plan.outputs.java_version }}
+      node_version: ${{ needs.plan.outputs.node_version }}
 
-  s2:
-    needs: [graph, s1]
-    if: needs.graph.outputs.s2 != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.graph.outputs.s2) }}
-    uses: ./.github/workflows/claude-node.yml
-    secrets: inherit
-    with:
-      node: ${{ matrix.node }}
-      label: ${{ matrix.label }}
-      rescue: ${{ matrix.rescue }}
-      make_pr: ${{ matrix.make_pr }}
-      prompt: ${{ inputs.prompt }}
-      branch: ${{ needs.graph.outputs.branch }}
-      task_code: ${{ inputs.task_code }}
-      issue: ${{ inputs.issue }}
-      context_type: ${{ inputs.context_type }}
-      runner: ${{ needs.graph.outputs.runner }}
-      java_version: ${{ needs.graph.outputs.java_version }}
-      node_version: ${{ needs.graph.outputs.node_version }}
-
-  s3:
-    needs: [graph, s2]
-    if: needs.graph.outputs.s3 != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.graph.outputs.s3) }}
-    uses: ./.github/workflows/claude-node.yml
-    secrets: inherit
-    with:
-      node: ${{ matrix.node }}
-      label: ${{ matrix.label }}
-      rescue: ${{ matrix.rescue }}
-      make_pr: ${{ matrix.make_pr }}
-      prompt: ${{ inputs.prompt }}
-      branch: ${{ needs.graph.outputs.branch }}
-      task_code: ${{ inputs.task_code }}
-      issue: ${{ inputs.issue }}
-      context_type: ${{ inputs.context_type }}
-      runner: ${{ needs.graph.outputs.runner }}
-      java_version: ${{ needs.graph.outputs.java_version }}
-      node_version: ${{ needs.graph.outputs.node_version }}
-
-  s4:
-    needs: [graph, s3]
-    if: needs.graph.outputs.s4 != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.graph.outputs.s4) }}
-    uses: ./.github/workflows/claude-node.yml
-    secrets: inherit
-    with:
-      node: ${{ matrix.node }}
-      label: ${{ matrix.label }}
-      rescue: ${{ matrix.rescue }}
-      make_pr: ${{ matrix.make_pr }}
-      prompt: ${{ inputs.prompt }}
-      branch: ${{ needs.graph.outputs.branch }}
-      task_code: ${{ inputs.task_code }}
-      issue: ${{ inputs.issue }}
-      context_type: ${{ inputs.context_type }}
-      runner: ${{ needs.graph.outputs.runner }}
-      java_version: ${{ needs.graph.outputs.java_version }}
-      node_version: ${{ needs.graph.outputs.node_version }}
+  next:
+    name: 다음 단계로
+    needs: [plan, run]
+    if: needs.plan.outputs.has_next == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # AGENT_PAT 이 없으면 여기서 조용히 끝난다. GITHUB_TOKEN 으로 건 workflow_dispatch 는
+      # 워크플로를 깨우지 못하기 때문이다 — next-role.sh 가 그 상황을 loop-off 로 먼저 잡는다.
+      - name: 자기를 다음 단계로 부른다
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
+          STAGE: ${{ inputs.stage }}
+          STEP: ${{ inputs.step }}
+          RAN: ${{ needs.plan.outputs.roles }}
+        run: |
+          set -e
+          NEXT_STAGE=$(( ${STAGE:-0} + 1 ))
+          # 이번 단계에서 돈 노드 수만큼 실행 횟수를 올린다 — 병렬이면 한 번에 여럿이다
+          NEXT_STEP=$(( ${STEP:-0} + $(printf '%s' "$RAN" | wc -w) ))
+          gh workflow run claude-agent.yml \
+            -f prompt="${{ inputs.prompt }}" \
+            -f graph="${{ inputs.graph }}" \
+            -f branch="${{ needs.plan.outputs.branch }}" \
+            -f task_code="${{ inputs.task_code }}" \
+            -f issue="${{ inputs.issue }}" \
+            -f context_type="${{ inputs.context_type }}" \
+            -f stage="$NEXT_STAGE" \
+            -f step="$NEXT_STEP"
+          echo "다음 단계 트리거됨 (단계 $NEXT_STAGE · 실행 $NEXT_STEP)"

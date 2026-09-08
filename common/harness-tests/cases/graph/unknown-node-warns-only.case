@@ -4,7 +4,4 @@
 # 아무것도 못 한 채 성공으로 끝난다. 고칠 때 이 케이스의 expect 를 FAIL 로 뒤집는다.
 # expect: PASS
 # graph: nope>code
-s1=[{"node":"nope","label":"nope","rescue":"","make_pr":"false"}]
-s2=[{"node":"code","label":"code","rescue":"","make_pr":"true"}]
-s3=[]
-s4=[]
+stages=[[{"node":"nope","label":"nope","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]

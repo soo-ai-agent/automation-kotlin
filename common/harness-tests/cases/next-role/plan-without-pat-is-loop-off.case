@@ -1,0 +1,10 @@
+# PAT 이 없으면 다음 단계를 못 부른다 — 시작하기 전에 알린다.
+# expect: loop-off
+# verdict: 
+# rounds: 0
+# max-rounds: 3
+# has-pat: false
+# step: 1
+# max-steps: 12
+# broken: 0
+# stage-roles: code

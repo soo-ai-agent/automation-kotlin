@@ -1,9 +1,0 @@
-# 판정이 없다 — 리뷰가 돌지 않았다. 짐작해서 역할을 부르지 않는다.
-# expect: human
-# verdict: 
-# step: 0
-# rounds: 0
-# max-rounds: 3
-# has-pat: true
-# max-steps: 12
-# broken: 0

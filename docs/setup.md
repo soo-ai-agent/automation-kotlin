@@ -131,7 +131,7 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 | 리뷰는 통과했는데 자동 머지가 안 된다 | 정상일 수 있다 — 자동 머지는 에이전트가 쪼갠 하위 이슈(`claude-made` 라벨)에만 적용된다. 사람이 올린 이슈는 사람이 머지한다 |
 | 지적을 받았는데 스스로 고치지 않는다 | `AGENT_PAT` 의 **Actions: Read and write** 권한 |
 | 그래프의 다음 단계가 안 돈다 | 앞 단계가 실패했는지 본다. 실패했다면 멈추는 것이 정상 동작이다 |
-| `순차 단계는 최대 4개예요` 에러 | `CLAUDE_GRAPH` 에서 `>` 로 이은 단계가 4개를 넘었다 — `+` 로 묶어 동시에 돌리거나 작업을 두 번에 나눈다 |
+| 단계가 끝까지 안 돌고 멈춤 | 노드 실행 횟수가 `CLAUDE_MAX_STEPS`(기본 12)에 닿았다 — Actions 로그의 경고에 이유가 적힌다 |
 
 
 ## 내 컴퓨터에서도 같은 규칙으로

@@ -59,7 +59,7 @@
 
   항목은 `{ node, label, rescue, make_pr }`. `CLAUDE_NODE` 가 있으면 그 노드 하나만 `s1` 에 담는다.
 
-- `claude-agent.yml` — `graph` 잡이 `settings.env` 를 읽고 브랜치명과 런타임 버전을 outputs 로 낸 뒤, 단계 잡 `s1`..`s4` 가 `claude-node.yml` 을 매트릭스로 호출한다.
+- `claude-agent.yml` — `plan` 잡이 `settings.env` 를 읽고 계획을 펼쳐 이번 단계의 역할을 정하면, `run` 잡이 `claude-node.yml` 을 매트릭스로 호출하고, `next` 잡이 남은 단계가 있으면 자기를 다시 부른다.
 
   `sN` 은 `needs: [graph, s(N-1)]` 이고 `if: needs.graph.outputs.sN != '[]'`.
 
@@ -73,15 +73,15 @@
 
 원본은 자식 파이프라인으로 잡을 실행 중에 생성했다. GitHub Actions 에는 그 기능이 없다.
 
-- 단계 잡을 **미리 선언**해야 해서 순차 단계가 **최대 4개**로 제한된다 (`graph.js` 의 `MAX_STAGES`). 병렬(`+`)로 묶는 수에는 제한이 없다.
+- 순차 단계 수에 제한이 없다. 잡 하나가 이번 단계를 돌린 뒤 자기를 다시 부르므로 잡을 미리 선언할 필요가 없다. 병렬(`+`)로 묶는 수에도 제한이 없다.
 
 - 수습을 별도 잡으로 두면 단계마다 잡을 두 벌씩 선언해야 하므로 **노드 잡 안으로 넣었다.** 덕분에 노드 상태를 아티팩트로 주고받을 필요가 없어졌다.
 
 ### 수정 시 불변 조건
 
-- `MAX_STAGES` 를 늘리려면 `claude-agent.yml` 에 같은 모양의 단계 잡을 **먼저 추가**해야 한다. 숫자만 바꾸면 5번째 단계가 조용히 사라진다.
+- 단계 잡을 다시 미리 선언하지 말 것. 그러면 상한이 되살아나고 같은 `with:` 블록을 여러 벌 관리하게 된다 — `static.sh` 가 막는다.
 
-- 단계 잡의 `needs` 에서 앞 단계를 빼지 말 것 — 실패 전파가 사라져 앞 노드가 깨진 채로 뒤 노드가 돈다.
+- `next` 잡의 `needs` 에서 `run` 을 빼지 말 것 — 실패 전파가 사라져 앞 단계가 깨진 채로 다음 단계가 돈다.
 
 - `strategy.fail-fast: false` 를 지우지 말 것 — 병렬 노드 하나가 실패하면 나머지가 중도 취소된다.
 
@@ -232,6 +232,18 @@
 
 - `CLAUDE.md` 의 `@common/docs/code-review/rules.md` import 경로와 `settings.env` 의 `CLAUDE_REVIEW_RULES_DIR` 은 같은 곳을 가리켜야 한다.
 
+- **계획은 잡을 미리 선언하지 않는다.** `claude-agent.yml` 의 잡은 셋이고 단계 수와 무관하다 —
+  `plan`(이번 단계를 고른다) · `run`(그 역할들을 나란히 돌린다) · `next`(남았으면 `stage+1` 로 자기를 다시 부른다).
+
+  예전에는 단계마다 잡(`s1`~`s4`)을 선언해 두고 `graph.js` 의 `MAX_STAGES` 로 맞췄다.
+  Actions 가 잡을 실행 중에 만들 수 없어서였고, 그래서 순차 4단계가 상한이었고 같은 `with:` 블록이 네 벌 복사돼 있었다.
+
+  **이제 상한이 없으므로 루프가 스스로 멈춰야 한다.** `CLAUDE_MAX_STEPS` 가 그 상한이고 `next-role.sh` 가 잰다.
+  `GITHUB_TOKEN` 재귀는 Actions 가 막아 주지만 **PAT 재귀는 막아 주지 않는다** — 이 상한이 유일한 정지선이다.
+
+  병렬(`+`)은 `run` 잡의 matrix 로 살아 있다. `next-role.sh` 가 이번 단계의 역할을 공백으로 이어 내고,
+  `run` 이 그만큼 나란히 돈다. 실행 횟수는 그 수만큼 오른다.
+
 - **하네스 회귀(`claude-harness.yml`)는 PR 브랜치를 checkout 한다** — 리뷰어와 반대다.
   리뷰어는 PR 이 자기 심사 기준을 바꾸지 못하게 기준 브랜치 설정을 쓰지만, 하네스는 그 PR 이 바꾼 규칙이 검사 대상이라 PR 것을 읽어야 한다.
 
@@ -265,8 +277,13 @@
   | ④ | 라운드가 `CLAUDE_MAX_ROUNDS` 이상 | `human` |
   | ⑤ | 실행 횟수가 `CLAUDE_MAX_STEPS` 이상 | `human` |
   | ⑥ | `AGENT_PAT` 없음 | `loop-off` |
-  | ⑦ | 지적 남음(`CHANGES_REQUESTED`) | `fix` |
-  | ⑧ | 판정이 없거나 모르는 값 | `human` |
+  | ⑦ | 판정 없음 + 계획에 남은 역할 있음 | 그 역할들 |
+  | ⑦ | 판정 없음 + 계획 끝 | `done` |
+  | ⑧ | 지적 남음(`CHANGES_REQUESTED`) | `fix` |
+  | ⑨ | 모르는 판정 | `human` |
+
+  **판정이 없다는 것은 계획을 밟는 중이라는 뜻이다.** 리뷰어는 언제나 판정을 채워 부르므로
+  (`claude-review.yml` 이 `PASS` 아니면 `CHANGES_REQUESTED` 로 정한다) 빈 판정은 `claude-agent.yml` 에서만 온다.
 
   **③ 을 ④⑤⑥ 보다 앞에 두는 것이 중요하다.** 상한과 PAT 은 일을 더 시킬 수 있는지를 재는 것이고
   통과는 시킬 일이 없다는 뜻이라, 순서를 뒤집으면 통과한 PR 까지 사람을 부르며 막힌다.

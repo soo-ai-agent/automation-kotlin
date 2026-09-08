@@ -3,7 +3,4 @@
 # expect: PASS
 # graph: plan>code?fix>test
 # node: fix
-s1=[{"node":"fix","label":"fix","rescue":"","make_pr":"true"}]
-s2=[]
-s3=[]
-s4=[]
+stages=[[{"node":"fix","label":"fix","rescue":"","make_pr":"true"}]]

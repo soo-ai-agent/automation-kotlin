@@ -16,12 +16,15 @@
 #   MAX_STEPS   그 상한 (settings.env 의 CLAUDE_MAX_STEPS)
 #   BROKEN      상태를 읽지 못했다는 표시 (state.sh 의 broken)
 #   HAS_PAT     true | false               AGENT_PAT 이 있나
+#   STAGE_ROLES 계획에서 이번에 돌릴 역할들 (공백 구분). 리뷰 뒤 호출이면 빈 값
 #
-# 내는 값 (stdout 한 단어):
+# 내는 값 (stdout 한 줄):
 #   done       더 부를 역할이 없다. 루프를 끝낸다
 #   human      자동으로 이어갈 수 없다. 사람을 부른다
 #   loop-off   PAT 이 없어 재작업 루프가 꺼져 있다
-#   <역할 이름>  .github/agent/nodes/<이름>.md 가 있는 역할
+#   <역할 이름들>  공백으로 구분한다. 여럿이면 그 단계에서 나란히 돈다
+#
+# 부르는 곳이 둘이다. 판정(VERDICT)이 있으면 리뷰 뒤이고, 없으면 계획을 밟는 중이다.
 #
 # **왜 그렇게 정했는지는 stderr 에 한 줄로 낸다.** stdout 은 대조할 수 있게 한 단어로 두고,
 # 사람에게 남길 말은 따로 보낸다 — 부르는 쪽이 이유를 짐작해 지어내지 않게.
@@ -40,6 +43,7 @@ STEP="${STEP:-0}"
 MAX_STEPS="${MAX_STEPS:-0}"
 BROKEN="${BROKEN:-0}"
 HAS_PAT="${HAS_PAT:-false}"
+STAGE_ROLES="${STAGE_ROLES:-}"
 
 say() { printf '%s\n' "$1" >&2; }
 
@@ -91,7 +95,19 @@ if [ "$HAS_PAT" != "true" ]; then
     exit 0
 fi
 
-# ⑦ 지적이 남았다. 고치는 역할은 fix 하나다.
+# ⑦ 계획을 밟는 중이다 — 리뷰 전이라 판정이 없다. 이번 단계의 역할들을 그대로 돌린다.
+#    여럿이면 나란히 돈다. 계획을 해석하는 것은 graph.js 이고, 여기는 받은 것을 통과시킨다.
+if [ -z "$VERDICT" ]; then
+    if [ -n "$STAGE_ROLES" ]; then
+        echo "$STAGE_ROLES"
+        exit 0
+    fi
+    # 계획이 끝났다. 리뷰는 PR 이 열린 뒤에 따로 돈다.
+    echo "done"
+    exit 0
+fi
+
+# ⑧ 지적이 남았다. 고치는 역할은 fix 하나다.
 #
 #    영역별로 나누고 싶을 수 있다(백엔드 지적이면 백엔드만 고치는 역할). 지금은 안 한다 —
 #    api·web 노드의 지시문은 "기능을 구현한다"이지 "지적을 고친다"가 아니라서,
@@ -101,6 +117,6 @@ if [ "$VERDICT" = "CHANGES_REQUESTED" ]; then
     exit 0
 fi
 
-# ⑧ 판정이 없거나 모르는 값이다. 리뷰가 돌지 않았거나 형식이 바뀐 것이라 사람이 봐야 한다.
-say "리뷰 판정을 알 수 없어요 (${VERDICT:-없음})."
+# ⑨ 모르는 판정이다. 리뷰 출력 형식이 바뀐 것이라 사람이 봐야 한다.
+say "리뷰 판정을 알 수 없어요 (${VERDICT})."
 echo "human"

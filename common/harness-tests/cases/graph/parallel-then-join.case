@@ -2,7 +2,4 @@
 # 중간에 열면 완성 전 코드가 리뷰된다.
 # expect: PASS
 # graph: api+web>e2e
-s1=[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}]
-s2=[{"node":"e2e","label":"e2e","rescue":"","make_pr":"true"}]
-s3=[]
-s4=[]
+stages=[[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}],[{"node":"e2e","label":"e2e","rescue":"","make_pr":"true"}]]

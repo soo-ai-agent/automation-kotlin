@@ -187,44 +187,30 @@ check_node_contracts() {
     fi
 }
 
-# ── ⑧ 그래프의 단계 수와 단계 잡이 맞는가 ────────────────────────────
-# 순차 단계 상한은 두 곳에 있다 — graph.js 의 MAX_STAGES 와 claude-agent.yml 에
-# 미리 선언해 둔 단계 잡(s1..sN). GitHub Actions 가 잡을 실행 중에 만들 수 없어서
-# 어쩔 수 없이 나뉘어 있는 값이라, 어긋나면 그래프가 펼쳐지고도 돌 잡이 없다.
+# ── ⑧ 계획이 잡을 미리 선언하지 않고 루프로 도는가 ───────────────────
+# 예전에는 단계마다 잡(s1..s4)을 선언해 두고 graph.js 의 MAX_STAGES 로 맞췄다.
+# 그래서 순차 단계가 4개로 막혔고, 같은 with 블록이 네 벌 복사돼 있었다.
 #
-# 단계 잡의 `with:` 블록도 함께 본다. 네 잡은 세 줄(needs·if·include)만 다르고
-# 나머지는 같아야 하는데, 하나만 고치면 그 단계만 다른 입력으로 돈다.
-check_graph_stage_jobs() {
+# 지금은 잡 하나가 이번 단계를 돌린 뒤 자기를 다시 부른다. 되돌아가면 상한이 되살아나므로
+# 그 흔적을 막는다 — 단계 잡 선언, MAX_STAGES, 그리고 재호출이 사라지는 것.
+check_graph_loop_shape() {
     wf=".github/workflows/claude-agent.yml"
-    max=$(sed -n 's/^const MAX_STAGES = \([0-9][0-9]*\).*/\1/p' .github/agent/graph.js)
-    jobs=$(grep -cE '^  s[0-9]+:$' "$wf")
-
     bad=""
-    [ -n "$max" ] || bad="$bad graph.js(MAX_STAGES를_못읽음)"
-    [ "$max" = "$jobs" ] || bad="$bad MAX_STAGES=$max≠단계잡=$jobs"
-
-    # with: 블록을 잡마다 파일로 뽑아 첫 번째와 대조한다
-    tmp=$(mktemp -d)
-    awk -v dir="$tmp" '
-        /^    with:$/ { n++; inb = 1; next }
-        inb && /^      / { print > (dir "/" n); next }
-        inb { inb = 0 }
-    ' "$wf"
-    if [ -f "$tmp/1" ]; then
-        i=2
-        while [ -f "$tmp/$i" ]; do
-            cmp -s "$tmp/1" "$tmp/$i" || bad="$bad s${i}(with블록이_s1과_다름)"
-            i=$((i + 1))
-        done
-    else
-        bad="$bad $wf(with블록을_못찾음)"
-    fi
-    rm -rf "$tmp"
+    n=$(grep -cE '^  s[0-9]+:$' "$wf")
+    [ "$n" = "0" ] || bad="$bad claude-agent.yml(단계_잡을_미리_선언함:$n개)"
+    grep -q 'MAX_STAGES' .github/agent/graph.js && bad="$bad graph.js(단계_상한이_되살아남)"
+    grep -qF 'gh workflow run claude-agent.yml' "$wf" \
+        || bad="$bad claude-agent.yml(자기를_다시_안부름)"
+    grep -qF 'bash .github/agent/next-role.sh' "$wf" \
+        || bad="$bad claude-agent.yml(계속할지를_규칙에_안물음)"
+    # 병렬은 matrix 로 살아 있어야 한다 — 없으면 api+web 이 순차로 떨어진다
+    grep -qF 'include: ${{ fromJSON(needs.plan.outputs.matrix) }}' "$wf" \
+        || bad="$bad claude-agent.yml(병렬_matrix_가_없음)"
 
     if [ -z "$bad" ]; then
-        ok "그래프 단계 상한($max)과 단계 잡 수가 같고, 단계 잡의 with 블록이 모두 같다"
+        ok "계획이 잡을 미리 선언하지 않고, 루프가 자기를 다시 부르며, 병렬이 살아 있다"
     else
-        ng "그래프 단계 선언이 어긋난다" "$bad"
+        ng "계획 실행이 정적 구조로 되돌아갔다" "$bad"
     fi
 }
 
@@ -357,7 +343,7 @@ check_harness_paths_filter
 check_rules_path_agreement
 check_review_role_shared
 check_node_contracts
-check_graph_stage_jobs
+check_graph_loop_shape
 check_loop_decision_shared
 check_state_shared
 check_next_role_testable

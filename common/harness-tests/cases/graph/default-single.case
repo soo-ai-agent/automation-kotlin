@@ -1,7 +1,4 @@
 # 설정 기본값 — 노드 하나. 그 하나가 PR 을 연다.
 # expect: PASS
 # graph: code
-s1=[{"node":"code","label":"code","rescue":"","make_pr":"true"}]
-s2=[]
-s3=[]
-s4=[]
+stages=[[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]

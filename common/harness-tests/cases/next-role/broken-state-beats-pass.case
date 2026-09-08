@@ -6,4 +6,5 @@
 # max-rounds: 3
 # has-pat: true
 # max-steps: 12
+# stage-roles:
 # broken: 1
