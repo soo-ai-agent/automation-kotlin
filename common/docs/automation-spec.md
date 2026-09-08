@@ -25,7 +25,9 @@
 | 하네스 머지 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
 | 머지 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 루프 상태 | `.github/agent/state.sh` | 노드·리뷰어·하네스가 **같은 도구**로 읽고 씀 |
-| 전이 규칙 | `.github/agent/next-role.sh` | 리뷰 뒤 어느 역할을 부를지 — 리뷰어와 하네스가 **같은 파일**을 읽음 |
+| 전이 규칙 | `.github/agent/next-role.sh` | 다음에 어느 역할을 부를지 — 리뷰어·계획·하네스가 **같은 파일**을 읽음 |
+| 계획 한 단계 | `.github/agent/plan-stage.sh` | 이번 단계의 역할과 매트릭스 — 워크플로와 하네스가 **같은 파일**을 읽음 |
+| 하네스 계획 루프 회귀 | `common/harness-tests/plan.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `plan.sh '<계획>'`) |
 | 하네스 전이 회귀 | `common/harness-tests/next-role.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `next-role.sh table`) |
 | 하네스 상태 회귀 | `common/harness-tests/state.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `state.sh show`) |
 | 설정 | `.github/agent/settings.env` | — |
@@ -264,8 +266,11 @@
   하네스가 자기 프롬프트를 따로 쓰면 **하네스가 통과해도 실제 리뷰어의 회귀를 못 잡는다.** 실제로 그 상태였다 —
   `CLAUDE_REVIEW_BAR` 를 망가뜨려도 하네스는 그 문자열을 아예 안 읽어 초록불이었다. `static.sh` 가 이 공유를 검사한다.
 
-- **검사는 여섯으로 나눈다** — `static.sh`(형식) · `graph.sh`(그래프 펼치기) · `loop.sh`(루프 판단) · `state.sh`(루프 상태) ·
-  `next-role.sh`(전이 규칙)는 모델을 안 불러 공짜고, `run.sh` 만 케이스당 claude 호출 1건이다. CI 는 싼 것을 먼저 돌려 걸러낸다.
+- **검사는 일곱으로 나눈다** — `static.sh`(형식) · `graph.sh`(그래프 펼치기) · `loop.sh`(머지 판단) · `state.sh`(루프 상태) ·
+  `next-role.sh`(전이 규칙) · `plan.sh`(계획 루프)는 모델을 안 불러 공짜고, `run.sh` 만 케이스당 claude 호출 1건이다.
+
+- **`plan.sh` 만 여러 바퀴를 이어 돌린다.** 나머지는 규칙 하나에 값을 넣어 답 하나를 본다.
+  한 바퀴씩은 맞는데 이어 돌리면 안 되는 결함이 있고, 그것은 이어 돌려야만 보인다.
 
 - **리뷰 뒤에 어느 역할을 부를지는 `next-role.sh` 가 정한다.** 규칙은 위에서 아래로 읽고 먼저 걸리는 것이 이긴다.
 
@@ -274,19 +279,23 @@
   | ① | 상태를 못 읽음(`broken=1`) | `human` |
   | ② | 횟수가 숫자가 아님 | `human` |
   | ③ | 통과(`PASS`) | `done` |
-  | ④ | 라운드가 `CLAUDE_MAX_ROUNDS` 이상 | `human` |
-  | ⑤ | 실행 횟수가 `CLAUDE_MAX_STEPS` 이상 | `human` |
-  | ⑥ | `AGENT_PAT` 없음 | `loop-off` |
-  | ⑦ | 판정 없음 + 계획에 남은 역할 있음 | 그 역할들 |
-  | ⑦ | 판정 없음 + 계획 끝 | `done` |
+  | ④ | 실행 횟수가 `CLAUDE_MAX_STEPS` 이상 | `human` |
+  | ⑤ | `AGENT_PAT` 없음 | `loop-off` |
+  | ⑥ | 판정 없음 + 계획에 남은 역할 있음 | 그 역할들 |
+  | ⑥ | 판정 없음 + 계획 끝 | `done` |
+  | ⑦ | 라운드가 `CLAUDE_MAX_ROUNDS` 이상 | `human` |
   | ⑧ | 지적 남음(`CHANGES_REQUESTED`) | `fix` |
   | ⑨ | 모르는 판정 | `human` |
 
   **판정이 없다는 것은 계획을 밟는 중이라는 뜻이다.** 리뷰어는 언제나 판정을 채워 부르므로
   (`claude-review.yml` 이 `PASS` 아니면 `CHANGES_REQUESTED` 로 정한다) 빈 판정은 `claude-agent.yml` 에서만 온다.
 
-  **③ 을 ④⑤⑥ 보다 앞에 두는 것이 중요하다.** 상한과 PAT 은 일을 더 시킬 수 있는지를 재는 것이고
+  **③ 을 ④⑤ 보다 앞에 두는 것이 중요하다.** 상한과 PAT 은 일을 더 시킬 수 있는지를 재는 것이고
   통과는 시킬 일이 없다는 뜻이라, 순서를 뒤집으면 통과한 PR 까지 사람을 부르며 막힌다.
+
+  **⑥(계획)을 ⑦(라운드 상한)보다 앞에 두는 것도 그만큼 중요하다.** 계획 중에는 리뷰가 돈 적이 없어
+  라운드가 0 이고 상한도 넘어오지 않아 0 이다. 순서를 뒤집으면 `0 >= 0` 이 걸려 **루프가 첫 걸음에서 막힌다.**
+  실제로 그렇게 막혔고, 규칙 하나씩 보는 케이스로는 안 보여 계획 루프 회귀(`plan.sh`)가 잡았다.
 
   `CLAUDE_MAX_ROUNDS` 와 `CLAUDE_MAX_STEPS` 는 다른 상한이다 — 저쪽은 같은 PR 을 몇 번 다시 보는지,
   이쪽은 작업 하나에서 노드가 통틀어 몇 번 도는지다.

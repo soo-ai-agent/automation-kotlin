@@ -1,0 +1,5 @@
+# 설정 기본값 — 한 바퀴에 끝난다.
+# expect: code
+# graph: code
+# max-steps: 12
+# has-pat: true

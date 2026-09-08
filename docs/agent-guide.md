@@ -196,7 +196,8 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | 규칙을 고쳤을 때 판정 회귀 | `.github/workflows/claude-harness.yml` |
 | 리뷰 통과 뒤 머지 판단 | `.github/agent/loop-decision.sh` |
 | 루프 상태 (코멘트 안 숨은 블록) | `.github/agent/state.sh` |
-| 리뷰 뒤 다음 역할 고르기 | `.github/agent/next-role.sh` |
+| 다음 역할 고르기 | `.github/agent/next-role.sh` |
+| 계획의 한 단계 정하기 | `.github/agent/plan-stage.sh` |
 | 노드 역할 정의 | `.github/agent/nodes/<이름>.md` |
 | 공통 스위치 | `.github/agent/settings.env` |
 | 배포 | `.github/workflows/deploy.yml` ([deploy.md](deploy.md)) |

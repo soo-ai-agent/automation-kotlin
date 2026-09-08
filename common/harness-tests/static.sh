@@ -45,7 +45,7 @@ check_case_expectations() {
         grep -qE '^# expect: (PASS|FAIL)$' "$f" || bad="$bad $f(expect없음)"
         grep -q '^# graph: ' "$f" || bad="$bad $f(graph없음)"
     done
-    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case; do
+    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case common/harness-tests/cases/plan/*.case; do
         [ -e "$f" ] || continue
         grep -q '^# expect: ' "$f" || bad="$bad $f(expect없음)"
     done
@@ -102,7 +102,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh"; do
+    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh" ".github/agent/plan-stage.sh"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -201,8 +201,15 @@ check_graph_loop_shape() {
     grep -q 'MAX_STAGES' .github/agent/graph.js && bad="$bad graph.js(단계_상한이_되살아남)"
     grep -qF 'gh workflow run claude-agent.yml' "$wf" \
         || bad="$bad claude-agent.yml(자기를_다시_안부름)"
-    grep -qF 'bash .github/agent/next-role.sh' "$wf" \
-        || bad="$bad claude-agent.yml(계속할지를_규칙에_안물음)"
+    grep -qF 'bash .github/agent/plan-stage.sh' "$wf" \
+        || bad="$bad claude-agent.yml(계획_계산을_스크립트에_안맡김)"
+    grep -qF 'bash .github/agent/next-role.sh' .github/agent/plan-stage.sh \
+        || bad="$bad plan-stage.sh(계속할지를_규칙에_안물음)"
+    grep -qF 'PLAN=".github/agent/plan-stage.sh"' common/harness-tests/plan.sh \
+        || bad="$bad harness-tests/plan.sh(같은_파일을_안가리킴)"
+    # 계획 계산이 워크플로 셸로 돌아오면 하네스가 그것을 베껴 쓰게 된다
+    grep -qF 'node .github/agent/graph.js' "$wf" \
+        && bad="$bad claude-agent.yml(계획_계산이_셸로_되돌아옴)"
     # 병렬은 matrix 로 살아 있어야 한다 — 없으면 api+web 이 순차로 떨어진다
     grep -qF 'include: ${{ fromJSON(needs.plan.outputs.matrix) }}' "$wf" \
         || bad="$bad claude-agent.yml(병렬_matrix_가_없음)"

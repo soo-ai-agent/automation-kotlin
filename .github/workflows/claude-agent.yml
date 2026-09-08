@@ -100,44 +100,15 @@ jobs:
           else BRANCH="claude/work-${{ github.run_id }}"; fi
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-          STAGE="${STAGE:-0}"
-          STEP="${STEP:-0}"
-
-          # 계획 전체를 펼친다. graph.js 는 단계 배열 하나를 낸다 — 단계 수에 상한은 없다.
+          # 계획 계산은 plan-stage.sh 가 한다 — 여기 인라인으로 두면 하네스가 그것을 베껴
+          # 쓰게 되고, 베낀 것이 어긋나도 하네스는 초록불이다.
           CLAUDE_GRAPH="${IN_GRAPH:-$CLAUDE_GRAPH}" CLAUDE_NODE="$IN_NODE" \
-            node .github/agent/graph.js > /tmp/graph.txt
-          STAGES=$(sed -n 's/^stages=//p' /tmp/graph.txt)
+            STAGE="${STAGE:-0}" STEP="${STEP:-0}" MAX_STEPS="$CLAUDE_MAX_STEPS" HAS_PAT="$HAS_PAT" \
+            bash .github/agent/plan-stage.sh > /tmp/plan.txt 2>/tmp/why.txt
 
-          # 이번 단계와 다음 단계를 꺼낸다. 다음이 비어 있으면 이번이 마지막이다.
-          THIS=$(printf '%s' "$STAGES" | node -e '
-            const all = JSON.parse(require("fs").readFileSync(0, "utf8"));
-            process.stdout.write(JSON.stringify(all[Number(process.env.STAGE)] || []));
-          ')
-          NEXT=$(printf '%s' "$STAGES" | node -e '
-            const all = JSON.parse(require("fs").readFileSync(0, "utf8"));
-            process.stdout.write(JSON.stringify(all[Number(process.env.STAGE) + 1] || []));
-          ')
-          STAGE_ROLES=$(printf '%s' "$THIS" | node -e '
-            const s = JSON.parse(require("fs").readFileSync(0, "utf8"));
-            process.stdout.write(s.map((n) => n.node).join(" "));
-          ')
-
-          # 계속할지는 next-role.sh 가 정한다 — 상한도 상태도 거기서 잰다.
-          # 계획을 밟는 중이라 판정(VERDICT)은 없다.
-          ROLES=$(STAGE_ROLES="$STAGE_ROLES" STEP="$STEP" MAX_STEPS="$CLAUDE_MAX_STEPS" \
-                  HAS_PAT="$HAS_PAT" bash .github/agent/next-role.sh 2>/tmp/why.txt || true)
-          echo "단계 $STAGE · 실행 $STEP/$CLAUDE_MAX_STEPS · 이번 역할: ${ROLES}"
+          cat /tmp/plan.txt >> "$GITHUB_OUTPUT"
+          echo "단계 ${STAGE:-0} · 실행 ${STEP:-0}/$CLAUDE_MAX_STEPS · 이번 역할: $(sed -n 's/^roles=//p' /tmp/plan.txt)"
           [ -s /tmp/why.txt ] && echo "::warning::$(cat /tmp/why.txt)"
-
-          case "$ROLES" in
-            done | human | loop-off) MATRIX="[]"; HAS_NEXT=false ;;
-            *) MATRIX="$THIS"; [ "$NEXT" = "[]" ] && HAS_NEXT=false || HAS_NEXT=true ;;
-          esac
-          {
-            echo "roles=$ROLES"
-            echo "matrix=$MATRIX"
-            echo "has_next=$HAS_NEXT"
-          } >> "$GITHUB_OUTPUT"
 
   run:
     name: ${{ matrix.label }}

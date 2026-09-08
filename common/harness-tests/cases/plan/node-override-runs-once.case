@@ -1,0 +1,6 @@
+# 리뷰어의 단일 노드 호출 — 계획을 무시하고 한 바퀴만 돈다.
+# expect: fix
+# graph: plan>code?fix>test
+# max-steps: 12
+# has-pat: true
+# node: fix

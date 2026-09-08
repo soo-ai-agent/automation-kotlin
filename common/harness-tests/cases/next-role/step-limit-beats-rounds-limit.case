@@ -1,0 +1,11 @@
+# 두 상한에 동시에 닿았다 — 실행 횟수 상한이 앞선다.
+# 라운드는 리뷰 맥락의 상한이고 실행 횟수는 루프 전체의 상한이라, 뒤엣것이 더 넓다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# rounds: 3
+# max-rounds: 3
+# has-pat: true
+# step: 99
+# max-steps: 12
+# broken: 0
+# stage-roles: 
