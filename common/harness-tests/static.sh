@@ -410,6 +410,31 @@ check_dispatch_rules_shared() {
     fi
 }
 
+# ── ⑮ 리뷰어가 읽기만 하고, 토큰을 못 만지는가 ────────────────────────
+# 리뷰어는 코드를 고치지 않는다. 그런데 지시문으로만 말하고 도구는 전부 열려 있었다 —
+# Bash 가 있고 GH_TOKEN 이 잡 레벨에 있어서, 모델이 gh 를 불러 AGENT_PAT 권한을
+# 쓸 수 있었다. claude-node.yml 이 지키던 규칙인데 리뷰어만 어기고 있었다.
+#
+# 하네스도 같은 제한으로 부른다 — 안 맞추면 하네스가 실제 리뷰어를 재지 못한다.
+check_reviewer_readonly() {
+    wf=".github/workflows/claude-review.yml"
+    bad=""
+    grep -qF -e '--allowedTools "Read,Grep,Glob"' "$wf" \
+        || bad="$bad claude-review.yml(도구를_안좁힘)"
+    grep -qF -e '--allowedTools "Read,Grep,Glob"' common/harness-tests/run.sh \
+        || bad="$bad run.sh(같은_제한으로_안부름)"
+
+    # GH_TOKEN 이 잡 레벨에 있으면 claude 를 돌리는 step 도 갖게 된다.
+    # 잡 레벨 env 는 들여쓰기 6칸, step 의 env 는 10칸이라 그것으로 가른다.
+    grep -qE '^      GH_TOKEN:' "$wf" && bad="$bad claude-review.yml(GH_TOKEN이_잡_레벨)"
+
+    if [ -z "$bad" ]; then
+        ok "리뷰어가 읽기 도구만 쓰고 GH_TOKEN 을 step 에만 건다"
+    else
+        ng "리뷰어가 필요 이상의 권한으로 돈다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -424,6 +449,7 @@ check_next_role_testable
 check_case_area_match
 check_syntax
 check_dispatch_rules_shared
+check_reviewer_readonly
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
