@@ -1,6 +1,0 @@
-# 분할 상위 이슈의 마감은 사람 몫이다 — 하위가 다 끝나도 닫지 않는다.
-# run: python3 .github/agent/dispatch_rules.py close-issue
-# expect: keep
-# labels: claude claude-split claude-sent
-# pr-open: false
-# pr-merged: true

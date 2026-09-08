@@ -24,7 +24,7 @@
 
 | 파일 | 용도 |
 |---|---|
-| [agent/setup-agent.sh](agent/setup-agent.sh) | 라벨·시크릿·워크플로 권한·브랜치 보호 일괄 세팅 |
+| [agent/setup-agent.sh](agent/setup-agent.sh) | 라벨·시크릿·워크플로 권한·머지된 브랜치 자동 삭제·브랜치 보호 일괄 세팅 |
 | [agent/setup-speckit.sh](agent/setup-speckit.sh) | 스펙 먼저 쓰기 켜기 — spec-kit 설치와 한국어 템플릿 등록 ([안내](../docs/sdd-guide.md)) |
 
 ```bash

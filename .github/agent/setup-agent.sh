@@ -59,7 +59,14 @@ gh api -X PUT "repos/${REPO}/actions/permissions/workflow" \
   && echo "워크플로 권한 — 쓰기 허용" \
   || echo "워크플로 권한 — 설정 실패 (저장소 admin 권한 필요). Settings → Actions → General 에서 직접 켜세요"
 
-# ── 4. 기본 브랜치 보호 ───────────────────────────────────
+# ── 4. 머지된 브랜치 자동 삭제 ────────────────────────────
+# GitHub 이 머지 순간 head 브랜치를 지운다. 디스패처가 10분마다 훑으며 지우던 일이라,
+# 이걸 켜면 그쪽은 PR 이 없는 브랜치만 남게 된다.
+gh api -X PATCH "repos/${REPO}" -F delete_branch_on_merge=true >/dev/null \
+  && echo "머지된 브랜치 자동 삭제 — 켬" \
+  || echo "머지된 브랜치 자동 삭제 — 설정 실패 (저장소 admin 권한 필요). Settings → General → Pull Requests 에서 직접 켜세요"
+
+# ── 5. 기본 브랜치 보호 ───────────────────────────────────
 # 직접 푸시를 막아요. 리뷰어가 통과 PR 을 자동 머지하므로 AGENT_PAT 은 쓰기 권한이어야 해요.
 if gh api "repos/${REPO}/branches/${DEF}/protection" >/dev/null 2>&1; then
   echo "브랜치 보호 (${DEF}) — 이미 있음"

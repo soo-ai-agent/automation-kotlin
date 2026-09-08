@@ -67,6 +67,7 @@ CLAUDE_CODE_OAUTH_TOKEN=<발급값> AGENT_PAT=<PAT> bash .github/agent/setup-age
 | 라벨 4종 | `claude`(에이전트에게 맡김) · `claude-split`(쪼개서 맡김) · `claude-sent`(일을 시작했다는 표시) · `claude-made`(에이전트가 만든 하위 이슈) |
 | 시크릿 등록 | `CLAUDE_CODE_OAUTH_TOKEN` · `AGENT_PAT` |
 | 워크플로 권한 | Actions 의 기본 권한을 쓰기로 열고, PR 생성·승인을 허용 |
+| 머지된 브랜치 자동 삭제 | GitHub 이 머지 순간 head 브랜치를 지운다 (Settings → General → Pull Requests) |
 | 기본 브랜치 보호 | 강제 푸시·삭제 차단 (private 저장소는 플랜에 따라 실패할 수 있는데, 그러면 건너뛴다) |
 
 이슈를 훑는 주기(10분)는 워크플로 파일에 이미 들어 있어 따로 만들 것이 없다.

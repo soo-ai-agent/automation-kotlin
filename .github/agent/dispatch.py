@@ -145,24 +145,8 @@ def report_split_parents():
         print(f"issue #{number} 완료 보고 게시 — 마감은 사람 몫")
 
 
-def close_merged_issues():
-    """4) 마감 청소 — 머지된 PR 이 있는데 열려 있는 이슈를 닫는다."""
-    for it in issues("claude,claude-sent"):
-        number = it["number"]
-        found = prs(f"claude/issue-{number}")
-        if dispatch_rules.close_issue(
-                labels_of(it),
-                any(p["state"] == "open" for p in found),
-                any(p.get("merged_at") for p in found)) != "close":
-            continue
-        api(f"issues/{number}/comments",
-            data={"body": "✅ 연결된 PR 이 머지되어 있어 이슈를 닫아요."}, method="POST")
-        api(f"issues/{number}", data={"state": "closed"}, method="PATCH")
-        print(f"issue #{number} 머지 확인 — 마감")
-
-
 def close_orphan_prs():
-    """5) PR 청소 — 이슈가 닫힌 claude/issue-N 의 열린 PR 은 폐기된 작업이라 닫는다.
+    """4) PR 청소 — 이슈가 닫힌 claude/issue-N 의 열린 PR 은 폐기된 작업이라 닫는다.
     변경 내용은 닫힌 PR 화면에 그대로 보존되므로 브랜치도 함께 지운다."""
     for pr in api("pulls?state=open&per_page=100") or []:
         src = pr["head"]["ref"]
@@ -187,7 +171,12 @@ def close_orphan_prs():
 
 
 def delete_merged_branches():
-    """6) 브랜치 청소 — 기본 브랜치에 다 들어간 claude/* 브랜치를 지운다.
+    """5) 브랜치 청소 — PR 없이 남은 claude/* 브랜치를 지운다.
+
+    머지된 PR 의 브랜치는 GitHub 이 지운다 (저장소 설정 delete_branch_on_merge,
+    setup-agent.sh 4절이 켠다). 여기 남는 것은 PR 을 열지 못한 채 끝난 브랜치다 —
+    실행 상한에 걸려 make_pr 노드까지 못 간 경우가 그렇다.
+
     GitHub 브랜치 API 에는 merged 플래그가 없어 compare 의 ahead_by 로 판정한다."""
     for br in api("branches?per_page=100") or []:
         name = br["name"]
@@ -209,7 +198,6 @@ def delete_merged_branches():
 
 def cleanup():
     report_split_parents()
-    close_merged_issues()
     close_orphan_prs()
     delete_merged_branches()
 

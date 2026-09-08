@@ -51,17 +51,6 @@ def start_issue(has_pat, labels):
     return "skip"
 
 
-def close_issue(labels, has_open_pr, has_merged_pr):
-    """PR 이 머지된 이슈를 닫을까. → close | keep"""
-    if "claude-split" in labels:
-        return "keep"   # 분할 상위 이슈의 마감은 사람 몫이다
-    if has_open_pr:
-        return "keep"   # 재작업 PR 이 열려 있다 — 아직 끝난 게 아니다
-    if not has_merged_pr:
-        return "keep"   # 머지된 적이 없다 — 사람이 판단할 몫
-    return "close"
-
-
 def close_pr(head_ref, issue_state):
     """이슈가 닫힌 PR 을 닫을까. → close | keep
 
@@ -104,8 +93,6 @@ def _ahead_by():
 
 COMMANDS = {
     "start": lambda: start_issue(_flag("HAS_PAT"), os.environ.get("LABELS", "").split()),
-    "close-issue": lambda: close_issue(
-        os.environ.get("LABELS", "").split(), _flag("PR_OPEN"), _flag("PR_MERGED")),
     "close-pr": lambda: close_pr(
         os.environ.get("HEAD_REF", ""), os.environ.get("ISSUE_STATE", "unknown")),
     "delete-branch": lambda: delete_branch(

@@ -1,6 +1,0 @@
-# 재작업 PR 이 열려 있다 — 아직 끝난 게 아니다.
-# run: python3 .github/agent/dispatch_rules.py close-issue
-# expect: keep
-# labels: claude claude-sent
-# pr-open: true
-# pr-merged: true

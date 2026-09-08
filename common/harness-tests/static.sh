@@ -394,7 +394,7 @@ check_dispatch_rules_shared() {
     bad=""
     [ -f "$rules" ] || bad="$bad $rules(없음)"
     grep -qF 'import dispatch_rules' "$dp" || bad="$bad dispatch.py(규칙을_안가져옴)"
-    for fn in start_issue close_issue close_pr delete_branch issue_of; do
+    for fn in start_issue close_pr delete_branch issue_of; do
         grep -qF "dispatch_rules.$fn" "$dp" || bad="$bad dispatch.py(${fn}_를_안물음)"
     done
     grep -qrF 'python3 .github/agent/dispatch_rules.py' common/harness-tests/cases/dispatch/ \
