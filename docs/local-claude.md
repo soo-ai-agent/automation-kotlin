@@ -86,7 +86,7 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 는 모델을 가리지 않는다. Claude·GPT·Gemini·Qwen·DeepSeek 를 같은 방식으로 다루고,
 Ollama 같은 로컬 추론 서버도 엔드포인트로 붙인다. **로컬 모델로 이 저장소 작업을 하려면 이쪽이다.**
 
-이 저장소의 코딩 규칙은 Hermes 에서도 그대로 적용된다. `.agents/skills/` 가 우리 스킬 33종을 가리키고 있고,
+이 저장소의 코딩 규칙은 Hermes 에서도 그대로 적용된다. `.agents/skills/` 가 우리 스킬 34종을 가리키고 있고,
 Hermes 는 저장소 스킬을 `trust` 한 뒤부터 읽는다.
 
 ```bash
@@ -96,14 +96,14 @@ hermes model                   # 제공자와 모델 고르기 — 여기서 로
 hermes                         # 세션 시작
 ```
 
-**Claude Code 쪽과 다른 점이 하나 있다.** `ccsk` 는 영역별로 스킬을 갈라 붙이지만(`ccsk be` 는 `kotlin-*` 만),
+**Claude Code 쪽과 다른 점이 하나 있다.** launcher 는 영역별로 스킬을 갈라 붙이지만(`claude-be` 는 `kotlin-*` 만),
 Hermes 는 저장소 스킬을 통째로 읽는다. 사람이 직접 쓰는 세션이라 어느 영역을 고칠지 사람이 알고 있다는 전제다.
 
 **링크가 죽으면 그 규칙은 안 읽힌다.** `bash common/harness-tests/static.sh` 가 링크가 성한지 검사한다.
 
 ## 로컬에서 계획을 돌린다
 
-`ccsk` 로 세션을 열면 노드 역할이 이 세션의 서브에이전트로 올라온다. 그러면 계획 하나를 세션 안에서 끝까지 돌릴 수 있다.
+`claude-be`·`claude-fe`·`claude-all` 로 세션을 열면 노드 역할이 이 세션의 서브에이전트로 올라온다. 그러면 계획 하나를 세션 안에서 끝까지 돌릴 수 있다.
 
 ```
 /work
@@ -124,7 +124,7 @@ Hermes 는 저장소 스킬을 통째로 읽는다. 사람이 직접 쓰는 세�
 
 ```bash
 bash common/harness-tests/static.sh          # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
-bash common/harness-tests/cases.sh           # ② 케이스 81건 — 그래프·머지·상태·전이·계획·정리
+bash common/harness-tests/cases.sh           # ② 케이스 77건 — 그래프·머지·상태·전이·계획·정리
 bash common/harness-tests/cases.sh next-role # ②의 한 갈래만
 bash common/harness-tests/run.sh backend     # ③ 판정 회귀 — 백엔드 케이스만 (claude 5회)
 ```

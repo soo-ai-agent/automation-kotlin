@@ -17,7 +17,7 @@
 
 리뷰 규칙은 [common/docs/code-review/rules.md](../common/docs/code-review/rules.md) 에 있다.
 
-그래프·머지·상태·전이·계획·정리는 모델 없이 확인할 수 있다 — `bash common/harness-tests/cases.sh` 가 케이스 81건을 돌린다.
+그래프·머지·상태·전이·계획·정리는 모델 없이 확인할 수 있다 — `bash common/harness-tests/cases.sh` 가 케이스 77건을 돌린다.
 갈래 하나만 보려면 `cases.sh next-role` 처럼 폴더 이름을 붙인다.
 
 ## 사람이 실행하는 파일 (처음 한 번)
