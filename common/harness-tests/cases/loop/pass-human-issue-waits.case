@@ -1,0 +1,8 @@
+# 사람이 올린 이슈의 PR — 통과해도 머지는 사람 몫이다.
+# expect: human-merge
+# verdict: PASS
+# head-ref: claude/issue-42
+# agent-made: false
+# rounds: 1
+# max-rounds: 3
+# has-pat: true

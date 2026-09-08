@@ -1,0 +1,8 @@
+# 라벨을 확인하지 못했다(이슈 조회 실패 등). 판별 불가면 머지하지 않는 쪽으로 떨어진다.
+# expect: human-merge
+# verdict: PASS
+# head-ref: claude/issue-42
+# agent-made: unknown
+# rounds: 1
+# max-rounds: 3
+# has-pat: true

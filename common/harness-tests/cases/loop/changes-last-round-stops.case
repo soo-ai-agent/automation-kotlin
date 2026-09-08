@@ -1,0 +1,8 @@
+# 라운드를 다 썼다 — 더 돌리지 않고 사람을 부른다.
+# expect: human-stop
+# verdict: CHANGES_REQUESTED
+# head-ref: claude/issue-42
+# agent-made: true
+# rounds: 3
+# max-rounds: 3
+# has-pat: true

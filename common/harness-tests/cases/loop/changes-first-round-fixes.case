@@ -1,0 +1,8 @@
+# 첫 지적 — fix 노드를 불러 재작업한다.
+# expect: fix
+# verdict: CHANGES_REQUESTED
+# head-ref: claude/issue-42
+# agent-made: true
+# rounds: 0
+# max-rounds: 3
+# has-pat: true

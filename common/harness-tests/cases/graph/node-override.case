@@ -1,0 +1,9 @@
+# 리뷰 fix 루프가 쓰는 경로 — CLAUDE_NODE 가 있으면 그래프를 통째로 무시한다.
+# 이게 깨지면 재작업이 fix 하나가 아니라 그래프 전체를 다시 돌린다.
+# expect: PASS
+# graph: plan>code?fix>test
+# node: fix
+s1=[{"node":"fix","label":"fix","rescue":"","make_pr":"true"}]
+s2=[]
+s3=[]
+s4=[]

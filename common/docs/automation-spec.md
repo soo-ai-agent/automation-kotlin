@@ -21,6 +21,9 @@
 | 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
 | 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
 | 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
+| 하네스 그래프 회귀 | `common/harness-tests/graph.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `graph.sh '<표현식>'`) |
+| 하네스 루프 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
+| 루프 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 설정 | `.github/agent/settings.env` | — |
 | 노드 지시문·실행 계약 | `.github/agent/nodes/<이름>.md` | 앞머리 `---` 블록이 그 역할에 허용할 명령을 정한다 |
 | 리뷰어 역할 지시문 | `.github/agent/review-role.md` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
@@ -245,8 +248,17 @@
   하네스가 자기 프롬프트를 따로 쓰면 **하네스가 통과해도 실제 리뷰어의 회귀를 못 잡는다.** 실제로 그 상태였다 —
   `CLAUDE_REVIEW_BAR` 를 망가뜨려도 하네스는 그 문자열을 아예 안 읽어 초록불이었다. `static.sh` 가 이 공유를 검사한다.
 
-- **검사는 둘로 나눈다** — `static.sh` 는 모델을 부르지 않는 형식 검사(링크·경로·케이스 형식)라 공짜고,
-  `run.sh` 는 케이스당 claude 호출 1건이다. CI 는 싼 것을 먼저 돌려 걸러낸다.
+- **검사는 넷으로 나눈다** — `static.sh`(형식) · `graph.sh`(그래프 펼치기) · `loop.sh`(루프 판단)는 모델을 안 불러 공짜고,
+  `run.sh` 만 케이스당 claude 호출 1건이다. CI 는 싼 것을 먼저 돌려 걸러낸다.
+
+- **그래프와 루프는 모델 없이 잰다.** 잴 수 있는 이유는 그 판단이 워크플로 셸이 아니라 값만 받는 도구로 나와 있기 때문이다 —
+  그래프는 `graph.js`(환경변수 in → 단계 매트릭스 out), 루프는 `loop-decision.sh`(값 in → 결정 한 단어 out).
+
+  **판단을 워크플로 YAML 안으로 되돌리면 그 축의 회귀 검사가 통째로 죽는다.** `static.sh` 가 둘 다 검사한다 —
+  리뷰어가 `loop-decision.sh` 를 기준 브랜치에서 꺼내 쓰는지, 그리고 그 결정대로 실행하는지까지 본다.
+
+  이 둘은 설계 손잡이이기도 하다: `graph.sh '<표현식>'` 은 워크플로를 돌리지 않고 그래프를 펼쳐 보고,
+  `loop.sh table` 은 상황별 결정을 표로 뽑는다. 그래프·루프를 고치기 전에 여기서 먼저 본다.
 
   "규칙이 옳은가"는 `run.sh` 가, **"규칙이 읽히기는 하는가"** 는 `static.sh` 가 본다. 링크가 죽거나 경로가
   어긋나면 규칙은 파일에 남아 있어도 아무도 안 읽는데, 이건 모델을 안 불러도 잡힌다.

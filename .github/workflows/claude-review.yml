@@ -52,6 +52,9 @@ jobs:
           # 여기 인라인으로 두면 하네스가 자기 프롬프트를 따로 쓰게 되고, 그러면 하네스가
           # 통과해도 실제 리뷰어의 회귀는 못 잡는다.
           git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md
+          # 루프 판단(자동 머지 게이트 포함) — PR 브랜치가 자기 머지 조건을 바꾸지 못하게 기준 브랜치 것.
+          # 하네스(common/harness-tests/loop.sh)도 같은 파일을 돌린다.
+          git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh
           . /tmp/settings.env
           {
             echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
@@ -137,42 +140,53 @@ jobs:
           printf '## %s — %s\n\n%s\n' "$MARKER" "$BADGE" "$(tail -n +2 /tmp/review.md)" > /tmp/note.md
           gh pr comment "$PR" --body-file /tmp/note.md
 
-      - name: 통과 — 자동 머지 판단
+      # 무엇을 할지는 /tmp/loop-decision.sh 가 정하고, 여기서는 그대로 실행만 한다.
+      # 판단을 이 셸에 되돌려 놓으면 하네스가 루프를 돌려 볼 수 없게 된다
+      # (common/harness-tests/loop.sh — 상황 10건을 모델도 PR 도 없이 잰다).
+      - name: 루프 결정과 실행
         if: env.SKIP != 'true'
         run: |
-          head -n 1 /tmp/review.md | grep -q "PASS" || exit 0
-          # 2중 게이트 — ① 브랜치명이 claude/issue-N 인가 ② 그 이슈에 claude-made 라벨이 있는가.
-          # 판별 불가면 머지하지 않는 쪽으로 떨어진다 (안전 측 실패).
-          case "$HEAD_REF" in
-            claude/issue-*) N="${HEAD_REF#claude/issue-}" ;;
-            *) echo "이슈 기반 PR 아님 — 머지는 사람 몫"; exit 0 ;;
-          esac
-          case "$N" in ''|*[!0-9]*) echo "이슈 번호 판별 불가 — 머지는 사람 몫"; exit 0 ;; esac
-          if ! gh issue view "$N" --json labels --jq '.labels[].name' 2>/dev/null | grep -qx "claude-made"; then
-            echo "사람이 올린 이슈(#$N) — 머지는 사람 몫"; exit 0
-          fi
-          if gh pr merge "$PR" --squash --delete-branch; then
-            echo "자동 머지 완료"
-          else
-            gh pr comment "$PR" --body "⚠️ 리뷰는 통과했지만 자동 머지에 실패했어요 (충돌 또는 권한 — AGENT_PAT 의 Contents: Read and write 를 확인하세요). 사람이 머지해 주세요."
-            echo "자동 머지 실패 — 사람에게 넘김"
+          set -e
+          if head -n 1 /tmp/review.md | grep -q "PASS"; then VERDICT=PASS; else VERDICT=CHANGES_REQUESTED; fi
+
+          # 브랜치명 해석은 스크립트가 한다 — 여기서 또 하면 두 곳이 어긋난다
+          N=$(VERDICT="$VERDICT" bash /tmp/loop-decision.sh issue)
+          AGENT_MADE=unknown
+          if [ -n "$N" ] && LABELS=$(gh issue view "$N" --json labels --jq '.labels[].name' 2>/dev/null); then
+            if printf '%s\n' "$LABELS" | grep -qx "claude-made"; then AGENT_MADE=true; else AGENT_MADE=false; fi
           fi
 
-      - name: 지적 — fix 노드 재호출
-        if: env.SKIP != 'true'
-        run: |
-          head -n 1 /tmp/review.md | grep -q "PASS" && { echo "통과 — 재작업 없음"; exit 0; }
-          if [ "$ROUNDS" -ge "$MAX_ROUNDS" ]; then
-            gh pr comment "$PR" --body "⚠️ 리뷰 ${ROUNDS}회 후에도 지적이 남아 자동 재작업을 멈춰요. 사람이 확인해 주세요."
-            exit 0
-          fi
-          if [ "$HAS_PAT" != "true" ]; then
-            echo "AGENT_PAT 없음 — 재작업 루프 꺼짐 (GITHUB_TOKEN 은 다른 워크플로를 깨우지 못한다)"; exit 0
-          fi
-          gh workflow run claude-agent.yml \
-            -f prompt="$(cat /tmp/review.md)" \
-            -f node="fix" \
-            -f branch="$HEAD_REF" \
-            -f issue="$PR" \
-            -f context_type="pr"
-          echo "재작업 트리거됨 (라운드 $ROUNDS)"
+          DECISION=$(VERDICT="$VERDICT" AGENT_MADE="$AGENT_MADE" bash /tmp/loop-decision.sh)
+          echo "루프 결정: $DECISION (판정=$VERDICT 라벨=$AGENT_MADE 라운드=$ROUNDS/$MAX_ROUNDS)"
+
+          case "$DECISION" in
+            merge)
+              if gh pr merge "$PR" --squash --delete-branch; then
+                echo "자동 머지 완료"
+              else
+                gh pr comment "$PR" --body "⚠️ 리뷰는 통과했지만 자동 머지에 실패했어요 (충돌 또는 권한 — AGENT_PAT 의 Contents: Read and write 를 확인하세요). 사람이 머지해 주세요."
+                echo "자동 머지 실패 — 사람에게 넘김"
+              fi
+              ;;
+            human-merge)
+              echo "머지는 사람 몫 (이슈 기반이 아니거나, 사람이 올린 이슈이거나, 판별 불가)"
+              ;;
+            fix)
+              gh workflow run claude-agent.yml \
+                -f prompt="$(cat /tmp/review.md)" \
+                -f node="fix" \
+                -f branch="$HEAD_REF" \
+                -f issue="$PR" \
+                -f context_type="pr"
+              echo "재작업 트리거됨 (라운드 $ROUNDS)"
+              ;;
+            human-stop)
+              gh pr comment "$PR" --body "⚠️ 리뷰 ${ROUNDS}회 후에도 지적이 남아 자동 재작업을 멈춰요. 사람이 확인해 주세요."
+              ;;
+            loop-off)
+              echo "AGENT_PAT 없음 — 재작업 루프 꺼짐 (GITHUB_TOKEN 은 다른 워크플로를 깨우지 못한다)"
+              ;;
+            *)
+              echo "모르는 결정: $DECISION"; exit 1
+              ;;
+          esac

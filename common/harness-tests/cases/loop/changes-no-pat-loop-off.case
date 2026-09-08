@@ -1,0 +1,8 @@
+# PAT 이 없으면 루프가 아예 안 돈다 — 도는 척하지 않고 꺼졌다고 말한다.
+# expect: loop-off
+# verdict: CHANGES_REQUESTED
+# head-ref: claude/issue-42
+# agent-made: true
+# rounds: 0
+# max-rounds: 3
+# has-pat: false

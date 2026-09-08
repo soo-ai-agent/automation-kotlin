@@ -192,6 +192,7 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | 그래프 펼치기 (`>`·`+`·`?`) | `.github/agent/graph.js` |
 | 코드 리뷰·자동 머지 | `.github/workflows/claude-review.yml` |
 | 규칙을 고쳤을 때 판정 회귀 | `.github/workflows/claude-harness.yml` |
+| 리뷰 뒤 머지·재작업 판단 | `.github/agent/loop-decision.sh` |
 | 노드 역할 정의 | `.github/agent/nodes/<이름>.md` |
 | 공통 스위치 | `.github/agent/settings.env` |
 | 배포 | `.github/workflows/deploy.yml` ([deploy.md](deploy.md)) |

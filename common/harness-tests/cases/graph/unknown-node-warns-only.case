@@ -1,0 +1,10 @@
+# 지금 동작을 고정해 둔다 — 역할 파일이 없는 노드는 **경고만 하고 통과한다.**
+#
+# 이건 결함이다. 그 노드는 빈 지시문으로 돌고, 실행 계약도 없어서 읽기 전용 git 만 받아
+# 아무것도 못 한 채 성공으로 끝난다. 고칠 때 이 케이스의 expect 를 FAIL 로 뒤집는다.
+# expect: PASS
+# graph: nope>code
+s1=[{"node":"nope","label":"nope","rescue":"","make_pr":"false"}]
+s2=[{"node":"code","label":"code","rescue":"","make_pr":"true"}]
+s3=[]
+s4=[]

@@ -1,0 +1,8 @@
+# 브랜치명이 claude/issue- 로 시작하지만 뒤가 숫자가 아니다.
+# expect: human-merge
+# verdict: PASS
+# head-ref: claude/issue-abc
+# agent-made: true
+# rounds: 1
+# max-rounds: 3
+# has-pat: true

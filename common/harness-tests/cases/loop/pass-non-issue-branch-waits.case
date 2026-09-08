@@ -1,0 +1,8 @@
+# 이슈에서 시작하지 않은 PR — 브랜치명 게이트에서 걸린다.
+# expect: human-merge
+# verdict: PASS
+# head-ref: feat/hand-written
+# agent-made: true
+# rounds: 1
+# max-rounds: 3
+# has-pat: true
