@@ -26,7 +26,7 @@ claude setup-token                          # 브라우저가 열리며 로그�
 ~/work/automation-kotlin/bin/claude-skills.sh install
 ```
 
-`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 세 개가 만들어진다.
+`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 과 짧은 이름 `ccsk` 네 개가 만들어진다.
 
 **3. PATH 에 그 폴더를 넣는다.** PATH 는 터미널이 명령어 파일을 찾아다니는 폴더 목록이다. 여기 없으면 이름만 쳐서는 실행되지 않는다.
 
@@ -39,6 +39,16 @@ claude-be      # 백엔드 작업으로 열기
 claude-fe      # 프론트 작업으로 열기
 claude-all     # 저장소 전체
 ```
+
+더 짧게 치고 싶으면 `ccsk` 다 — 같은 것의 짧은 이름이고, 영역을 인자로 받는다.
+
+```bash
+ccsk be        # = claude-be
+ccsk fe        # = claude-fe
+ccsk           # = claude-all (영역을 안 주면 전체)
+```
+
+`ccsk -c` 처럼 `-` 로 시작하는 첫 인자는 영역이 아니라 claude 옵션으로 넘어간다 — 전체 자리에서 이어서 대화하기다.
 
 어느 폴더에서 쳐도 된다. 셋 다 **저장소 루트에서** 열린다 — 루트 `CLAUDE.md` 와 거기 딸린 3대 원칙·리뷰 규칙(MUST)이
 통째로 읽히는 자리가 루트뿐이기 때문이다. 하위 폴더에서 열면 그 규칙들이 빠진 채로 열린다.

@@ -29,8 +29,9 @@ SCRIPT_PATH="$(resolve_link "${BASH_SOURCE[0]}")"
 REPO_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 
 # 깔리는 명령어 이름 = 영역. 링크 이름으로 불리면 인자 없이 그 영역이 열린다.
+# ccsk 는 영역을 인자로 받는 짧은 이름이다 — `ccsk` 전체, `ccsk be` 백엔드, `ccsk fe` 프론트.
 # 연관배열(declare -A)을 쓰지 않는 이유는 macOS 기본 bash 가 3.2 라 지원하지 않기 때문이다.
-LINK_NAMES="claude-be claude-fe claude-all"
+LINK_NAMES="claude-be claude-fe claude-all ccsk"
 area_of_link() {
     case "$1" in
         claude-be) echo backend ;;
@@ -48,11 +49,13 @@ usage() {
   claude-fe                     프론트 작업 — 공통 + frontend-* 스킬, 변경은 frontend/ 안에서만
   claude-all                    저장소 전체 — 공통 + kotlin-* + frontend-* 전부
 
-  $(basename "$SCRIPT_PATH") install     위 세 명령어를 $BIN_DIR 에 깐다 (한 번만)
+  ccsk [be|fe]                  위와 같은 것의 짧은 이름 — ccsk 전체 · ccsk be 백엔드 · ccsk fe 프론트
+
+  $(basename "$SCRIPT_PATH") install     위 명령어들을 $BIN_DIR 에 깐다 (한 번만)
   $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
 
-셋 다 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(3대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
-셋 다 권한 확인 창 없이 연다(--dangerously-skip-permissions) — 세션이 하는 일을 사람이 보고 있어야 한다.
+전부 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(3대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
+전부 권한 확인 창 없이 연다(--dangerously-skip-permissions) — 세션이 하는 일을 사람이 보고 있어야 한다.
 뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
 
@@ -64,12 +67,13 @@ install_links() {
     mkdir -p "$BIN_DIR"
     for name in $LINK_NAMES; do
         ln -sf "$SCRIPT_PATH" "$BIN_DIR/$name"
-        echo "  $BIN_DIR/$name  →  $(area_of_link "$name")"
+        area="$(area_of_link "$name")"
+        echo "  $BIN_DIR/$name  →  ${area:-인자로 고름 (ccsk [be|fe])}"
     done
     echo
     case ":$PATH:" in
         *":$BIN_DIR:"*)
-            echo "완료. 이제 어디서든 claude-be · claude-fe · claude-all 로 열면 된다."
+            echo "완료. 이제 어디서든 claude-be · claude-fe · claude-all, 짧게는 ccsk [be|fe] 로 열면 된다."
             ;;
         *)
             echo "완료. 다만 $BIN_DIR 이 PATH 에 없어서 아직 이름만으로는 안 불린다."
@@ -80,11 +84,15 @@ install_links() {
     esac
 }
 
-# 링크 이름으로 불렸으면 그 이름이 영역이다 — 인자를 먹지 않고 전부 claude 로 넘긴다
+# 링크 이름으로 불렸으면 그 이름이 영역이다 — 인자를 먹지 않고 전부 claude 로 넘긴다.
+# ccsk 처럼 이름에 영역이 없으면 첫 인자가 영역이다. 다만 첫 인자가 - 로 시작하면
+# claude 옵션이므로 먹지 않고 전체(all)로 연다 — `ccsk -c` 는 전체 자리에서 이어서 대화다.
 AREA="$(area_of_link "$(basename "$0")")"
 if [ -z "$AREA" ]; then
-    AREA="${1:-all}"
-    [ $# -gt 0 ] && shift
+    case "${1:-}" in
+        '' | -*) AREA="all" ;;
+        *) AREA="$1"; shift ;;
+    esac
 fi
 
 # 어느 자리를 고르든 claude 는 저장소 루트에서 연다.
