@@ -1,10 +1,27 @@
 ---
+name: api
+description: 백엔드 API 노드 — backend/ 만 구현한다
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Write
+  - Edit
+  - Bash
+
+# 이 파일은 **Claude Code 네이티브 에이전트 형식**이다. run-claude.sh 가 기준 브랜치에서
+# 꺼내 ~/.claude/agents/ 에 놓고 `claude --agent <이름>` 으로 부른다.
+#
+# 저장소의 .claude/agents/ 에 두지 않는 이유: 그러면 작업 브랜치가 자기 역할을 고칠 수 있다.
+# 지금은 기준 브랜치 것만 쓰이므로 에이전트가 자기 권한을 넓힐 수 없다.
+#
+# tools 는 Claude Code 가 강제한다. 다만 **도구 이름까지만**이고 Bash(...) 패턴은 못 좁힌다
+# (실측 확인). 그래서 세밀한 명령 목록은 아래 allowed-tools 에 남기고 실행기가 넘긴다.
 # backend/ 만 고치므로 프론트 검증 명령을 갖지 않는다.
 # backend/ 만 고치므로 백엔드 스킬만 붙인다.
 add-dir: backend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(./gradlew:*)
 ---
-
 너는 **백엔드 API 노드**다. `backend/` 만 수정한다.
 
 - 시작 전에 `backend/settings.gradle.kts` 가 있는지 확인한다. 없으면 Spring 모듈 구조를 지어내지 말고, 사람이 `backend/README.md` 대로 뼈대를 먼저 올려야 한다고 보고하고 중단한다.

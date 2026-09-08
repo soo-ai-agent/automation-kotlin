@@ -174,6 +174,11 @@ check_node_contracts() {
         fi
         grep -q '^allowed-tools:' "$f" || bad="$bad ${name}(allowed-tools없음)"
         grep -q '^add-dir:' "$f" || bad="$bad ${name}(add-dir없음)"
+        # 네이티브 에이전트 형식이어야 --agent 로 부를 수 있다. 이름은 파일 이름과 같아야
+        # 하고(실행기가 NODE_NAME 으로 부른다), tools 는 Claude Code 가 강제한다.
+        [ "$(sed -n 's/^name: //p' "$f" | head -n 1)" = "$(basename "$f" .md)" ] \
+            || bad="$bad ${name}(name이_파일이름과_다름)"
+        grep -q '^tools:' "$f" || bad="$bad ${name}(tools없음)"
         # 코드를 커밋하는 역할은 영역 스킬 없이 돌면 안 된다 — 리뷰어는 그 스킬로 판정하는데
         # 작성자는 그 스킬을 못 보는 상태가 된다. 실제로 그 상태였다.
         if grep -q 'git commit' "$f" && [ -z "$(sed -n 's/^add-dir: *//p' "$f")" ]; then
@@ -191,10 +196,15 @@ check_node_contracts() {
     grep -qF -e '--allowedTools "$ALLOWED"' "$runner" || bad="$bad run-claude.sh(계약을_CLI에_안넘김)"
     # 루트에서 열면 하위 폴더의 kotlin-*·frontend-* 가 세션 스킬 목록에 안 오른다.
     # 실측: --add-dir 없이 0개, 붙이면 17개·8개 (bin/claude-skills.sh 에도 같은 기록이 있다).
-    grep -qF 'claude $ADD_DIRS -p' "$runner" || bad="$bad run-claude.sh(영역스킬을_안붙임)"
+    grep -qF 'claude --agent "$AGENT" $ADD_DIRS -p' "$runner" \
+        || bad="$bad run-claude.sh(영역스킬을_안붙이거나_에이전트로_안부름)"
+    # 역할 파일은 기준 브랜치 것을 홈에 놓는다. 저장소 .claude/agents/ 에 두면
+    # 작업 브랜치가 자기 역할을 덮어써 권한을 넓힐 수 있다.
+    grep -qF 'cp "$1" ~/.claude/agents/' "$runner" || bad="$bad run-claude.sh(역할을_에이전트_자리에_안놓음)"
+    [ -d .claude/agents ] && bad="$bad 저장소에_.claude/agents가_생김(작업_브랜치가_역할을_고칠_수_있다)"
 
     if [ -z "$bad" ]; then
-        ok "노드마다 실행 계약(명령·영역 스킬)이 있고 run-claude.sh 가 그것을 적용한다"
+        ok "노드가 네이티브 에이전트 형식이고 run-claude.sh 가 --agent 로 부른다"
     else
         ng "노드 실행 계약이 없거나 적용되지 않는다" "$bad"
     fi

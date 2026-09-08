@@ -2,9 +2,12 @@
 # 🔒 기능 본체 — 노드 하나가 Claude 를 실행하는 부분. claude-node.yml 의 ② 단계가 부른다.
 #
 # 하는 일은 셋이다.
-#   1. 역할 파일 앞머리의 실행 계약(frontmatter)을 읽어 그 역할에 허용할 명령을 정한다
-#   2. 역할 지시문 + 작업 지시 + 커밋 규칙을 이어 붙여 프롬프트를 만든다
+#   1. 역할 파일을 ~/.claude/agents/ 에 놓아 `claude --agent <이름>` 으로 부를 수 있게 한다
+#   2. 작업 지시 + 커밋 규칙으로 프롬프트를 만든다 (역할은 에이전트가 들고 있다)
 #   3. claude CLI 를 돌리고, 실패했는데 수습 노드가 지정돼 있으면 한 번 더 이어서 돌린다
+#
+# 역할 파일은 Claude Code 네이티브 에이전트 형식이다. tools 는 Claude Code 가 강제하고,
+# Bash(...) 패턴은 네이티브가 못 좁혀서 allowed-tools 로 남겨 --allowedTools 에 넘긴다.
 #
 # 워크플로가 이 파일을 **기본 브랜치에서 꺼내** /tmp 로 복사한 뒤 실행한다.
 # 작업 브랜치가 이 파일을 고쳐도 그 잡의 실행 방식이 바뀌지 않아야 하기 때문이다.
@@ -32,13 +35,6 @@ frontmatter() { # $1=역할 파일 → 계약 본문만
   awk 'NR == 1 && $0 != "---" { exit } NR > 1 { if ($0 == "---") exit; print }' "$1"
 }
 
-# 계약은 프롬프트에 넣지 않는다 — 모델이 읽을 것은 지시문이지 자기 권한 목록이 아니다.
-strip_frontmatter() { # $1=역할 파일 → 지시문 본문만
-  awk 'NR == 1 && $0 == "---" { in_fm = 1; next }
-       in_fm && $0 == "---" { in_fm = 0; next }
-       !in_fm { print }' "$1"
-}
-
 # 역할이 정한 명령을 기본 위에 얹는다. 계약이 없으면 읽기 전용 git 만 남는다 —
 # 모르는 역할에 권한을 주는 쪽이 아니라 막는 쪽으로 떨어져야 한다.
 #
@@ -47,6 +43,13 @@ strip_frontmatter() { # $1=역할 파일 → 지시문 본문만
 # 오른다. 안 붙이면 이름조차 뜨지 않는다 (bin/claude-skills.sh 에 실측 기록이 있다).
 # 리뷰어와 하네스는 이미 붙이고 있었는데 노드만 빠져 있었다 — 리뷰어가 그 스킬로 판정하는데
 # 작성자는 그 스킬을 못 보는 상태였다.
+# 역할 파일을 Claude Code 가 찾는 자리에 놓는다. 저장소의 .claude/agents/ 가 아니라
+# 홈에 두는 것은, 작업 브랜치가 자기 역할을 덮어쓰지 못하게 하기 위해서다.
+install_agent() { # $1=역할 파일, $2=이름
+  mkdir -p ~/.claude/agents
+  cp "$1" ~/.claude/agents/"$2".md
+}
+
 apply_contract() { # $1=역할 파일 → ALLOWED 와 ADD_DIRS 를 채운다
   extra=$(frontmatter "$1" | sed -n 's/^allowed-tools: *//p')
   ALLOWED="$BASE_TOOLS${extra:+,$extra}"
@@ -57,9 +60,9 @@ apply_contract() { # $1=역할 파일 → ALLOWED 와 ADD_DIRS 를 채운다
   done
 }
 
-build_prompt() { # $1=역할 파일, $2=출력 파일
+build_prompt() { # $1=역할 파일(계약을 읽는 용도), $2=출력 파일
   : > "$2"
-  [ -s "$1" ] && printf '%s\n\n' "$(strip_frontmatter "$1")" >> "$2"
+  # 역할 지시문은 프롬프트에 넣지 않는다 — --agent 로 부르면 에이전트가 들고 있다.
   printf '## 작업\n\n%s\n\n' "$(cat /tmp/body.md)" >> "$2"
 
   if [ "$CONTEXT_TYPE" = "issue" ] && [ "$NODE_NAME" != "split" ]; then
@@ -94,7 +97,7 @@ run_claude() { # $1=프롬프트 파일 → 종료코드를 STATUS 에
   # --add-dir 은 폴더를 여럿 받는 옵션이라 바로 뒤에 플래그가 아닌 것이 오면 그것까지
   # 폴더로 먹는다. 뒤에 -p 가 오도록 순서를 지킨다.
   # shellcheck disable=SC2086
-  claude $ADD_DIRS -p "$(cat "$1")" \
+  claude --agent "$AGENT" $ADD_DIRS -p "$(cat "$1")" \
     --permission-mode acceptEdits \
     --allowedTools "$ALLOWED" \
     --output-format stream-json --verbose \
@@ -103,6 +106,8 @@ run_claude() { # $1=프롬프트 파일 → 종료코드를 STATUS 에
   node /tmp/stream.js result /tmp/claude-stream.jsonl > /tmp/claude-out.txt
 }
 
+AGENT="$NODE_NAME"
+install_agent /tmp/role.md "$AGENT"
 apply_contract /tmp/role.md
 build_prompt /tmp/role.md /tmp/prompt.txt
 echo "노드: $NODE_NAME${RESCUE:+ (수습: $RESCUE)}"
@@ -114,7 +119,9 @@ run_claude /tmp/prompt.txt
 if [ "$STATUS" != "0" ] && [ -n "$RESCUE" ]; then
   echo "::warning::$NODE_NAME 실패(status $STATUS) — $RESCUE 노드로 수습 시작"
   cp /tmp/claude-out.txt /tmp/prev-out.txt
-  # 수습 노드는 자기 계약으로 돈다 — 실패한 노드의 권한을 물려받지 않는다.
+  # 수습 노드는 자기 계약과 자기 역할로 돈다 — 실패한 노드의 것을 물려받지 않는다.
+  AGENT="$RESCUE"
+  install_agent /tmp/rescue-role.md "$AGENT"
   apply_contract /tmp/rescue-role.md
   build_prompt /tmp/rescue-role.md /tmp/rescue-prompt.txt
   {

@@ -239,11 +239,21 @@ VERDICT=PASS ROUNDS=0 MAX_ROUNDS=3 STEP=1 MAX_STEPS=12 \
 
 ```yaml
 ---
-# frontend/ 만 고치므로 백엔드 검증 명령을 갖지 않는다.
+name: web                      # 파일 이름과 같아야 한다
+description: 프론트엔드 노드 — frontend/ 만 구현한다
+tools:                         # Claude Code 가 강제한다
+  - Read
+  - Write
+  - Edit
+  - Bash
+
+# 아래 둘은 Claude Code 가 모르는 키 — 실행기가 읽어 CLI 플래그로 넘긴다
 add-dir: frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bash(npm:*)
 ---
 ```
+
+`tools` 는 **도구 이름**을 Claude Code 가 직접 막는다. `split` 노드에 `Bash` 가 없으면 그 세션은 정말로 셸을 못 쓴다.
 
 `allowed-tools` 는 허용할 명령이다. 읽기 전용 git(`status`·`diff`·`log`)은 모든 노드가 기본으로 갖고, 여기에 적는 것은 그 위에 더할 것뿐이다.
 

@@ -1,10 +1,27 @@
 ---
+name: fix
+description: 수정 노드 — 리뷰 지적만 고친다
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Write
+  - Edit
+  - Bash
+
+# 이 파일은 **Claude Code 네이티브 에이전트 형식**이다. run-claude.sh 가 기준 브랜치에서
+# 꺼내 ~/.claude/agents/ 에 놓고 `claude --agent <이름>` 으로 부른다.
+#
+# 저장소의 .claude/agents/ 에 두지 않는 이유: 그러면 작업 브랜치가 자기 역할을 고칠 수 있다.
+# 지금은 기준 브랜치 것만 쓰이므로 에이전트가 자기 권한을 넓힐 수 없다.
+#
+# tools 는 Claude Code 가 강제한다. 다만 **도구 이름까지만**이고 Bash(...) 패턴은 못 좁힌다
+# (실측 확인). 그래서 세밀한 명령 목록은 아래 allowed-tools 에 남기고 실행기가 넘긴다.
 # 지적이 어느 영역에 오든 고쳐야 하므로 양쪽 검증 명령을 갖는다.
 # 지적이 어느 영역에 오든 고쳐야 하므로 둘 다 붙인다.
 add-dir: backend frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
 ---
-
 너는 **수정 노드**다. 아래 리뷰 지적만 고친다.
 
 - 고칠 파일의 위치가 적용할 영역 스킬을 정한다 — `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`.

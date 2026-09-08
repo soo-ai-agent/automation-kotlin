@@ -29,7 +29,7 @@
 | 전이 규칙 | `.github/agent/next-role.sh` | 다음에 어느 역할을 부를지 — 리뷰어·계획·하네스가 **같은 파일**을 읽음 |
 | 계획 한 단계 | `.github/agent/plan-stage.sh` | 이번 단계의 역할과 매트릭스 — 워크플로와 하네스가 **같은 파일**을 읽음 |
 | 설정 | `.github/agent/settings.env` | — |
-| 노드 지시문·실행 계약 | `.github/agent/nodes/<이름>.md` | 앞머리 `---` 블록이 그 역할에 허용할 명령을 정한다 |
+| 노드 역할 (네이티브 에이전트) | `.github/agent/nodes/<이름>.md` | Claude Code 에이전트 형식. `run-claude.sh` 가 `~/.claude/agents/` 에 놓고 `--agent` 로 부른다 |
 | 리뷰어 역할 지시문 | `.github/agent/review-role.md` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 서버 세팅 | `.github/agent/setup-agent.sh` | 사용자가 1회 실행 |
 
@@ -137,6 +137,15 @@
   말하지 않고 도구로 막는다. 하네스(`run.sh`)도 같은 제한으로 부른다 — 안 맞추면 실제 리뷰어를 재지 못한다.
 
   `--allowedTools` 는 git 과 gradle/npm 검증 명령만 허용한다.
+
+- **역할 파일은 Claude Code 네이티브 에이전트 형식이다.** `tools:` 를 Claude Code 가 강제한다 —
+  `split` 은 `Bash` 가 없어 실제로 커밋할 수 없다. 지시문으로만 말하던 것을 도구로 막는다.
+
+  **저장소의 `.claude/agents/` 에 두지 않는다.** 거기 두면 작업 브랜치가 자기 역할 파일을 고쳐 권한을 넓힐 수 있다.
+  기준 브랜치에서 꺼내 `~/.claude/agents/` 에 놓으므로 그럴 수 없다. `static.sh` 가 `.claude/agents/` 가 생기면 막는다.
+
+  **`tools:` 는 도구 이름까지만 강제하고 `Bash(git add:*)` 같은 패턴은 못 좁힌다** (실측 확인).
+  그래서 세밀한 명령 목록은 `allowed-tools:` 에 남기고 실행기가 `--allowedTools` 로 넘긴다.
 
 - **허용 명령은 역할마다 다르고, 그 역할의 노드 파일이 정한다.** `run-claude.sh` 의 `BASE_TOOLS` 는 모든 노드가 갖는 읽기 전용 git 뿐이고,
   커밋·빌드 명령은 `nodes/<이름>.md` 앞머리 `allowed-tools:` 가 얹는다. 여기에 공통으로 더하면 역할 분리가 도로 무너진다.
