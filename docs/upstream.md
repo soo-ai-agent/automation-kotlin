@@ -28,22 +28,24 @@
 |---|---|
 | 원본 | <https://github.com/DietrichGebert/ponytail> |
 | 라이선스 | MIT (© DietrichGebert) — [.claude/skills/LICENSE](../.claude/skills/LICENSE) |
-| 우리 자리 | `.claude/skills/ponytail`·`ponytail-review` |
+| 우리 자리 | `.claude/skills/ponytail`·`ponytail-review`·`ponytail-audit`·`ponytail-debt` |
 
 에이전트가 **가장 단순하고 가장 짧은 해법**을 고르게 만드는 규칙 모음이다.
 
 코드를 쓰기 전에 이 순서로 묻는다 — 이게 애초에 필요한가(YAGNI), 이미 있는 것을 재사용할 수 있나, 표준 라이브러리로 되나, 플랫폼 기능으로 되나, 이미 깔린 의존성으로 되나, 한 줄로 되나.
 
-두 스킬의 역할은 이렇게 나뉜다.
+네 스킬의 역할은 이렇게 나뉜다.
 
 | 스킬 | 하는 일 |
 |---|---|
 | `ponytail` | 코드를 쓸 때 적용하는 본체 |
-| `ponytail-review` | diff 에서 오버엔지니어링만 골라내는 리뷰 — **코드 리뷰할 때 함께 본다** |
+| `ponytail-review` | diff 에서 오버엔지니어링만 골라내는 리뷰 — **리뷰어가 연다** |
+| `ponytail-audit` | 저장소 전체를 훑는 일회성 감사 — 사람이 부를 때만 |
+| `ponytail-debt` | 코드에 남은 `ponytail:` 주석을 모아 부채 장부로 만든다 — 사람이 부를 때만 |
 
 **우리가 바꾼 것은 없다.** 원본 그대로 두었고, 각 파일 frontmatter 의 `license: MIT` 로 출처가 표시돼 있다.
 
-`.claude/skills/LICENSE` 는 **이 두 스킬에만** 적용된다. 같은 폴더의 다른 스킬(`oop-responsibility-design`·`md-doc`·`api-contract`)은 이 저장소의 자체 문서다.
+`.claude/skills/LICENSE` 는 **이 네 스킬에만** 적용된다. 같은 폴더의 다른 스킬(`oop-responsibility-design`·`md-doc`·`api-contract`)은 이 저장소의 자체 문서다.
 
 ## spec-kit — 스펙 먼저 쓰기(SDD) 도구
 

@@ -28,6 +28,8 @@ allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*
 
 - 어느 스킬을 열지는 `frontend/.claude/skills/README.md` 색인이 안내한다. `frontend-e2e` 가 본체이고, 화면 선택자를 다룰 때 `frontend-screen` 을 함께 본다.
 
+- 공통 스킬(`.claude/skills/`)도 항상 적용된다 — 테스트도 코드라서 `ponytail` 이 그대로 걸린다. 흐름 하나를 확인하는 가장 짧은 테스트를 쓴다.
+
 - 기본은 `page.route` 로 API 응답을 가짜로 주는 것이다. 백엔드를 띄울 수 있으면 실제 호출로 한 흐름을 더 확인한다.
 
 - 먼저 환경을 확인한다. 백엔드를 띄울 수 있으면 (`cd backend && ./gradlew :api:bootRun` 이 뜨면) 실제로 띄우고 프론트를 빌드해 테스트를 실행한다.

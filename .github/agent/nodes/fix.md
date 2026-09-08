@@ -29,7 +29,7 @@ allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*
   어느 스킬을 열지는 각 폴더의 `README.md` 색인이 안내한다.
   백엔드는 `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 셋을, 프론트는 `frontend-common`·`frontend-style` 둘을 항상 읽는다.
 
-- 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다. 색인은 `.claude/skills/README.md` 다.
+- 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다 — 모든 코딩에 `ponytail`, 설계 판단에 `oop-responsibility-design`. 색인은 `.claude/skills/README.md` 다.
 
 - 지적된 것 외의 리팩터링·개선을 곁들이지 않는다.
 

@@ -14,7 +14,7 @@
 | 모든 코딩 | `.claude/skills/ponytail/SKILL.md` |
 | 설계 판단 (책임 배치·다형성·상속) | `.claude/skills/oop-responsibility-design/SKILL.md` |
 | 이슈 분석·기술 문서(md) 작성 | `.claude/skills/md-doc/SKILL.md` |
-| 오버엔지니어링 점검 | `.claude/skills/ponytail-review` — **리뷰할 때 함께 본다** |
+| 오버엔지니어링 점검 | `.claude/skills/ponytail-review` — **리뷰어가 연다.** 저장소 전체 감사는 `ponytail-audit`, 미뤄 둔 것 장부는 `ponytail-debt` (둘 다 사람이 부를 때만) |
 | 백엔드 공통 | `backend/.claude/skills/kotlin-common/SKILL.md` |
 | Kotlin 조건·분기·반복 문법 (when·sealed·null·코루틴 예외) | `backend/.claude/skills/kotlin-style/SKILL.md` |
 | 파일을 어디 둘지 판단, 새 기능의 소유 도메인 정하기 | `backend/.claude/skills/kotlin-module-layout/SKILL.md` |
