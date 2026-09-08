@@ -143,24 +143,33 @@ jobs:
     steps:
       # AGENT_PAT 이 없으면 여기서 조용히 끝난다. GITHUB_TOKEN 으로 건 workflow_dispatch 는
       # 워크플로를 깨우지 못하기 때문이다 — next-role.sh 가 그 상황을 loop-off 로 먼저 잡는다.
+      # 사용자 입력은 셸에 직접 끼워 넣지 않고 환경변수로만 받는다 (스크립트 인젝션 방지).
+      # ${{ }} 는 스크립트 본문에 글자 그대로 박히므로, prompt 에 따옴표 하나만 있어도
+      # 명령이 깨지고 백틱·$() 는 그대로 실행된다 — claude-node.yml 과 같은 원칙이다.
       - name: 자기를 다음 단계로 부른다
         env:
           GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
           STAGE: ${{ inputs.stage }}
           STEP: ${{ inputs.step }}
           RAN: ${{ needs.plan.outputs.roles }}
+          IN_PROMPT: ${{ inputs.prompt }}
+          IN_GRAPH: ${{ inputs.graph }}
+          IN_TASK_CODE: ${{ inputs.task_code }}
+          ISSUE: ${{ inputs.issue }}
+          CONTEXT_TYPE: ${{ inputs.context_type }}
+          BRANCH: ${{ needs.plan.outputs.branch }}
         run: |
           set -e
           NEXT_STAGE=$(( ${STAGE:-0} + 1 ))
           # 이번 단계에서 돈 노드 수만큼 실행 횟수를 올린다 — 병렬이면 한 번에 여럿이다
           NEXT_STEP=$(( ${STEP:-0} + $(printf '%s' "$RAN" | wc -w) ))
           gh workflow run claude-agent.yml \
-            -f prompt="${{ inputs.prompt }}" \
-            -f graph="${{ inputs.graph }}" \
-            -f branch="${{ needs.plan.outputs.branch }}" \
-            -f task_code="${{ inputs.task_code }}" \
-            -f issue="${{ inputs.issue }}" \
-            -f context_type="${{ inputs.context_type }}" \
+            -f prompt="$IN_PROMPT" \
+            -f graph="$IN_GRAPH" \
+            -f branch="$BRANCH" \
+            -f task_code="$IN_TASK_CODE" \
+            -f issue="$ISSUE" \
+            -f context_type="$CONTEXT_TYPE" \
             -f stage="$NEXT_STAGE" \
             -f step="$NEXT_STEP"
           echo "다음 단계 트리거됨 (단계 $NEXT_STAGE · 실행 $NEXT_STEP)"
