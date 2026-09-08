@@ -66,4 +66,4 @@ React Native(Expo) + TypeScript 프론트엔드 규칙이다. 한 코드가 iOS�
 
 기준은 루트 [CONTRACT.md](../../../CONTRACT.md) 와 백엔드 응답 DTO 코드다. 절차는 [api-contract](../../../.claude/skills/api-contract/SKILL.md).
 
-머지를 막는 기준 전체는 [common/docs/code-review/rules.md](../../../common/docs/code-review/rules.md) 에 있다.
+머지를 막는 기준 전체는 [rules/code-review.md](../../../rules/code-review.md) 에 있다.

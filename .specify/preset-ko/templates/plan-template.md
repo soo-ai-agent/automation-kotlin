@@ -39,7 +39,7 @@
 
 *관문: Phase 0 조사 전에 통과해야 한다. Phase 1 설계 후에 다시 확인한다.*
 
-[`constitution.md` 가 가리키는 규칙으로 판정한다. 이 저장소에서 머지를 막는 기준은 `common/docs/code-review/rules.md` 와 각 스킬의 '적발 신호' 중 Critical 항목이다]
+[`constitution.md` 가 가리키는 규칙으로 판정한다. 이 저장소에서 머지를 막는 기준은 `rules/code-review.md` 와 각 스킬의 '적발 신호' 중 Critical 항목이다]
 
 ## Project Structure (프로젝트 구조)
 

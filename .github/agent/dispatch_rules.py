@@ -2,7 +2,7 @@
 
 여기에는 GitHub 호출도 파일 쓰기도 없다. 값을 받아 한 단어를 돌려준다.
 그래야 하네스가 GitHub 없이 판단을 통째로 돌려 볼 수 있다
-(common/harness-tests/cases.sh — 케이스는 cases/dispatch/).
+(tests/cases.sh — 케이스는 cases/dispatch/).
 
 **청소는 보수적으로.** 판단이 안 서면 건드리지 않는 쪽으로 떨어진다. 이슈를 닫고 PR 을
 닫고 브랜치를 지우는 판단이라, 틀리면 사람이 만든 것이 사라진다. 그래서 각 함수는

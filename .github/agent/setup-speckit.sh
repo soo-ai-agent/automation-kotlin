@@ -14,7 +14,7 @@
 #   0. 쓸 버전을 정한다 — 처음이면 그때의 최신 릴리스를 찾아 파일에 적어 고정
 #   1. specify CLI 를 그 버전으로 설치
 #   2. 이 저장소에 spec-kit 을 초기화 (.specify/ 와 .claude/skills/speckit-* 생성)
-#   3. 한국어 산출물 템플릿(common/speckit-ko)을 프리셋으로 등록
+#   3. 한국어 산출물 템플릿(.specify/preset-ko)을 프리셋으로 등록
 #   4. 한국어판이 실제로 선택되는지 확인
 #
 # ⚠️ speckit-* 스킬 10종이 우리 규칙 스킬과 **같은 폴더**(.claude/skills/)에 깔립니다.
@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-PRESET_DIR="common/speckit-ko"
+PRESET_DIR=".specify/preset-ko"
 PRESET_ID="korean"
 
 # 이 프로젝트가 쓰는 spec-kit 버전. **첫 설치 때 그 시점의 최신 릴리스로 정해져 여기 적힌다.**
@@ -145,7 +145,7 @@ fi
 echo "     .specify/ 와 .claude/skills/speckit-* 생성"
 
 # ── 3. 한국어 프리셋 등록 ──────────────────────────────────
-# 원본은 common/speckit-ko 에 두고 여기서 등록한다. .specify/ 는 설치물이라
+# 원본은 .specify/preset-ko 에 두고 여기서 등록한다. .specify/ 는 설치물이라
 # .gitignore 대상이어서, 번역본을 그 안에 두면 무시 규칙에 함께 걸린다.
 echo "3/4 한국어 산출물 템플릿 등록"
 # 이미 깔려 있으면 add 가 거부하므로 먼저 지운다. 없을 때 지우는 것은 실패해도 괜찮다.
@@ -197,7 +197,7 @@ cat <<EOF
 끝났습니다. 다음은 이렇게 씁니다.
 
   /speckit-constitution   프로젝트 규칙을 정한다 — 규칙 사본이 아니라
-                          .claude/skills/ 와 common/docs/code-review/rules.md 를
+                          .claude/skills/ 와 rules/code-review.md 를
                           가리키게 쓰고, "산출물은 한국어로 작성한다" 를 넣으세요.
   /speckit-specify        만들 것을 스펙으로 적는다 (specs/ 에 생긴다)
   /speckit-clarify        모호한 곳을 질문으로 뽑아 좁힌다 (선택)

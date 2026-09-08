@@ -37,8 +37,8 @@
 |---|---|
 | 원본 | <https://github.com/github/spec-kit> |
 | 라이선스 | MIT (© GitHub, Inc.) |
-| 쓰는 버전 | `common/speckit-ko/speckit-version.txt` 가 고정한다 |
-| 우리 자리 | 설치물은 `.specify/`·`.claude/skills/speckit-*`(둘 다 커밋 안 함), 번역은 `common/speckit-ko/` |
+| 쓰는 버전 | `.specify/preset-ko/speckit-version.txt` 가 고정한다 |
+| 우리 자리 | 설치물은 `.specify/`·`.claude/skills/speckit-*`(둘 다 커밋 안 함), 번역은 `.specify/preset-ko/` |
 
 만들 것을 **스펙 문서로 먼저 고정하고 그 스펙으로 구현**하게 돕는 도구다.
 
@@ -54,7 +54,7 @@
 
 `plan` 템플릿은 번역에 더해 **이 저장소의 모듈 구조**(Kotlin 멀티모듈·Expo 프론트)로 예시를 바꿨고, `tasks` 템플릿은 상류가 "테스트는 선택"이라고 한 부분을 **필수**로 고쳤다. 이 저장소에서는 테스트가 빠지면 머지가 막히기 때문이다.
 
-무엇을 영어로 남겼는지, 상류가 바뀌었을 때 어떻게 따라가는지는 [common/speckit-ko/README.md](../common/speckit-ko/README.md) 에 있다.
+무엇을 영어로 남겼는지, 상류가 바뀌었을 때 어떻게 따라가는지는 [.specify/preset-ko/README.md](../.specify/preset-ko/README.md) 에 있다.
 
 ### 주의
 

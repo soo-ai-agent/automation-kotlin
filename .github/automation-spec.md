@@ -4,7 +4,7 @@
 
 > 각 절은 요구사항 → 구현 위치(파일·함수) → **수정 시 지켜야 할 불변 조건** 순이다.
 
-> 사용자용 사용법은 [docs/](../../docs/README.md), 동작 개요는 [docs/agent-guide.md](../../docs/agent-guide.md), 파일 지도는 [.github/README.md](../../.github/README.md).
+> 사용자용 사용법은 [docs/](../docs/README.md), 동작 개요는 [docs/agent-guide.md](../docs/agent-guide.md), 파일 지도는 [.github/README.md](README.md).
 
 ## 0. 전체 지형
 
@@ -16,14 +16,14 @@
 | 그래프 펼치기 | `.github/agent/graph.js` | 진입점의 `graph` 잡이 실행 |
 | 디스패처 로직 | `.github/agent/dispatch.py` | `claude-dispatch.yml` 이 `start`·`cleanup` 두 번 실행 |
 | 디스패처 판단 | `.github/agent/dispatch_rules.py` | 착수·마감·삭제를 정한다 — 디스패처와 하네스가 **같은 파일**을 읽음 |
-| 하네스 동작 회귀 | `common/harness-tests/cases.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 갈래 하나만은 `cases.sh <갈래>`) |
+| 하네스 동작 회귀 | `tests/cases.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 갈래 하나만은 `cases.sh <갈래>`) |
 | 노드의 Claude 실행 | `.github/agent/run-claude.sh` | 노드가 기본 브랜치에서 꺼내 씀 |
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
 | 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
-| 하네스 판정 케이스 | `common/harness-tests/cases/backend/`·`cases/frontend/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
+| 하네스 판정 케이스 | `tests/cases/backend/`·`cases/frontend/` | 위 워크플로가 실행 (수동은 `bash tests/run.sh [backend\|frontend\|all]`) |
 | 하네스 동작 케이스 | `cases/graph/`·`cases/loop/`·`cases/state/`·`cases/next-role/`·`cases/plan/` | 같은 워크플로 (영역과 무관 — 오케스트레이션이다) |
-| 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
+| 하네스 형식 검사 | `tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
 | 머지 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 루프 상태 | `.github/agent/state.sh` | 노드·리뷰어·하네스가 **같은 도구**로 읽고 씀 |
 | 전이 규칙 | `.github/agent/next-role.sh` | 다음에 어느 역할을 부를지 — 리뷰어·계획·하네스가 **같은 파일**을 읽음 |
@@ -302,7 +302,7 @@
 
   공통 스킬은 고치는 파일의 위치와 무관하게 항상 적용되고, 영역 스킬은 위치가 정한다 (디렉터리 스코프 스킬).
 
-- 문서는 독자 기준 분리: `docs/` = **사용자 전용**. 에이전트 규칙은 루트 `CLAUDE.md`·`AGENTS.md`(도구 규약상 루트 고정) + 모듈별 스킬 + `common/docs/`(리뷰 규칙·이 문서).
+- 문서는 독자 기준 분리: `docs/` = **사용자 전용**. 에이전트 규칙은 루트 `CLAUDE.md`·`AGENTS.md`(도구 규약상 루트 고정) + 모듈별 스킬 + `rules/`(리뷰 규칙) + `.github/automation-spec.md`(이 문서).
 
   `.github/README.md` 는 CI 파일 지도로 사람이 읽는다.
 
@@ -314,7 +314,7 @@
 
 - `CLAUDE.md`·`AGENTS.md` 는 루트에서 옮길 수 없다 (Claude Code·Codex 가 루트에서 읽는다).
 
-- `CLAUDE.md` 의 `@common/docs/code-review/rules.md` import 경로와 `settings.env` 의 `CLAUDE_REVIEW_RULES_DIR` 은 같은 곳을 가리켜야 한다.
+- `CLAUDE.md` 의 `@rules/code-review.md` import 경로와 `settings.env` 의 `CLAUDE_REVIEW_RULES_DIR` 은 같은 곳을 가리켜야 한다.
 
 - **계획은 잡을 미리 선언하지 않는다.** `claude-agent.yml` 의 잡은 셋이고 단계 수와 무관하다 —
   `plan`(이번 단계를 고른다) · `run`(그 역할들을 나란히 돌린다) · `next`(남았으면 `stage+1` 로 자기를 다시 부른다).
@@ -425,4 +425,4 @@
   "규칙이 옳은가"는 `run.sh` 가, **"규칙이 읽히기는 하는가"** 는 `static.sh` 가 본다. 링크가 죽거나 경로가
   어긋나면 규칙은 파일에 남아 있어도 아무도 안 읽는데, 이건 모델을 안 불러도 잡힌다.
 
-- 문서를 추가할 때 독자를 정하고 위치를 고른다: 사용자 → `docs/`, 에이전트 → `common/docs/` 또는 스킬. `docs/README.md` 머리의 경계 선언을 유지할 것.
+- 문서를 추가할 때 독자를 정하고 위치를 고른다: 사용자 → `docs/`, 에이전트 → `rules/` 또는 스킬. `docs/README.md` 머리의 경계 선언을 유지할 것.

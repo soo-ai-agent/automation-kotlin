@@ -76,7 +76,7 @@ core/core-<도메인>/…/core/<도메인>/
 **4. 공용으로 올리기 전에 한 번 더 묻는다.**
 
 판정은 하나다 — **"다른 프로젝트에 그대로 옮겨도 말이 되는가."** 그렇다면 `support:util` 이고,
-인자에 우리 도메인 타입이 있으면 util 이 아니다(`common/docs/code-review/rules.md`).
+인자에 우리 도메인 타입이 있으면 util 이 아니다(`rules/code-review.md`).
 
 ### 새 도메인을 만들 기준
 

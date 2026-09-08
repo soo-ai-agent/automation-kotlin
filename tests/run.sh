@@ -2,9 +2,9 @@
 # 하네스 회귀 테스트 — 리뷰어가 "심어 둔 위반"을 여전히 잡는지 확인한다.
 #
 # 사용 (저장소 루트에서):
-#   bash common/harness-tests/run.sh             # 전부 (backend + frontend)
-#   bash common/harness-tests/run.sh backend     # 백엔드 케이스만
-#   bash common/harness-tests/run.sh frontend    # 프론트 케이스만
+#   bash tests/run.sh             # 전부 (backend + frontend)
+#   bash tests/run.sh backend     # 백엔드 케이스만
+#   bash tests/run.sh frontend    # 프론트 케이스만
 #
 # 영역은 **어느 케이스를 돌릴지**만 고른다. 리뷰어를 부르는 방식은 영역과 무관하게
 # 언제나 .github/workflows/claude-review.yml 과 똑같다 — 역할 지시문·리뷰 규칙 전문·
@@ -23,17 +23,17 @@
 
 set -u
 
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/.."
 
 ROLE_FILE=".github/agent/review-role.md"
 SETTINGS_FILE=".github/agent/settings.env"
 
 usage() {
     cat << USAGE
-사용법: bash common/harness-tests/run.sh [backend|frontend|all]
+사용법: bash tests/run.sh [backend|frontend|all]
 
-  backend    common/harness-tests/cases/backend/
-  frontend   common/harness-tests/cases/frontend/
+  backend    tests/cases/backend/
+  frontend   tests/cases/frontend/
   all        둘 다 (기본값)
 
 영역은 어느 케이스를 돌릴지만 고른다. 리뷰어는 언제나 실제 리뷰어와 같은 방식으로 불린다.
@@ -47,14 +47,14 @@ AREA="${1:-all}"
 case "$AREA" in
     backend | be)
         AREA="backend"
-        CASE_DIRS="common/harness-tests/cases/backend"
+        CASE_DIRS="tests/cases/backend"
         ;;
     frontend | fe)
         AREA="frontend"
-        CASE_DIRS="common/harness-tests/cases/frontend"
+        CASE_DIRS="tests/cases/frontend"
         ;;
     all)
-        CASE_DIRS="common/harness-tests/cases/backend common/harness-tests/cases/frontend"
+        CASE_DIRS="tests/cases/backend tests/cases/frontend"
         ;;
     -h | --help | help)
         usage

@@ -2,7 +2,7 @@
 # 한국어 프리셋 원본이 바뀌었는데 설치본이 그대로일 때 알린다 — PostToolUse(Write|Edit) 훅.
 #
 # 왜 필요한가: `specify preset add --dev` 는 심볼릭 링크가 아니라 **복사**다.
-# 그래서 common/speckit-ko/ 를 고치고 설치 스크립트를 다시 돌리지 않으면,
+# 그래서 .specify/preset-ko/ 를 고치고 설치 스크립트를 다시 돌리지 않으면,
 # /speckit-* 가 계속 예전 번역을 쓴다. 조용히 어긋나므로 알아채기 어렵다.
 #
 # 한계: 에이전트가 고칠 때만 걸린다. 사람이 편집기로 직접 고치면 이 훅은 모른다.
@@ -18,12 +18,12 @@ else
 fi
 
 case "$path" in
-    *common/speckit-ko/*) ;;
+    *.specify/preset-ko/*) ;;
     *) exit 0 ;;
 esac
 
 root="${CLAUDE_PROJECT_DIR:-.}"
-src="$root/common/speckit-ko"
+src="$root/.specify/preset-ko"
 installed="$root/.specify/presets/korean"
 
 # 아직 설치한 적이 없으면 어긋날 것도 없다.

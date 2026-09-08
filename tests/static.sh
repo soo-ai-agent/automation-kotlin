@@ -2,7 +2,7 @@
 # 형식 검사 — 모델을 부르지 않고 규칙 장치가 성한지만 본다.
 #
 # 사용 (저장소 루트에서):
-#   bash common/harness-tests/static.sh
+#   bash tests/static.sh
 #
 # run.sh 와 나눈 이유: 저기는 케이스 하나가 claude 호출 1건이라 느리고 비싸다.
 # 아래 검사들은 문자열 대조로 끝나므로 공짜다. 싼 것을 먼저 돌려 걸러내고,
@@ -13,7 +13,7 @@
 
 set -u
 
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/.."
 
 PASS=0
 FAIL=0
@@ -36,11 +36,11 @@ ng() {
 # 그래프 케이스(.case, graph.sh 가 모델 없이 펼쳐 본다). 기대값의 꼴이 다르다.
 check_case_expectations() {
     bad=""
-    for f in common/harness-tests/cases/*/*.diff; do
+    for f in tests/cases/*/*.diff; do
         [ -e "$f" ] || continue
         head -n 1 "$f" | grep -qE '^# expect: (PASS|CHANGES_REQUESTED)$' || bad="$bad $f"
     done
-    for f in common/harness-tests/cases/*/*.case; do
+    for f in tests/cases/*/*.case; do
         [ -e "$f" ] || continue
         grep -q '^# run: ' "$f" || bad="$bad $f(run없음)"
         grep -qE '^# expect(-stderr)?: ' "$f" || bad="$bad $f(expect없음)"
@@ -58,7 +58,7 @@ check_case_expectations() {
 # 판정 케이스(.diff)를 담은 영역만 본다 — 그래프 케이스에는 '과잉 차단'이라는 것이 없다.
 check_pass_case_per_area() {
     bad=""
-    for dir in common/harness-tests/cases/*/; do
+    for dir in tests/cases/*/; do
         [ -d "$dir" ] || continue
         ls "$dir"*.diff >/dev/null 2>&1 || continue
         grep -lqx '# expect: PASS' "$dir"*.diff 2>/dev/null || bad="$bad $dir"
@@ -98,7 +98,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh" ".github/agent/plan-stage.sh" ".github/agent/dispatch_rules.py" ".github/agent/dispatch.py"; do
+    for needed in "**/.claude/skills/**" "rules/code-review.md" "CLAUDE.md" "tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh" ".github/agent/plan-stage.sh" ".github/agent/dispatch_rules.py" ".github/agent/dispatch.py"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -133,9 +133,9 @@ check_review_role_shared() {
     [ -f "$role" ] || missing="$missing $role(없음)"
     grep -qF 'cat /tmp/review-role.md' .github/workflows/claude-review.yml \
         || missing="$missing claude-review.yml(역할파일을_프롬프트로_안넘김)"
-    grep -qF 'ROLE_FILE=".github/agent/review-role.md"' common/harness-tests/run.sh \
+    grep -qF 'ROLE_FILE=".github/agent/review-role.md"' tests/run.sh \
         || missing="$missing run.sh(역할파일을_안가리킴)"
-    grep -qF 'cat "$ROLE_FILE"' common/harness-tests/run.sh \
+    grep -qF 'cat "$ROLE_FILE"' tests/run.sh \
         || missing="$missing run.sh(역할파일을_프롬프트로_안넘김)"
     # 비교용 워크플로가 있는 동안에는 그것도 같은 역할 파일을 읽어야 한다 —
     # 자기 프롬프트를 따로 쓰면 무엇을 비교하는지 알 수 없게 된다.
@@ -233,7 +233,7 @@ check_graph_loop_shape() {
         || bad="$bad claude-agent.yml(계획_계산을_스크립트에_안맡김)"
     grep -qF 'bash .github/agent/next-role.sh' .github/agent/plan-stage.sh \
         || bad="$bad plan-stage.sh(계속할지를_규칙에_안물음)"
-    grep -qF 'bash .github/agent/plan-stage.sh' common/harness-tests/cases.sh \
+    grep -qF 'bash .github/agent/plan-stage.sh' tests/cases.sh \
         || bad="$bad cases.sh(계획을_안가리킴)"
     # 계획 계산이 워크플로 셸로 돌아오면 하네스가 그것을 베껴 쓰게 된다
     grep -qF 'node .github/agent/graph.js' "$wf" \
@@ -263,7 +263,7 @@ check_loop_decision_shared() {
         || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
     grep -qE '^[[:space:]]*MERGE=' "$wf" \
         || bad="$bad claude-review.yml(머지_결정을_스크립트에_안물음)"
-    grep -qrF 'bash .github/agent/loop-decision.sh' common/harness-tests/cases/loop/ \
+    grep -qrF 'bash .github/agent/loop-decision.sh' tests/cases/loop/ \
         || bad="$bad cases/loop(같은_파일을_안가리킴)"
 
     # 물어보고 답을 버리면 판단이 되돌아간 것과 같다 — 결정대로 실행하는지까지 본다
@@ -295,7 +295,7 @@ check_state_shared() {
         || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
     grep -qF 'bash /tmp/state.sh merge' .github/workflows/claude-review.yml \
         || bad="$bad claude-review.yml(상태를_안씀)"
-    grep -qrF 'bash .github/agent/state.sh' common/harness-tests/cases/state/ \
+    grep -qrF 'bash .github/agent/state.sh' tests/cases/state/ \
         || bad="$bad cases/state(같은_파일을_안가리킴)"
 
     # 도구 안에 GitHub 호출이 들어오면 하네스가 상태를 돌려 볼 수 없게 된다
@@ -316,7 +316,7 @@ check_next_role_testable() {
     wf=".github/workflows/claude-review.yml"
     bad=""
     [ -f "$next" ] || bad="$bad $next(없음)"
-    grep -qrF 'bash .github/agent/next-role.sh' common/harness-tests/cases/next-role/ \
+    grep -qrF 'bash .github/agent/next-role.sh' tests/cases/next-role/ \
         || bad="$bad cases/next-role(같은_파일을_안가리킴)"
     grep -qE '^[[:space:]]*(gh|curl|git) ' "$next" && bad="$bad next-role.sh(바깥을_부름)"
 
@@ -350,7 +350,7 @@ check_next_role_testable() {
 # 그 케이스가 조용히 빠진 것을 모른다.
 check_case_area_match() {
     bad=""
-    for dir in common/harness-tests/cases/backend common/harness-tests/cases/frontend; do
+    for dir in tests/cases/backend tests/cases/frontend; do
         area=$(basename "$dir")
         for f in "$dir"/*.diff; do
             [ -e "$f" ] || continue
@@ -379,7 +379,7 @@ check_case_area_match() {
 # next-role.sh·plan.sh)가 값을 넣어 답을 대조한다.
 check_syntax() {
     bad=""
-    for f in .github/agent/*.sh common/harness-tests/*.sh; do
+    for f in .github/agent/*.sh tests/*.sh; do
         [ -e "$f" ] || continue
         bash -n "$f" 2>/dev/null || bad="$bad $(basename "$f")"
     done
@@ -412,7 +412,7 @@ check_dispatch_rules_shared() {
     for fn in start_issue close_pr delete_branch issue_of; do
         grep -qF "dispatch_rules.$fn" "$dp" || bad="$bad dispatch.py(${fn}_를_안물음)"
     done
-    grep -qrF 'python3 .github/agent/dispatch_rules.py' common/harness-tests/cases/dispatch/ \
+    grep -qrF 'python3 .github/agent/dispatch_rules.py' tests/cases/dispatch/ \
         || bad="$bad cases/dispatch(같은_파일을_안가리킴)"
     # 규칙 안에서 바깥을 부르면 하네스가 못 돌린다
     grep -qE '^[[:space:]]*(import (urllib|requests|subprocess)|from (urllib|subprocess))' "$rules" \
@@ -436,7 +436,7 @@ check_reviewer_readonly() {
     bad=""
     grep -qF -e '--allowedTools "Read,Grep,Glob"' "$wf" \
         || bad="$bad claude-review.yml(도구를_안좁힘)"
-    grep -qF -e '--allowedTools "Read,Grep,Glob"' common/harness-tests/run.sh \
+    grep -qF -e '--allowedTools "Read,Grep,Glob"' tests/run.sh \
         || bad="$bad run.sh(같은_제한으로_안부름)"
 
     # GH_TOKEN 이 잡 레벨에 있으면 claude 를 돌리는 step 도 갖게 된다.

@@ -13,7 +13,7 @@ description: >-
 
 저장소 전체에 적용되는 최상위 원칙이다. 영역도 언어도 가리지 않는다 — 백엔드·프론트엔드·CI 스크립트 어디서든 같다.
 
-다른 규칙 문서(`kotlin-*`, `frontend-*`, `ponytail`, `oop-responsibility-design`, `common/docs/code-review/rules.md`)는 모두 이 원칙에 종속된다.
+다른 규칙 문서(`kotlin-*`, `frontend-*`, `ponytail`, `oop-responsibility-design`, `rules/code-review.md`)는 모두 이 원칙에 종속된다.
 
 충돌하면 이 문서가 앞선다.
 
@@ -184,4 +184,4 @@ enum·union 에 새 값이 생겼을 때 빠뜨린 분기가 컴파일 에러로
 
 영역별 구체 판정과 심각도는 각 영역 스킬의 "적발 신호" 표에 있다 — 백엔드 **kotlin-common**, 프론트 **frontend-common**, 설계 **oop-responsibility-design**.
 
-머지 차단 여부는 `common/docs/code-review/rules.md` 의 MUST 가 정한다.
+머지 차단 여부는 `rules/code-review.md` 의 MUST 가 정한다.

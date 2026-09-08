@@ -1,6 +1,6 @@
-# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 케이스를 늘리려면 common/harness-tests/cases/backend/ 나
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 케이스를 늘리려면 tests/cases/backend/ 나
 #    cases/frontend/ 에 .diff 파일을 더하고, 첫 줄에 `# expect: PASS` 또는 `# expect: CHANGES_REQUESTED` 를 적어요.
-#    이 파일은 기능 자체를 개조할 때만 열고, 수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#    이 파일은 기능 자체를 개조할 때만 열고, 수정 전에 .github/automation-spec.md 를 먼저 읽어요.
 #
 # 하네스 회귀 테스트 — 규칙 문서를 고친 PR 에서, 리뷰어가 "심어 둔 위반"을 여전히 잡는지 확인해요.
 #
@@ -22,10 +22,10 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - "**/.claude/skills/**"
-      - "common/docs/code-review/rules.md"
+      - "rules/code-review.md"
       - "CLAUDE.md"
       - "AGENTS.md"
-      - "common/harness-tests/**"
+      - "tests/**"
       # 리뷰어의 역할 지시문과 통과 기준도 판정 기준이다 — 고치면 판정이 흔들린다
       - ".github/agent/review-role.md"
       - ".github/agent/settings.env"
@@ -68,7 +68,7 @@ jobs:
 
       # 모델을 안 부르는 검사부터 — 여기서 깨지면 claude 를 한 번도 안 부르고 끝나요.
       - name: 형식 검사
-        run: bash common/harness-tests/static.sh
+        run: bash tests/static.sh
 
       - uses: actions/setup-node@v4
         with:
@@ -76,7 +76,7 @@ jobs:
 
       # 나머지는 케이스로 잰다 — 그래프·머지·상태·전이·계획·정리. 모델도 GitHub 도 안 부른다.
       - name: 케이스 회귀
-        run: bash common/harness-tests/cases.sh
+        run: bash tests/cases.sh
 
       - name: claude CLI 설치
         run: npm install -g @anthropic-ai/claude-code
@@ -85,4 +85,4 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         # run.sh 는 FAIL 이 하나라도 있으면 0 이 아닌 코드로 끝나요 — 그대로 잡 실패가 되어 머지를 막아요.
-        run: bash common/harness-tests/run.sh
+        run: bash tests/run.sh

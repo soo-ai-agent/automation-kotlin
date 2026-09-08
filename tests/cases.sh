@@ -2,8 +2,8 @@
 # 케이스 러너 — cases/ 아래의 모든 케이스를 돌린다. 모델도 GitHub 도 부르지 않는다.
 #
 # 사용 (저장소 루트에서):
-#   bash common/harness-tests/cases.sh            # 전부
-#   bash common/harness-tests/cases.sh next-role  # 그 폴더만
+#   bash tests/cases.sh            # 전부
+#   bash tests/cases.sh next-role  # 그 폴더만
 #
 # 케이스가 스스로 무엇을 돌릴지 적는다. 그래서 러너는 종류마다 다르지 않고 이것 하나다.
 #
@@ -21,9 +21,9 @@
 
 set -u
 
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/.."
 
-CASE_ROOT="common/harness-tests/cases"
+CASE_ROOT="tests/cases"
 
 # 계획을 끝까지 돌려 바퀴마다의 역할을 ' | ' 로 이어 낸다.
 walk() {

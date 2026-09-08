@@ -10,7 +10,7 @@ description: 프론트엔드 전 레이어 공통 규칙. 도메인 최상위 �
 이 스킬은 레이어와 무관한 공통 규칙을 담는다. 각 레이어의 상세는 `frontend-screen`·`frontend-hooks`·`frontend-service`·`frontend-api`·`frontend-lib` 가,
 TS/RN 문법은 `frontend-style` 이, 서버 계약은 `api-contract` 가 담당한다.
 
-공통 문서(`common/docs/code-review/rules.md`)와 충돌하면 프론트 스킬이 우선한다. 단 CLAUDE.md·README 와 충돌하면 그쪽이 우선한다.
+공통 문서(`rules/code-review.md`)와 충돌하면 프론트 스킬이 우선한다. 단 CLAUDE.md·README 와 충돌하면 그쪽이 우선한다.
 
 ## 정답 코드가 동봉되어 있다
 

@@ -1,6 +1,6 @@
 # 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 고칠 곳: 스위치는 .github/agent/settings.env,
 #    노드 지시문은 .github/agent/nodes/*.md. 이 파일은 기능 자체를 개조할 때만 열고,
-#    수정 전에 common/docs/automation-spec.md 를 먼저 읽어요.
+#    수정 전에 .github/automation-spec.md 를 먼저 읽어요.
 #
 # Claude 일꾼 — 지시를 받아 계획의 한 단계를 돌리고, 남은 단계가 있으면 자기를 다시 부른다.
 #

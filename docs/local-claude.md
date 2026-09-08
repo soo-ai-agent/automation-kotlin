@@ -99,7 +99,7 @@ hermes                         # 세션 시작
 **Claude Code 쪽과 다른 점이 하나 있다.** launcher 는 영역별로 스킬을 갈라 붙이지만(`claude-be` 는 `kotlin-*` 만),
 Hermes 는 저장소 스킬을 통째로 읽는다. 사람이 직접 쓰는 세션이라 어느 영역을 고칠지 사람이 알고 있다는 전제다.
 
-**링크가 죽으면 그 규칙은 안 읽힌다.** `bash common/harness-tests/static.sh` 가 링크가 성한지 검사한다.
+**링크가 죽으면 그 규칙은 안 읽힌다.** `bash tests/static.sh` 가 링크가 성한지 검사한다.
 
 ## 로컬에서 계획을 돌린다
 
@@ -123,10 +123,10 @@ Hermes 는 저장소 스킬을 통째로 읽는다. 사람이 직접 쓰는 세�
 규칙이나 자동화를 고쳤으면 하네스로 확인한다. 검사는 셋이고, **싼 것부터** 돌린다.
 
 ```bash
-bash common/harness-tests/static.sh          # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
-bash common/harness-tests/cases.sh           # ② 케이스 77건 — 그래프·머지·상태·전이·계획·정리
-bash common/harness-tests/cases.sh next-role # ②의 한 갈래만
-bash common/harness-tests/run.sh backend     # ③ 판정 회귀 — 백엔드 케이스만 (claude 5회)
+bash tests/static.sh          # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
+bash tests/cases.sh           # ② 케이스 77건 — 그래프·머지·상태·전이·계획·정리
+bash tests/cases.sh next-role # ②의 한 갈래만
+bash tests/run.sh backend     # ③ 판정 회귀 — 백엔드 케이스만 (claude 5회)
 ```
 
 **①②는 모델을 부르지 않는다.** ①은 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 본다 —
@@ -223,7 +223,7 @@ claude-be                 # 실제로 열어 본다
 # CLAUDE.md 끝부분 — 이 두 줄이 원칙과 리뷰 규칙 전문을 끌어온다
 @.claude/skills/core-principles/SKILL.md
 
-@common/docs/code-review/rules.md
+@rules/code-review.md
 ```
 
 마지막 줄만 즉시가 아니다. 스킬이 34종이라 본문을 전부 미리 읽으면 한 번에 다룰 수 있는 분량을 넘긴다.

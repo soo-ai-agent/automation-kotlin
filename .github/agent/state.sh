@@ -6,11 +6,11 @@
 # 구조라, 상황을 보고 다음 역할을 고르는 루프를 그 위에 올릴 수 없다.
 #
 # 상태는 이슈·PR 코멘트 안의 숨은 블록에 있다. 왜 거기인지, 다른 자리를 왜 안 골랐는지는
-# common/docs/automation-spec.md 5절에 적혀 있다 — 여기 옮겨 적으면 두 곳이 어긋난다.
+# .github/automation-spec.md 5절에 적혀 있다 — 여기 옮겨 적으면 두 곳이 어긋난다.
 #
 # 여기에는 GitHub API 호출이 없다. 코멘트 본문을 stdin 으로 받아 값을 내고, 값을 받아
 # 블록을 낸다. 그래야 하네스가 GitHub 없이 상태를 통째로 돌려 볼 수 있다
-# (common/harness-tests/cases.sh — 케이스는 cases/state/).
+# (tests/cases.sh — 케이스는 cases/state/).
 #
 # 사용:
 #   state.sh read              stdin(코멘트 모음) → key=value 줄들. 블록이 여럿이면 마지막 것.

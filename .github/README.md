@@ -1,6 +1,6 @@
 # CI 안내
 
-> **이 문서는 사람이 읽습니다.** 워크플로를 수정하려는 에이전트는 [common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽습니다.
+> **이 문서는 사람이 읽습니다.** 워크플로를 수정하려는 에이전트는 [.github/automation-spec.md](../.github/automation-spec.md) 를 읽습니다.
 
 이 폴더에 자동화 전체가 들어 있다. 이슈를 발견하고, 코드를 쓰고, PR 을 열고, 리뷰하고, 배포하는 일이 전부 여기서 돈다.
 
@@ -15,9 +15,9 @@
 | [agent/settings.env](agent/settings.env) | 그래프 모양(`CLAUDE_GRAPH`), 재수정 횟수, 러너·런타임 버전, 리뷰 통과 기준 |
 | [agent/nodes/](agent/nodes/) | 각 노드의 역할 지시문과 실행 계약(앞머리 `allowed-tools:`), 새 노드 추가 (노드당 파일 하나) |
 
-리뷰 규칙은 [common/docs/code-review/rules.md](../common/docs/code-review/rules.md) 에 있다.
+리뷰 규칙은 [rules/code-review.md](../rules/code-review.md) 에 있다.
 
-그래프·머지·상태·전이·계획·정리는 모델 없이 확인할 수 있다 — `bash common/harness-tests/cases.sh` 가 케이스 77건을 돌린다.
+그래프·머지·상태·전이·계획·정리는 모델 없이 확인할 수 있다 — `bash tests/cases.sh` 가 케이스 77건을 돌린다.
 갈래 하나만 보려면 `cases.sh next-role` 처럼 폴더 이름을 붙인다.
 
 ## 사람이 실행하는 파일 (처음 한 번)
@@ -68,4 +68,4 @@ bash .github/agent/setup-speckit.sh
 
 권한 경계는 원본 그대로다: **Claude 는 파일만 쓰고, API 호출(이슈·PR·라벨)은 셸이 한다.** 그래서 `GH_TOKEN` 은 잡 전체가 아니라 `gh` 를 쓰는 step 에만 걸려 있다.
 
-이 워크플로들을 **수정**하려면 먼저 [common/docs/automation-spec.md](../common/docs/automation-spec.md) 를 읽는다 — 요구사항·구현 위치·불변 조건이 정리되어 있다.
+이 워크플로들을 **수정**하려면 먼저 [.github/automation-spec.md](../.github/automation-spec.md) 를 읽는다 — 요구사항·구현 위치·불변 조건이 정리되어 있다.

@@ -20,7 +20,7 @@ Sync Impact Report
 - 공통 코딩 규칙 — `.claude/skills/`
 - 백엔드 규칙 — `backend/.claude/skills/` (`kotlin-*` 17종)
 - 프론트엔드 규칙 — `frontend/.claude/skills/`
-- 머지를 막는 기준 — `common/docs/code-review/rules.md`
+- 머지를 막는 기준 — `rules/code-review.md`
 - 작업 규칙 진입점 — `CLAUDE.md`(Claude), `AGENTS.md`(Codex)
 
 **근거:** 같은 규칙을 말하는 문서가 둘이면 에이전트는 둘 중 하나를 따르고, 어느 쪽인지 예측할 수 없다. 실제로 스킬만 고치고 주변 문서를 두었을 때 같은 과제에서 두 번 연속 옛 구조가 나왔다.
@@ -43,7 +43,7 @@ Sync Impact Report
 
 - 치환 토큰 — `__SPECKIT_COMMAND_*__`
 
-절 제목은 `## Requirements (요구사항)` 처럼 병기한다. 상세는 `common/speckit-ko/README.md`.
+절 제목은 `## Requirements (요구사항)` 처럼 병기한다. 상세는 `.specify/preset-ko/README.md`.
 
 ### III. 새 동작에는 테스트가 같은 변경에 들어간다 (NON-NEGOTIABLE)
 
@@ -106,7 +106,7 @@ Sync Impact Report
 
 ## Governance
 
-이 헌법은 스펙 주도 개발(`/speckit-*`)의 판정 기준이다. 코드 리뷰의 머지 차단 기준은 `common/docs/code-review/rules.md` 가 갖는다 — 둘이 어긋나면 그쪽이 이긴다.
+이 헌법은 스펙 주도 개발(`/speckit-*`)의 판정 기준이다. 코드 리뷰의 머지 차단 기준은 `rules/code-review.md` 가 갖는다 — 둘이 어긋나면 그쪽이 이긴다.
 
 **개정 절차.** 원칙을 더하거나 빼거나 뜻을 바꾸려면 (1) 무엇이 왜 바뀌는지 PR 본문에 적고, (2) 원칙 VI 의 전수 검색 절차를 밟아 같은 규칙을 말하는 다른 문서를 함께 고치고, (3) 아래 버전을 올린다.
 

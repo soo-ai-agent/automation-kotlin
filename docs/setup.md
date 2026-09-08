@@ -109,7 +109,7 @@ gh run list --limit 5
 
 ```bash
 bash .github/agent/setup-speckit.sh
-git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
+git add .specify/preset-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
 ```
 
 버전 파일을 커밋해야 나중에 clone 한 사람도 같은 버전을 받는다. 무엇이 깔리고 어떻게 쓰는지는 [sdd-guide.md](sdd-guide.md) 에 있다.
@@ -158,7 +158,7 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 |---|---|
 | `.github/agent/settings.env` | 그래프 모양(`CLAUDE_GRAPH`), 재수정 횟수, 러너·런타임 버전, 리뷰 통과 기준 |
 | `.github/agent/nodes/<이름>.md` | 노드별 역할 지시문과 허용 명령(앞머리 `allowed-tools:`), 새 노드 추가 |
-| `common/docs/code-review/rules.md` | 리뷰 규칙 — MUST(머지 차단) / SHOULD(참고 코멘트) |
+| `rules/code-review.md` | 리뷰 규칙 — MUST(머지 차단) / SHOULD(참고 코멘트) |
 | `.claude/skills/` (공통) · `backend/.claude/skills/` · `frontend/.claude/skills/` | 코딩 규칙 — 일꾼과 리뷰어가 자동으로 읽는다 |
 
 나머지 워크플로 파일은 설정이 아니라 기능 자체를 개조할 때만 연다 ([.github/README.md](../.github/README.md)).

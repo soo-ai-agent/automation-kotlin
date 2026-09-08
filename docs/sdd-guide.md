@@ -25,7 +25,7 @@ bash .github/agent/setup-speckit.sh
 
 한 번 돌리면 도구 설치, 저장소 초기화, 한국어 템플릿 등록, 확인까지 끝난다. 여러 번 다시 돌려도 안전하다.
 
-처음 돌리면 **그 시점의 최신 릴리스**로 버전이 정해지고 `common/speckit-ko/speckit-version.txt` 에 적힌다. **이 파일을 커밋한다.** 그래야 나중에 clone 한 사람도 같은 버전을 받는다.
+처음 돌리면 **그 시점의 최신 릴리스**로 버전이 정해지고 `.specify/preset-ko/speckit-version.txt` 에 적힌다. **이 파일을 커밋한다.** 그래야 나중에 clone 한 사람도 같은 버전을 받는다.
 
 ## uv 를 깔 수 없는 환경이라면
 
@@ -37,8 +37,8 @@ bash .github/agent/setup-speckit.sh
 
 ```bash
 mkdir -p specs/001-주문취소
-cp common/speckit-ko/templates/spec-template.md specs/001-주문취소/spec.md
-cp common/speckit-ko/templates/plan-template.md specs/001-주문취소/plan.md
+cp .specify/preset-ko/templates/spec-template.md specs/001-주문취소/spec.md
+cp .specify/preset-ko/templates/plan-template.md specs/001-주문취소/plan.md
 ```
 
 채운 뒤 커밋하고, 이슈 본문에 `specs/001-주문취소/spec.md` 를 적으면 이후 흐름은 똑같다.
@@ -56,7 +56,7 @@ cp common/speckit-ko/templates/plan-template.md specs/001-주문취소/plan.md
 | 자리 | 무엇 | 커밋하나 |
 |---|---|---|
 | `specs/` | 만든 스펙·계획·작업 목록 | **한다** — 이게 결과물이다 |
-| `common/speckit-ko/speckit-version.txt` | 이 프로젝트가 쓰는 spec-kit 버전 | **한다** |
+| `.specify/preset-ko/speckit-version.txt` | 이 프로젝트가 쓰는 spec-kit 버전 | **한다** |
 | `.specify/memory/constitution.md` | 프로젝트 헌법 — `/speckit-constitution` 이 만든다 | **한다** — 우리가 쓴 규칙이다 |
 | `.specify/` 의 나머지 | spec-kit 설치물 | 안 한다 (`.gitignore`) |
 | `.claude/skills/speckit-*/` | `/speckit-*` 명령 10종 | 안 한다 (`.gitignore`) |
@@ -83,7 +83,7 @@ cp common/speckit-ko/templates/plan-template.md specs/001-주문취소/plan.md
 
 `/speckit-constitution` 은 **규칙을 새로 쓰는 자리가 아니다.**
 
-이 저장소의 규칙은 이미 `.claude/skills/` 와 `common/docs/code-review/rules.md` 에 있으므로, constitution 은 그것들을 **가리키게** 쓴다.
+이 저장소의 규칙은 이미 `.claude/skills/` 와 `rules/code-review.md` 에 있으므로, constitution 은 그것들을 **가리키게** 쓴다.
 
 규칙을 복사해 넣으면 같은 규칙을 말하는 문서가 둘이 되어 서로 어긋난다.
 
@@ -141,7 +141,7 @@ CI 노드(GitHub Actions)는 spec-kit 을 쓰지 않는다 — 노드가 쓸 수
 SPECKIT_VERSION=latest bash .github/agent/setup-speckit.sh
 ```
 
-올리기 전에 [common/speckit-ko/README.md](../common/speckit-ko/README.md) 의 "갱신 절차" 를 읽는다.
+올리기 전에 [.specify/preset-ko/README.md](../.specify/preset-ko/README.md) 의 "갱신 절차" 를 읽는다.
 
 한국어 템플릿이 기본 템플릿을 이기는 구조라, 상류가 개선돼도 **경고 없이 그 개선이 가려진다.** 번역 기준과 설치 버전이 다르면 스크립트가 알려 주므로, 그때 상류 변경분을 확인해 번역에 반영한다.
 
@@ -157,4 +157,4 @@ uv tool uninstall specify-cli
 
 헌법도 버릴 거라면 `rm -rf .specify .claude/skills/speckit-*` 로 한 번에 지운다. 커밋에서도 빠지므로 되돌리려면 git 으로 되살려야 한다.
 
-`specs/` 와 `common/speckit-ko/` 는 어느 쪽이든 남는다. 지우려면 직접 지운다. 기존 이슈 흐름은 영향받지 않는다.
+`specs/` 와 `.specify/preset-ko/` 는 어느 쪽이든 남는다. 지우려면 직접 지운다. 기존 이슈 흐름은 영향받지 않는다.

@@ -6,7 +6,7 @@
 두 모드를 나눈 이유는 Actions 화면에서 어느 쪽이 실패했는지 바로 보이게 하려는 것이다.
 정리(cleanup)는 착수(start)가 실패해도 돈다.
 
-수정 전에 common/docs/automation-spec.md 3절(완료 후 무인 정리)의 불변 조건을 먼저 읽는다.
+수정 전에 .github/automation-spec.md 3절(완료 후 무인 정리)의 불변 조건을 먼저 읽는다.
 핵심은 하나다 — **청소는 보수적으로.** 판단이 안 서면 지우지 않는 쪽으로 떨어져야 한다.
 
 환경변수: REPO · GH_TOKEN · DEF(기본 브랜치) · HAS_PAT

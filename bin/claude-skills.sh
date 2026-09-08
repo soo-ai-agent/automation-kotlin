@@ -56,7 +56,7 @@ usage() {
 뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
 
-하네스: bash common/harness-tests/run.sh [backend|frontend|all]
+하네스: bash tests/run.sh [backend|frontend|all]
 USAGE
 }
 

@@ -35,8 +35,8 @@
 | 프론트엔드 | `frontend/.claude/skills/README.md` 색인 — 계층별 스킬 8종, `frontend/README.md` |
 | TS/RN 조건·분기·리스트 문법 | `frontend/.claude/skills/frontend-style/SKILL.md` |
 | E2E 테스트 | `frontend/.claude/skills/frontend-e2e/SKILL.md` |
-| 코드 리뷰 | `common/docs/code-review/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
-| CI 자동화 수정 | `common/docs/automation-spec.md` (명세·구현 위치·불변 조건) |
+| 코드 리뷰 | `rules/*.md` (MUST 위반 = 머지 차단) + `.claude/skills/ponytail-review` (오버엔지니어링) |
+| CI 자동화 수정 | `.github/automation-spec.md` (명세·구현 위치·불변 조건) |
 | 백엔드 뼈대 만들기 | `backend/README.md` |
 | 작업 지시에 `specs/...` 경로가 있을 때 | 그 스펙 문서(`spec.md`·`plan.md`·`tasks.md`)를 먼저 읽는다 — 스펙이 기준이다 |
 
@@ -64,7 +64,7 @@ type: `feat` `fix` `remove` `refactor` `style` `comment` `rename` `docs` `test` 
 
 - **요청 범위 밖의 코드를 고치지 않는다.** 손대는 파일과 줄은 요청을 만족시키는 데 필요한 만큼으로 제한한다. 요청받지 않은 리팩터링·개선·이름 변경을 곁들이지 않고, 고쳐야 할 것 같으면 직접 고치는 대신 PR 본문에 적는다.
 
-  상세는 `common/docs/code-review/rules.md` 의 "변경 범위" 절(MUST).
+  상세는 `rules/code-review.md` 의 "변경 범위" 절(MUST).
 
 - 원격 상태를 바꾸는 명령(배포·삭제)을 검증 목적으로 실행하지 않는다.
 

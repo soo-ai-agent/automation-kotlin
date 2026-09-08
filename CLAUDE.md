@@ -56,4 +56,4 @@
 
 @.claude/skills/core-principles/SKILL.md
 
-@common/docs/code-review/rules.md
+@rules/code-review.md

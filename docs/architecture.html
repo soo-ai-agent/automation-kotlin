@@ -482,7 +482,7 @@
     </table></div>
 
     <div class="note">
-      <b>리뷰 게이트</b> — 머지를 막는 것은 셋뿐이다: <span class="mono">common/docs/code-review/rules.md</span> 의 MUST 위반,
+      <b>리뷰 게이트</b> — 머지를 막는 것은 셋뿐이다: <span class="mono">rules/code-review.md</span> 의 MUST 위반,
       스킬 적발 신호의 Critical 항목, 그리고 이슈가 가리키는 스펙(specs/)과 어긋난 구현. 스타일 취향·요청 밖 개선 제안은 통과시키고 코멘트로만 남긴다.
       "변경 범위" 규칙은 특히 강하다 — 요청 밖 리팩터링을 곁들인 diff 는 내용이 옳아도 차단된다.
     </div>
@@ -645,7 +645,7 @@
       </div>
       <div class="card">
         <h4>🤖 에이전트가 읽는다</h4>
-        <p><code>CLAUDE.md</code>·<code>AGENTS.md</code> 진입점 · 스킬 3계층 · <code>common/docs/</code>(리뷰 규칙·자동화 명세) · 헌법(포인터)</p>
+        <p><code>CLAUDE.md</code>·<code>AGENTS.md</code> 진입점 · 스킬 3계층 · <code>rules/</code>(리뷰 규칙) · <code>.github/automation-spec.md</code>(자동화 명세) · 헌법(포인터)</p>
       </div>
       <div class="card">
         <h4>↔️ 경계 문서 — 이동 금지</h4>
@@ -656,7 +656,7 @@
 <pre class="tree"><span class="c">사람이 고치는 설정 셋</span>
 .github/agent/settings.env        <span class="c">그래프 모양 · 재수정 횟수 · 리뷰 기준</span>
 .github/agent/nodes/*.md          <span class="c">노드 8종 역할 지시문</span>
-common/docs/code-review/rules.md  <span class="c">팀 리뷰 규칙 (MUST = 머지 차단)</span>
+rules/code-review.md  <span class="c">팀 리뷰 규칙 (MUST = 머지 차단)</span>
 
 <span class="c">규칙의 흐름</span>
 CLAUDE.md / AGENTS.md             <span class="c">진입점 — rules.md 를 import</span>
@@ -665,9 +665,9 @@ CLAUDE.md / AGENTS.md             <span class="c">진입점 — rules.md 를 imp
 └─ frontend/.claude/skills/  2종 <span class="c">frontend/ 를 고칠 때 위에 얹음</span>
 
 .specify/memory/constitution.md   <span class="c">헌법 — 규칙 사본이 아닌 포인터. 스킬과 어긋나면 스킬이 이긴다</span>
-common/docs/automation-spec.md    <span class="c">CI 를 고치는 에이전트용 명세 — 요구사항·구현 위치·불변 조건</span>
-common/harness-tests/             <span class="c">리뷰어 회귀 테스트 — 심어 둔 케이스 6개 (계약 개명·스펙 위반·투기적 추상화 차단)</span>
-common/speckit-ko/                <span class="c">스펙 산출물 한국어 템플릿 (설치 원본)</span></pre>
+.github/automation-spec.md    <span class="c">CI 를 고치는 에이전트용 명세 — 요구사항·구현 위치·불변 조건</span>
+tests/             <span class="c">리뷰어 회귀 테스트 — 심어 둔 케이스 6개 (계약 개명·스펙 위반·투기적 추상화 차단)</span>
+.specify/preset-ko/                <span class="c">스펙 산출물 한국어 템플릿 (설치 원본)</span></pre>
 
     <div class="note">
       규칙을 고칠 때의 절차(헌법 VI) — 같은 규칙을 말하는 문서를 <b>전부</b> 찾아 고치고, 같은 낱말로 재검색해 0건을 확인한다.

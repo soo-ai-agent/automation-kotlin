@@ -78,7 +78,7 @@ cd frontend && npm install && npm run web    # 브라우저로 확인 (폰으로
 
 ```bash
 bash .github/agent/setup-speckit.sh
-git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
+git add .specify/preset-ko/speckit-version.txt && git commit -m "chore:spec-kit 버전 고정"
 ```
 
 무엇이 깔리고 어떻게 쓰는지는 [docs/sdd-guide.md](docs/sdd-guide.md) 에 있다.
@@ -119,24 +119,42 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
 ## 폴더와 파일 — 어디를 보면 되나
 
-**사람이 읽는 것**
+보이는 폴더는 여섯이고, 이름이 곧 내용이다.
 
-    README.md    지금 이 문서
-    docs/        사용 설명서 — 읽는 순서는 docs/README.md
-    TASK.md      첫 구축 명세 양식 (빈칸을 채워 쓴다)
-    bin/         내 컴퓨터에서 같은 규칙으로 Claude 를 여는 launcher (docs/local-claude.md)
+    backend/    백엔드 앱 (Kotlin + Spring) — 비어 있다, backend/README.md 대로 채운다
+    frontend/   프론트엔드 앱 (Expo) — 완성 상태로 동봉
+    docs/       사람이 읽는 설명서 — 읽는 순서는 docs/README.md
+    rules/      리뷰 규칙 — 팀 규칙을 여기에 MUST 로 적으면 리뷰에 반영된다
+    tests/      하네스 — 모델 없이 자동화를 검증한다 (bash tests/cases.sh)
+    bin/        내 컴퓨터에서 같은 규칙으로 Claude 를 여는 launcher
 
-**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳 셋(settings.env·노드 지시문·리뷰 규칙)은 [.github/README.md](.github/README.md) 가 안내한다.
+루트 파일 여섯은 각각 독자가 다르다.
 
-스펙 먼저 쓰기 쪽도 사람이 고치는 자리가 둘 있다 — `common/speckit-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법) ([안내](docs/sdd-guide.md)).
-
-**에이전트가 읽고 쓰는 것** — 사람은 몰라도 된다. 독자별 문서 지도는 [docs/architecture.html](docs/architecture.html) 의 "문서 구조" 절에 있다.
-
-**앱 코드**
-
-    backend/            백엔드 앱 자리 — Spring 멀티모듈 뼈대로 채운다
-    frontend/           프론트엔드 앱 — 완성 상태로 동봉
+    README.md           지금 이 문서 (사람)
+    CLAUDE.md           에이전트 진입점 — 원칙과 리뷰 규칙을 import 로 끌어온다
+    AGENTS.md           에이전트 진입점 (Claude 아닌 도구용)
+    TASK.md             첫 구축 명세 양식 — 사람이 빈칸을 채운다
+    CONTRACT.md         API 계약 — api 노드가 쓰고 web 노드가 읽는다
     docker-compose.yml  서버 배포용
+
+**점(.)으로 시작하는 폴더 넷은 도구가 자리를 정한 것이라 옮길 수 없다.**
+
+    .claude/    Claude Code 규약 — 공통 규칙 스킬 9종 · 노드 역할 · 훅 · 로컬 워크플로
+    .github/    GitHub Actions 규약 — 워크플로 7개 · agent/ 스크립트 · 자동화 명세
+    .specify/   spec-kit 규약 — 헌법과 한국어 산출물 템플릿(preset-ko/)
+    .agents/    Hermes 규약 — 우리 스킬을 가리키는 링크 (로컬 모델로 쓸 때만)
+
+**코딩 규칙이 세 곳으로 나뉜 데는 이유가 있다.** 고치는 파일의 위치가 어느 규칙을 붙일지 고른다.
+
+    .claude/skills/           공통 9종 — 위치와 무관하게 항상 적용
+    backend/.claude/skills/   kotlin-* 17종 — backend/ 를 고칠 때만
+    frontend/.claude/skills/  frontend-* 8종 — frontend/ 를 고칠 때만
+
+**사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳 셋(`settings.env`·노드 지시문·`rules/`)은 [.github/README.md](.github/README.md) 가 안내한다.
+
+스펙 먼저 쓰기 쪽도 고치는 자리가 둘 있다 — `.specify/preset-ko/`(한국어 산출물 템플릿)와 `.specify/memory/constitution.md`(프로젝트 헌법) ([안내](docs/sdd-guide.md)).
+
+독자별 문서 지도는 [docs/architecture.html](docs/architecture.html) 의 "문서 구조" 절에 있다.
 
 ## 어떤 코드가 나오나
 
@@ -160,4 +178,4 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 | 프론트엔드 구조 | [frontend/README.md](frontend/README.md) |
 | CI 파일이 뭐가 뭔지 | [.github/README.md](.github/README.md) |
 | 빌려온 것의 원본·라이선스 | [docs/upstream.md](docs/upstream.md) |
-| 팀 리뷰 규칙 추가 | `common/docs/code-review/rules.md` 에 MUST 로 적는다 |
+| 팀 리뷰 규칙 추가 | `rules/code-review.md` 에 MUST 로 적는다 |

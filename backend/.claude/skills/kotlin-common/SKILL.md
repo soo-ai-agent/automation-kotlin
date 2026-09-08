@@ -16,7 +16,7 @@ description: Kotlin + Spring Boot 백엔드 전 레이어 공통 규칙. 자료�
 
 셋째와 다섯째가 부딪히면 **읽기 쉬움이 이긴다.** 짧게 만들려고 한 줄에 여러 일을 겹치지 않는다.
 
-다섯째(적게 쓰기)를 극단까지 미는 스킬이 `ponytail` 인데, **리뷰 규칙의 MUST(`common/docs/code-review/rules.md`)는 ponytail 로도 무를 수 없다** — 새 동작의 테스트 동반이 대표다.
+다섯째(적게 쓰기)를 극단까지 미는 스킬이 `ponytail` 인데, **리뷰 규칙의 MUST(`rules/code-review.md`)는 ponytail 로도 무를 수 없다** — 새 동작의 테스트 동반이 대표다.
 
 ## 최상위 원칙 — 3대 원칙이 정본이다
 

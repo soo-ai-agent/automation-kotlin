@@ -9,7 +9,7 @@ description: "기능 구현용 작업 목록 템플릿"
 
 **Prerequisites**: plan.md (필수), spec.md (사용자 스토리에 필요), research.md, data-model.md, contracts/
 
-**Tests**: **이 저장소에서 테스트는 선택이 아니다.** 새 동작(분기·정책·검증·상태 변경)에는 같은 변경에 유닛 테스트가 포함된다 — `common/docs/code-review/rules.md` 의 MUST 항목이라 빠지면 머지가 막힌다.
+**Tests**: **이 저장소에서 테스트는 선택이 아니다.** 새 동작(분기·정책·검증·상태 변경)에는 같은 변경에 유닛 테스트가 포함된다 — `rules/code-review.md` 의 MUST 항목이라 빠지면 머지가 막힌다.
 
 **Organization**: 작업은 사용자 스토리별로 묶는다. 그래야 스토리 하나를 따로 구현하고 따로 검증할 수 있다.
 
