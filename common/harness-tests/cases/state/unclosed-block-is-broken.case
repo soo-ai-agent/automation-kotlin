@@ -1,0 +1,4 @@
+# 열리고 안 닫힌 블록 — 잘렸거나 사람이 지웠다. 값을 믿지 않는다.
+# expect: round=0 step=0 last_role= last_status= verdict= broken=1
+<!-- claude-state
+round=3

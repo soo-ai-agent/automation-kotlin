@@ -55,6 +55,8 @@ jobs:
           # 루프 판단(자동 머지 게이트 포함) — PR 브랜치가 자기 머지 조건을 바꾸지 못하게 기준 브랜치 것.
           # 하네스(common/harness-tests/loop.sh)도 같은 파일을 돌린다.
           git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh
+          # 루프 상태의 단일 원본 — 노드도 리뷰어도 이 도구로만 상태를 읽고 쓴다
+          git show "origin/$BASE_REF:.github/agent/state.sh" > /tmp/state.sh
           . /tmp/settings.env
           {
             echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
@@ -136,8 +138,22 @@ jobs:
       - name: 코멘트 게시
         if: env.SKIP != 'true'
         run: |
-          if head -n 1 /tmp/review.md | grep -q "PASS"; then BADGE="✅ 통과"; else BADGE="❌ 수정 필요"; fi
-          printf '## %s — %s\n\n%s\n' "$MARKER" "$BADGE" "$(tail -n +2 /tmp/review.md)" > /tmp/note.md
+          if head -n 1 /tmp/review.md | grep -q "PASS"; then
+            BADGE="✅ 통과"; VERDICT=PASS
+          else
+            BADGE="❌ 수정 필요"; VERDICT=CHANGES_REQUESTED
+          fi
+          # 이번 라운드를 상태에 얹는다. 아직 이 값을 읽어 판단하는 곳은 없다 —
+          # ROUNDS 는 여전히 코멘트 개수로 센다. 읽는 쪽을 옮기는 것은 다음 단계다.
+          gh pr view "$PR" --json comments --jq '.comments[].body' > /tmp/comments.txt 2>/dev/null || : > /tmp/comments.txt
+          bash /tmp/state.sh read < /tmp/comments.txt \
+            | bash /tmp/state.sh merge "round=$((ROUNDS + 1))" "verdict=$VERDICT" \
+            | bash /tmp/state.sh block > /tmp/state-block.md
+
+          { printf '## %s — %s\n\n%s\n' "$MARKER" "$BADGE" "$(tail -n +2 /tmp/review.md)"
+            printf '\n'
+            cat /tmp/state-block.md
+          } > /tmp/note.md
           gh pr comment "$PR" --body-file /tmp/note.md
 
       # 무엇을 할지는 /tmp/loop-decision.sh 가 정하고, 여기서는 그대로 실행만 한다.

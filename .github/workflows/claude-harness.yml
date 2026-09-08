@@ -12,7 +12,8 @@
 #   ① static.sh  형식 검사 — 링크·경로·케이스 형식·노드 실행 계약·단계 잡 선언.
 #   ② graph.sh   그래프 회귀 — CLAUDE_GRAPH 표현식이 의도한 단계 매트릭스로 펼쳐지는지.
 #   ③ loop.sh    루프 회귀 — 리뷰 뒤에 머지할지·재작업할지·사람을 부를지.
-#   ④ run.sh     판정 회귀 — 케이스 하나당 claude 호출 1건. 지금 7건(백엔드 5 · 프론트 2)이에요.
+#   ④ state.sh   상태 회귀 — 코멘트에 남긴 루프 상태를 읽고 갱신하는 것이 맞는지.
+#   ⑤ run.sh     판정 회귀 — 케이스 하나당 claude 호출 1건. 지금 7건(백엔드 5 · 프론트 2)이에요.
 #
 # CI 는 영역 구분 없이 전부 돌려요 — 손으로 한 영역만 볼 때는 `run.sh backend` 처럼 영역을 붙여요.
 name: claude-harness
@@ -40,6 +41,9 @@ on:
       # 루프 판단(자동 머지 게이트 포함)과 그것을 실행하는 리뷰어 — 루프 회귀(③)가 잰다
       - ".github/agent/loop-decision.sh"
       - ".github/workflows/claude-review.yml"
+      # 루프 상태의 단일 원본과 그것을 쓰는 노드 — 상태 회귀(④)가 잰다
+      - ".github/agent/state.sh"
+      - ".github/workflows/claude-node.yml"
 
 permissions:
   contents: read
@@ -71,6 +75,10 @@ jobs:
       # 루프 회귀도 모델을 안 부른다 — 자동 머지 게이트를 포함한 판단을 상황별로 잰다.
       - name: 루프 회귀
         run: bash common/harness-tests/loop.sh
+
+      # 상태 회귀도 모델도 GitHub 도 안 부른다 — 코멘트 본문을 넣고 값을 받는다.
+      - name: 상태 회귀
+        run: bash common/harness-tests/state.sh
 
       - name: claude CLI 설치
         run: npm install -g @anthropic-ai/claude-code

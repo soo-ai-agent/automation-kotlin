@@ -1,0 +1,13 @@
+# 코멘트가 쌓이면 블록도 쌓인다 — 가장 나중 것이 지금 상태다.
+# expect: round=7 step=2 last_role=fix last_status= verdict= broken=0
+<!-- claude-state
+round=1
+step=1
+last_role=code
+-->
+그 사이의 사람 코멘트
+<!-- claude-state
+round=7
+step=2
+last_role=fix
+-->

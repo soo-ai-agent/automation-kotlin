@@ -1,0 +1,6 @@
+# 모르는 항목 — 형식이 바뀌었는데 읽는 쪽이 안 따라온 상태다. 조용히 넘기지 않는다.
+# expect: round=0 step=0 last_role= last_status= verdict= broken=1
+<!-- claude-state
+round=1
+nope=1
+-->

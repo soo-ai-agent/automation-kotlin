@@ -45,6 +45,10 @@ check_case_expectations() {
         grep -qE '^# expect: (PASS|FAIL)$' "$f" || bad="$bad $f(expect없음)"
         grep -q '^# graph: ' "$f" || bad="$bad $f(graph없음)"
     done
+    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case; do
+        [ -e "$f" ] || continue
+        grep -q '^# expect: ' "$f" || bad="$bad $f(expect없음)"
+    done
     if [ -z "$bad" ]; then
         ok "케이스마다 '# expect:' 기대값이 있다"
     else
@@ -98,7 +102,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml"; do
+    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -252,6 +256,37 @@ check_loop_decision_shared() {
     fi
 }
 
+# ── ⑩ 루프 상태를 세 소비자가 같은 도구로 읽고 쓰는가 ────────────────
+# ⑥·⑨ 와 같은 이유다. 상태는 노드·리뷰어·하네스 셋이 함께 쓰는 값이라,
+# 한 곳이 자기 방식으로 코멘트를 파싱하기 시작하면 그 순간 원본이 둘이 된다.
+#
+# 도구가 GitHub API 를 부르기 시작해도 같은 일이 벌어진다 — 하네스가 못 돌린다.
+check_state_shared() {
+    state=".github/agent/state.sh"
+    bad=""
+    [ -f "$state" ] || bad="$bad $state(없음)"
+
+    grep -qF "origin/\$DEF:.github/agent/state.sh" .github/workflows/claude-node.yml \
+        || bad="$bad claude-node.yml(기본_브랜치에서_안꺼냄)"
+    grep -qF 'bash /tmp/state.sh merge' .github/workflows/claude-node.yml \
+        || bad="$bad claude-node.yml(상태를_안씀)"
+    grep -qF "origin/\$BASE_REF:.github/agent/state.sh" .github/workflows/claude-review.yml \
+        || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
+    grep -qF 'bash /tmp/state.sh merge' .github/workflows/claude-review.yml \
+        || bad="$bad claude-review.yml(상태를_안씀)"
+    grep -qF 'STATE=".github/agent/state.sh"' common/harness-tests/state.sh \
+        || bad="$bad harness-tests/state.sh(같은_파일을_안가리킴)"
+
+    # 도구 안에 GitHub 호출이 들어오면 하네스가 상태를 돌려 볼 수 없게 된다
+    grep -qE '^[[:space:]]*(gh|curl) ' "$state" && bad="$bad state.sh(GitHub_호출이_들어옴)"
+
+    if [ -z "$bad" ]; then
+        ok "노드·리뷰어·하네스가 같은 상태 도구를 쓰고, 그 도구는 GitHub 를 안 부른다"
+    else
+        ng "루프 상태가 한 곳에서 관리되지 않는다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -261,6 +296,7 @@ check_review_role_shared
 check_node_contracts
 check_graph_stage_jobs
 check_loop_decision_shared
+check_state_shared
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

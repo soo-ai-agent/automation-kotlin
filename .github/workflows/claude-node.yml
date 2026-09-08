@@ -110,6 +110,8 @@ jobs:
           fi
           git show "origin/$DEF:.github/agent/stream.js" > /tmp/stream.js
           git show "origin/$DEF:.github/agent/run-claude.sh" > /tmp/run-claude.sh
+          # 루프 상태의 단일 원본 — 노드도 리뷰어도 이 도구로만 상태를 읽고 쓴다
+          git show "origin/$DEF:.github/agent/state.sh" > /tmp/state.sh
           npm install -g @anthropic-ai/claude-code
 
       - name: 작업 브랜치 준비
@@ -258,9 +260,24 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.AGENT_PAT || github.token }}
         run: |
+          # 지금까지의 상태를 읽어 이번 걸음을 얹는다. 코멘트 목록을 못 읽으면
+          # 첫 바퀴로 떨어진다 — 회신이 실패해서 작업이 죽으면 안 되기 때문이다.
+          if [ "$CONTEXT_TYPE" = "pr" ]; then
+            gh pr view "$ISSUE" --json comments --jq '.comments[].body' > /tmp/comments.txt 2>/dev/null || : > /tmp/comments.txt
+          else
+            gh issue view "$ISSUE" --json comments --jq '.comments[].body' > /tmp/comments.txt 2>/dev/null || : > /tmp/comments.txt
+          fi
+          STEP=$(bash /tmp/state.sh read < /tmp/comments.txt | sed -n 's/^step=//p')
+          bash /tmp/state.sh read < /tmp/comments.txt \
+            | bash /tmp/state.sh merge "step=$((STEP + 1))" \
+                "last_role=${NODE_LABEL:-$NODE_NAME}" "last_status=${CLAUDE_STATUS:-0}" \
+            | bash /tmp/state.sh block > /tmp/state-block.md
+
           { printf '🤖 Claude 실행 결과%s (노드: %s)\n\n' \
               "${TASK_CODE:+ [$TASK_CODE]}" "${NODE_LABEL:-$NODE_NAME}"
             tail -c 3000 /tmp/claude-out.txt 2>/dev/null || echo "(결과 없음)"
+            printf '\n'
+            cat /tmp/state-block.md
           } > /tmp/note.md
           # PR 번호는 gh issue 로 조회되지 않는다 — 리뷰 fix 루프는 gh pr 로 회신한다
           if [ "$CONTEXT_TYPE" = "pr" ]; then

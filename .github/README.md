@@ -17,8 +17,8 @@
 
 리뷰 규칙은 [common/docs/code-review/rules.md](../common/docs/code-review/rules.md) 에 있다.
 
-그래프와 루프는 모델 없이 돌려 볼 수 있다 — `bash common/harness-tests/graph.sh '<표현식>'` 로 단계 매트릭스를,
-`bash common/harness-tests/loop.sh table` 로 상황별 머지·재작업 결정을 본다.
+그래프·루프·상태는 모델 없이 돌려 볼 수 있다 — `bash common/harness-tests/graph.sh '<표현식>'` 로 단계 매트릭스를,
+`bash common/harness-tests/loop.sh table` 로 상황별 머지·재작업 결정을, `bash common/harness-tests/state.sh show` 로 상태 왕복을 본다.
 
 ## 사람이 실행하는 파일 (처음 한 번)
 

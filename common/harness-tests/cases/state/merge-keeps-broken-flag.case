@@ -1,0 +1,6 @@
+# 망가진 상태에 갱신을 얹어도 broken 은 지워지지 않는다 —
+# 덮어썼다고 해서 못 읽은 사실이 없어지지는 않는다.
+# expect: round=0 step=4 last_role=code last_status= verdict= broken=1
+# merge: step=4 last_role=code
+<!-- claude-state
+round=3
