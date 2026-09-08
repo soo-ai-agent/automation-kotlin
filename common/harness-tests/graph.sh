@@ -5,7 +5,7 @@
 #   bash common/harness-tests/graph.sh                  # 케이스 전부
 #   bash common/harness-tests/graph.sh 'api+web>e2e'    # 이 표현식 한 번 펼쳐 보기
 #
-# 두 번째 꼴이 그래프를 설계할 때 쓰는 손잡이다. 워크플로를 돌리지 않고 결과를 먼저 본다.
+# 두 번째 꼴은 그래프를 고치기 전에 결과를 미리 보는 데 쓴다. 워크플로를 돌리지 않아도 된다.
 #
 # static.sh·run.sh 와 나눈 이유:
 #   static.sh 는 "규칙이 읽히기는 하는가"(링크·경로·형식)를 보고,
@@ -35,11 +35,12 @@ expand() { # $1=그래프 표현식, $2=단일 노드 → stdout 에 s1..s4, std
     env -u GITHUB_OUTPUT CLAUDE_GRAPH="$1" CLAUDE_NODE="$2" node "$GRAPH_JS"
 }
 
-# ── 손잡이: 표현식 하나를 펼쳐 보여 준다 ─────────────────────────────
+# ── 표현식 하나를 펼쳐 보여 준다 ────────────────────────────────────
 if [ "$#" -gt 0 ]; then
     case "$1" in
         -h | --help | help)
-            sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+            # 머리말 주석을 그대로 보여 준다 — 줄 번호를 박으면 머리말이 바뀔 때 어긋난다
+            awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
             exit 0
             ;;
     esac

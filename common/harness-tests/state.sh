@@ -23,12 +23,12 @@ CASE_DIR="common/harness-tests/cases/state"
 
 [ -f "$STATE" ] || { echo "상태 스크립트가 없어요: $STATE"; exit 1; }
 
-# ── 손잡이: 왕복 한 번을 보여 준다 ──────────────────────────────────
+# ── 읽고 갱신해 다시 쓰는 과정을 한 번 보여 준다 ────────────────────
 if [ "${1:-}" = "show" ]; then
     printf '## 리뷰 코멘트\n<!-- claude-state\nround=1\nstep=3\nlast_role=code\nlast_status=0\nverdict=CHANGES_REQUESTED\nbroken=0\n-->\n' > /tmp/state-show.txt
     echo "── 코멘트에서 읽은 상태"
     bash "$STATE" read < /tmp/state-show.txt | sed 's/^/   /'
-    echo "── round 을 올리고 역할을 바꾼 뒤 다시 쓴 블록"
+    echo "── round 을 올리고 역할을 바꿔 다시 쓴 블록"
     bash "$STATE" read < /tmp/state-show.txt \
         | bash "$STATE" merge round=2 last_role=fix \
         | bash "$STATE" block | sed 's/^/   /'

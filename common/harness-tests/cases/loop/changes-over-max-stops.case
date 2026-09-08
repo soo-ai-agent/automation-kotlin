@@ -1,4 +1,4 @@
-# 상한을 이미 넘겼다 — >= 로 재는지 본다. > 로 재면 한 바퀴 더 돈다.
+# 상한을 이미 넘겼다 — >= 로 재는지 본다. > 로 재면 한 번 더 돈다.
 # expect: human-stop
 # verdict: CHANGES_REQUESTED
 # head-ref: claude/issue-42
