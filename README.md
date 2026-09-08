@@ -6,11 +6,12 @@
 
 **이 저장소의 코드와 규칙은 직접 쓴 것이다.** 밖에서 가져온 것은 셋뿐이고, 아래에 밝힌다.
 
-| 무엇 | 어디서 | 저장소의 어디 |
+| 무엇 | 어디서 (원본) | 저장소의 어디 |
 |---|---|---|
-| `claude` CLI · `.claude/` 폴더 규약 · `claude-code-action` | **Anthropic 공식** | 도구 자체(설치물)와 `.github/workflows/claude-review-compare.yml` 한 곳 |
-| `ponytail`·`ponytail-review`·`ponytail-audit`·`ponytail-debt` 스킬 4종 | DietrichGebert (MIT) | `.claude/skills/ponytail*` |
-| spec-kit — `speckit-*` 스킬 10종과 `.specify/` 설치물 | GitHub, Inc. (MIT) | 설치물이라 커밋되지 않는다. 한국어 번역만 `.specify/preset-ko/` |
+| `claude` CLI · `.claude/` 폴더 규약 | **Anthropic 공식** — <https://docs.claude.com/claude-code> | 도구 설치물. 저장소에는 규약이 정한 폴더만 있다 |
+| `claude-code-action` | **Anthropic 공식** — <https://github.com/anthropics/claude-code-action> | `.github/workflows/claude-review-compare.yml` 한 곳 (비교 실험용) |
+| `ponytail`·`ponytail-review`·`ponytail-audit`·`ponytail-debt` 스킬 4종 | DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail> | `.claude/skills/ponytail*` ([LICENSE](.claude/skills/LICENSE)) |
+| spec-kit — `speckit-*` 스킬 10종과 `.specify/` 설치물 | GitHub, Inc., MIT — <https://github.com/github/spec-kit> | 설치물이라 커밋되지 않는다. 한국어 번역만 `.specify/preset-ko/` |
 | **그 밖의 전부** — 자동화 스크립트·워크플로, 코딩 규칙 스킬 30종, 하네스, 프론트엔드 앱 | 이 저장소 자체 작성 | — |
 
 "하네스"(`tests/`)는 우리가 만든 것이다 — Anthropic 공식 도구가 아니다.

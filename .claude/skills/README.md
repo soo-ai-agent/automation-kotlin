@@ -4,8 +4,8 @@
 
 스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(8종).
 
-**출처 표시** — 아래 표의 9종 가운데 `ponytail` 계열 4종만 밖에서 가져온 것이다(DietrichGebert, MIT).
-나머지 5종과 `backend/`·`frontend/` 의 스킬 25종은 이 저장소가 쓴 것이다. 이 폴더에 함께 깔리는 `speckit-*` 10종은 spec-kit(GitHub, Inc.) 설치물이라 커밋되지 않는다.
+**출처 표시** — 아래 표의 9종 가운데 `ponytail` 계열 4종만 밖에서 가져온 것이다 (DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail>).
+나머지 5종과 `backend/`·`frontend/` 의 스킬 25종은 이 저장소가 쓴 것이다. 이 폴더에 함께 깔리는 `speckit-*` 10종은 spec-kit(GitHub, Inc., MIT — <https://github.com/github/spec-kit>) 설치물이라 커밋되지 않는다.
 자세한 것은 [docs/upstream.md](../../docs/upstream.md).
 
 이 폴더의 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 스택 스킬(`kotlin-*` · `frontend-*`)을 고른다.
