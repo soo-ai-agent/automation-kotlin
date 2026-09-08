@@ -254,7 +254,7 @@
 ### 구현
 
 - Hermes 는 저장소 스킬을 `./.agents/skills` 에서 읽는다 (`hermes skills trust` 이후).
-  그 폴더에 우리 스킬 34종을 가리키는 심볼릭 링크를 커밋해 둔다 — clone 하면 바로 붙는다.
+  그 폴더에 우리 스킬 33종을 가리키는 심볼릭 링크를 커밋해 둔다 — clone 하면 바로 붙는다.
 
 - 모델·엔드포인트는 Hermes 설정이 정한다 (`hermes model`). 저장소는 관여하지 않는다.
 
@@ -298,7 +298,7 @@
 
 ### 요구사항
 
-- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·algorithm-implementation·md-doc·api-contract), 백엔드 `backend/.claude/skills/`(kotlin-* 17종), 프론트 `frontend/.claude/skills/`(frontend-* 8종).
+- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·md-doc·api-contract), 백엔드 `backend/.claude/skills/`(kotlin-* 17종), 프론트 `frontend/.claude/skills/`(frontend-* 8종).
 
   공통 스킬은 고치는 파일의 위치와 무관하게 항상 적용되고, 영역 스킬은 위치가 정한다 (디렉터리 스코프 스킬).
 

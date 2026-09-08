@@ -54,7 +54,7 @@ claude-all     # 저장소 전체
 | `claude-fe` | 공통 + `frontend-*` | 9 + 8 |
 | `claude-all` | 공통 + `kotlin-*` + `frontend-*` | 34 전부 |
 
-**그냥 `claude` 로 열면 세션이 시작될 때 공통 9종만 붙는다.** claude 는 연 자리의 `.claude/skills/` 부터 뒤지므로
+**그냥 `claude` 로 열면 세션이 시작될 때 공통 8종만 붙는다.** claude 는 연 자리의 `.claude/skills/` 부터 뒤지므로
 루트에서 열면 `backend/`·`frontend/` 아래 스킬 25종은 목록에 없다. 그 폴더의 파일을 한 번 읽고 나면 뒤늦게 붙지만,
 그때는 **이미 규칙 없이 첫 판단을 내린 뒤**다. launcher 는 `--add-dir` 로 그 폴더를 처음부터 붙여 이 구멍을 막는다.
 
@@ -86,7 +86,7 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 는 모델을 가리지 않는다. Claude·GPT·Gemini·Qwen·DeepSeek 를 같은 방식으로 다루고,
 Ollama 같은 로컬 추론 서버도 엔드포인트로 붙인다. **로컬 모델로 이 저장소 작업을 하려면 이쪽이다.**
 
-이 저장소의 코딩 규칙은 Hermes 에서도 그대로 적용된다. `.agents/skills/` 가 우리 스킬 34종을 가리키고 있고,
+이 저장소의 코딩 규칙은 Hermes 에서도 그대로 적용된다. `.agents/skills/` 가 우리 스킬 33종을 가리키고 있고,
 Hermes 는 저장소 스킬을 `trust` 한 뒤부터 읽는다.
 
 ```bash
@@ -214,7 +214,7 @@ claude-be                 # 실제로 열어 본다
 | 3대 원칙(`core-principles`) 전문 | 명령 즉시 — `CLAUDE.md` 가 import 로 끌어온다 |
 | 리뷰 규칙 `rules.md`(MUST/SHOULD) 전문 | 명령 즉시 — 같은 import |
 | 작업 영역 지시 (backend/ 만 고친다 등) | 명령 즉시 — `claude-be`·`claude-fe` 만 |
-| 스킬의 이름·설명 (영역에 따라 26·17·34종) | 명령 즉시 — launcher 가 `--add-dir` 로 하위 스킬 폴더를 붙인다 |
+| 스킬의 이름·설명 (영역에 따라 25·16·33종) | 명령 즉시 — launcher 가 `--add-dir` 로 하위 스킬 폴더를 붙인다 |
 | 개별 스킬 **본문** | 그 작업이 시작될 때 |
 
 여기서 import 는 `CLAUDE.md` 안의 `@경로` 한 줄로, 그 파일 내용을 통째로 끌어와 함께 읽게 하는 표시다.
@@ -226,7 +226,7 @@ claude-be                 # 실제로 열어 본다
 @rules/code-review.md
 ```
 
-마지막 줄만 즉시가 아니다. 스킬이 34종이라 본문을 전부 미리 읽으면 한 번에 다룰 수 있는 분량을 넘긴다.
+마지막 줄만 즉시가 아니다. 스킬이 33종이라 본문을 전부 미리 읽으면 한 번에 다룰 수 있는 분량을 넘긴다.
 대신 목록과 설명이 항상 떠 있어서, 필요한 순간에 해당 스킬 본문이 열린다.
 
 > **확정** — `claude-be` 로 리뷰 규칙 본문(하이픈 규칙과 `/api/v1/order-items` 예시)을 도구 없이 답하는 것과,
