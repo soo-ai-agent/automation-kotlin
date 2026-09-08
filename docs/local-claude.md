@@ -81,6 +81,26 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 
 원래대로 확인 창을 받고 싶으면 launcher 대신 `claude` 를 직접 연다 — 대신 영역 스킬은 붙지 않는다.
 
+## Hermes 로 열 때 — 로컬 모델을 쓰고 싶다면
+
+[Hermes Agent](https://github.com/NousResearch/hermes-agent) 는 모델을 가리지 않는다. Claude·GPT·Gemini·Qwen·DeepSeek 를 같은 방식으로 다루고,
+Ollama 같은 로컬 추론 서버도 엔드포인트로 붙인다. **로컬 모델로 이 저장소 작업을 하려면 이쪽이다.**
+
+이 저장소의 코딩 규칙은 Hermes 에서도 그대로 적용된다. `.agents/skills/` 가 우리 스킬 33종을 가리키고 있고,
+Hermes 는 저장소 스킬을 `trust` 한 뒤부터 읽는다.
+
+```bash
+hermes skills trust            # 이 저장소를 한 번만 신뢰 등록 (clone 뒤 1회)
+hermes skills list             # 우리 스킬이 보이는지 확인
+hermes model                   # 제공자와 모델 고르기 — 여기서 로컬 엔드포인트를 지정한다
+hermes                         # 세션 시작
+```
+
+**Claude Code 쪽과 다른 점이 하나 있다.** `ccsk` 는 영역별로 스킬을 갈라 붙이지만(`ccsk be` 는 `kotlin-*` 만),
+Hermes 는 저장소 스킬을 통째로 읽는다. 사람이 직접 쓰는 세션이라 어느 영역을 고칠지 사람이 알고 있다는 전제다.
+
+**링크가 죽으면 그 규칙은 안 읽힌다.** `bash common/harness-tests/static.sh` 가 링크가 성한지 검사한다.
+
 ## 로컬에서 계획을 돌린다
 
 `ccsk` 로 세션을 열면 노드 역할이 이 세션의 서브에이전트로 올라온다. 그러면 계획 하나를 세션 안에서 끝까지 돌릴 수 있다.

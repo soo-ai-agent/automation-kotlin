@@ -473,6 +473,35 @@ check_workflow_roles() {
     fi
 }
 
+# ── ⑰ Hermes 저장소 스킬 링크가 성한가 ──────────────────────────────
+# Hermes 는 ./.agents/skills 의 저장소 스킬을 읽는다 (hermes skills trust 이후).
+# 링크가 죽으면 그 스킬은 파일이 남아 있어도 Hermes 세션에서 안 읽힌다 —
+# ③ 이 Claude Code 쪽 색인에 하는 것과 같은 검사를 이쪽에도 건다.
+#
+# speckit 링크는 대상이 설치물이라 여기서 보지 않는다.
+check_hermes_skill_links() {
+    dir=".agents/skills"
+    [ -d "$dir" ] || { ok "Hermes 저장소 스킬 없음 — 검사 건너뜀"; return; }
+    bad=""
+    for link in "$dir"/*; do
+        [ -e "$link" ] || { [ -L "$link" ] && bad="$bad $(basename "$link")(끊김)"; continue; }
+    done
+    # 우리 스킬 셋이 다 걸려 있는지 — 하나라도 빠지면 Hermes 세션이 그 규칙을 못 본다
+    for src in .claude/skills backend/.claude/skills frontend/.claude/skills; do
+        for d in "$src"/*/; do
+            n=$(basename "$d")
+            case "$n" in speckit-*) continue ;; esac
+            [ -L "$dir/$n" ] || bad="$bad ${n}(링크없음)"
+        done
+    done
+
+    if [ -z "$bad" ]; then
+        ok "Hermes 저장소 스킬 링크가 모두 살아 있고 스킬 셋을 다 덮는다"
+    else
+        ng "Hermes 저장소 스킬 링크가 어긋난다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -489,6 +518,7 @@ check_syntax
 check_dispatch_rules_shared
 check_reviewer_readonly
 check_workflow_roles
+check_hermes_skill_links
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
