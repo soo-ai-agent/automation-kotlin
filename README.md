@@ -2,6 +2,21 @@
 
 > **이 문서는 사람이 읽습니다.** 에이전트가 읽는 규칙은 [CLAUDE.md](CLAUDE.md)·[AGENTS.md](AGENTS.md) 입니다.
 
+## 출처 — 무엇이 우리 것이고 무엇이 빌려온 것인가
+
+**이 저장소의 코드와 규칙은 직접 쓴 것이다.** 밖에서 가져온 것은 셋뿐이고, 아래에 밝힌다.
+
+| 무엇 | 어디서 | 저장소의 어디 |
+|---|---|---|
+| `claude` CLI · `.claude/` 폴더 규약 · `claude-code-action` | **Anthropic 공식** | 도구 자체(설치물)와 `.github/workflows/claude-review-compare.yml` 한 곳 |
+| `ponytail`·`ponytail-review`·`ponytail-audit`·`ponytail-debt` 스킬 4종 | DietrichGebert (MIT) | `.claude/skills/ponytail*` |
+| spec-kit — `speckit-*` 스킬 10종과 `.specify/` 설치물 | GitHub, Inc. (MIT) | 설치물이라 커밋되지 않는다. 한국어 번역만 `.specify/preset-ko/` |
+| **그 밖의 전부** — 자동화 스크립트·워크플로, 코딩 규칙 스킬 30종, 하네스, 프론트엔드 앱 | 이 저장소 자체 작성 | — |
+
+"하네스"(`tests/`)는 우리가 만든 것이다 — Anthropic 공식 도구가 아니다.
+
+원본 주소·라이선스·우리가 고친 부분은 [docs/upstream.md](docs/upstream.md) 에 있다.
+
 ## 이게 무엇인가
 
 **만들 것을 글로 적어 두면, Claude 가 코드를 짜고 스스로 리뷰까지 마친 PR 을 열어 주는 저장소 템플릿**이다.

@@ -2,9 +2,25 @@
 
 > **이 문서는 사람이 읽습니다.**
 
-이 템플릿에는 밖에서 가져온 것이 둘 있다. 무엇을 가져왔고, 원본이 어디이며, 우리가 무엇을 바꿨는지 적는다.
+이 템플릿에는 밖에서 가져온 것이 셋 있다. 무엇을 가져왔고, 원본이 어디이며, 우리가 무엇을 바꿨는지 적는다.
 
 가져온 것을 고칠 때는 **원본이 따로 있다는 것을 먼저 기억한다.** 상류가 바뀌면 우리 쪽도 따라가야 하고, 우리가 고친 것은 상류로 돌아가지 않는다.
+
+## Anthropic 공식 — 도구 자체
+
+| | |
+|---|---|
+| 원본 | <https://docs.claude.com/claude-code> · <https://github.com/anthropics/claude-code-action> |
+| 라이선스 | Anthropic 이 제공하는 도구다. 코드를 저장소에 복사해 두지 않으므로 라이선스 파일도 두지 않는다 |
+| 우리 자리 | `claude` CLI(설치물) · `.claude/` 폴더 규약 · `claude-code-action`(`.github/workflows/claude-review-compare.yml` 한 곳) |
+
+**우리가 쓴 것은 그 도구가 정한 그릇의 형식이다.** `.claude/skills/`·`.claude/agents/`·`.claude/hooks/` 라는 자리와 frontmatter 형식은 Claude Code 가 정했고,
+그 안에 담긴 규칙 문서와 역할 지시문은 전부 이 저장소가 쓴 것이다.
+
+`claude-code-action` 은 **비교 실험용으로만** 쓴다. 지금 리뷰어와 같은 판정을 내는지 나란히 돌려 보는 중이고, 코멘트만 남길 뿐 아무것도 바꾸지 않는다.
+실험이 끝나면 그 워크플로는 지운다.
+
+그래프·루프·상태·머지 판단을 도는 자동화(`tests/`의 하네스 포함)는 Anthropic 것이 아니라 이 저장소에서 쓴 것이다.
 
 ## ponytail — 가장 게으른 해법을 강제하는 스킬
 
