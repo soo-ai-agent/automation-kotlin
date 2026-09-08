@@ -41,8 +41,12 @@ bash .github/agent/setup-speckit.sh
 | [workflows/claude-dispatch.yml](workflows/claude-dispatch.yml) | 디스패처 — 라벨 이슈 감지·착수, 완료 후 정리(상위 이슈 완료 보고, 이슈·PR·브랜치 청소) |
 | [workflows/claude-agent.yml](workflows/claude-agent.yml) | 진입점 — 계획의 한 단계를 돌리고, 남았으면 자기를 다시 부른다 |
 | [workflows/claude-node.yml](workflows/claude-node.yml) | 노드 하나 — 코드 작성·커밋·push, 명세/하위 이슈/PR 생성 |
-| [workflows/claude-harness.yml](workflows/claude-harness.yml) | 하네스 — 규칙 문서를 고친 PR 에서 형식 검사(공짜) 뒤 판정 회귀를 돌린다 |
+| [workflows/claude-harness.yml](workflows/claude-harness.yml) | 하네스 — 규칙 문서를 고친 PR 에서 모델 없는 검사 여섯을 먼저 돌리고 판정 회귀를 돌린다 |
 | [agent/graph.js](agent/graph.js) | `CLAUDE_GRAPH` 펼치기 (`>` 순차 · `+` 병렬 · `?` 수습) |
+| [agent/plan-stage.sh](agent/plan-stage.sh) | 계획의 이번 단계를 정한다 — 워크플로와 하네스가 **같은 파일**을 읽는다 |
+| [agent/next-role.sh](agent/next-role.sh) | 다음에 어느 역할을 부를지 — 계획·리뷰어·하네스가 **같은 파일**을 읽는다 |
+| [agent/loop-decision.sh](agent/loop-decision.sh) | 리뷰를 통과한 PR 을 머지할지 — 리뷰어와 하네스가 **같은 파일**을 읽는다 |
+| [agent/state.sh](agent/state.sh) | 루프 상태를 코멘트 안 숨은 블록으로 읽고 쓴다 |
 | [agent/dispatch.py](agent/dispatch.py) | 디스패처 본체 — `start`(이슈 착수) · `cleanup`(정리) 두 모드 |
 | [agent/run-claude.sh](agent/run-claude.sh) | 노드가 Claude 를 돌리는 부분 — 프롬프트 조립·실행·수습 |
 | [agent/stream.js](agent/stream.js) | 실행 로그 정리기 |

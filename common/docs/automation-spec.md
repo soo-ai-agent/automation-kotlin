@@ -19,7 +19,8 @@
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
 | 하네스 회귀 | `.github/workflows/claude-harness.yml` | `pull_request` 중 **규칙 문서를 건드린 것만** |
-| 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
+| 하네스 판정 케이스 | `common/harness-tests/cases/backend/`·`cases/frontend/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
+| 하네스 동작 케이스 | `cases/graph/`·`cases/loop/`·`cases/state/`·`cases/next-role/`·`cases/plan/` | 같은 워크플로 (영역과 무관 — 오케스트레이션이다) |
 | 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
 | 하네스 그래프 회귀 | `common/harness-tests/graph.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `graph.sh '<표현식>'`) |
 | 하네스 머지 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
@@ -253,7 +254,7 @@
   빠뜨리면 규칙이 바뀌어도 회귀가 돌지 않아 조용히 통과한다.
 
   노드의 실행 계약(`nodes/**`)과 그것을 적용하는 `run-claude.sh` 도 이 목록에 있다. 형식 검사가 계약의 어긋남을 잡기 때문이다.
-  대신 이 둘만 고친 PR 도 판정 회귀 7건을 함께 치른다 — 잡 하나가 검사 둘을 같이 돌리기 때문이고, 지금은 그 비용을 받아들인다.
+  대신 이 목록에 걸린 PR 은 모두 판정 회귀 7건을 함께 치른다 — 잡 하나가 검사 일곱을 순서대로 돌리기 때문이고, 지금은 그 비용을 받아들인다.
 
 - **하네스는 영역별로 갈린다** — 케이스는 `cases/backend/`·`cases/frontend/` 에 나눠 둔다.
   영역은 **어느 케이스를 돌릴지만** 고르고, CI 는 영역 구분 없이 `all` 로 전부 돌린다.

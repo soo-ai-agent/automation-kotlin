@@ -31,7 +31,7 @@ command -v node >/dev/null || { echo "node 가 필요해요"; exit 1; }
 
 # GITHUB_OUTPUT 이 있으면 graph.js 가 stdout 대신 그 파일에 쓴다 — CI 에서 빈 출력이 된다.
 # 여기서는 언제나 stdout 으로 받아야 하므로 그 변수를 지우고 부른다.
-expand() { # $1=그래프 표현식, $2=단일 노드 → stdout 에 s1..s4, stderr 는 호출자가 받는다
+expand() { # $1=그래프 표현식, $2=단일 노드 → stdout 에 stages=, stderr 는 호출자가 받는다
     env -u GITHUB_OUTPUT CLAUDE_GRAPH="$1" CLAUDE_NODE="$2" node "$GRAPH_JS"
 }
 
