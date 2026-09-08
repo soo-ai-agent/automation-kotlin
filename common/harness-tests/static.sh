@@ -87,7 +87,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env"; do
+    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -133,12 +133,52 @@ check_review_role_shared() {
     fi
 }
 
+# ── ⑦ 노드마다 실행 계약이 있고, 그것이 실제로 적용되는가 ────────────
+# 노드 파일 앞머리의 `allowed-tools:` 가 그 역할에 허용할 명령을 정한다.
+# 계약이 없으면 run-claude.sh 는 읽기 전용 git 만 준다 — 그 노드는 커밋도 검증도 못 하는데
+# 지시문은 "커밋해라"라고 말하는 상태가 된다. 조용히 어긋나기 전에 여기서 막는다.
+#
+# 파일에 계약을 적어 두는 것만으로는 부족하다 — run-claude.sh 가 그것을 읽어 쓰는지까지 본다.
+# (⑥ 에서 배운 것과 같다: 가져오기만 하고 안 쓰는 상태를 이름 검사로는 못 잡는다.)
+check_node_contracts() {
+    bad=""
+    for f in .github/agent/nodes/*.md; do
+        [ -e "$f" ] || continue
+        name=$(basename "$f")
+        if [ "$(head -n 1 "$f")" != "---" ]; then
+            bad="$bad ${name}(계약없음)"
+            continue
+        fi
+        if [ "$(grep -c '^---$' "$f")" -lt 2 ]; then
+            bad="$bad ${name}(닫는---없음)"
+            continue
+        fi
+        grep -q '^allowed-tools:' "$f" || bad="$bad ${name}(allowed-tools없음)"
+    done
+
+    runner=".github/agent/run-claude.sh"
+    # 줄 시작을 앵커로 잡는다 — 고정 문자열만 찾으면 주석 처리된 줄에도 걸려 변이를 놓친다
+    grep -qE '^[[:space:]]*apply_contract /tmp/role\.md$' "$runner" \
+        || bad="$bad run-claude.sh(계약을_안읽음)"
+    grep -qE '^[[:space:]]*apply_contract /tmp/rescue-role\.md$' "$runner" \
+        || bad="$bad run-claude.sh(수습노드에_계약을_안읽음)"
+    # 패턴이 -- 로 시작해 grep 이 옵션으로 먹는다 — 인자 끝 표시를 붙인다
+    grep -qF -e '--allowedTools "$ALLOWED"' "$runner" || bad="$bad run-claude.sh(계약을_CLI에_안넘김)"
+
+    if [ -z "$bad" ]; then
+        ok "노드마다 실행 계약이 있고 run-claude.sh 가 그것을 적용한다"
+    else
+        ng "노드 실행 계약이 없거나 적용되지 않는다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
 check_harness_paths_filter
 check_rules_path_agreement
 check_review_role_shared
+check_node_contracts
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

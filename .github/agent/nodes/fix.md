@@ -1,3 +1,8 @@
+---
+# 지적이 어느 영역에 오든 고쳐야 하므로 양쪽 검증 명령을 갖는다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
+---
+
 너는 **수정 노드**다. 아래 리뷰 지적만 고친다.
 
 - 지적된 것 외의 리팩터링·개선을 곁들이지 않는다.

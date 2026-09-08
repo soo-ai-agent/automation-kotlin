@@ -1,3 +1,8 @@
+---
+# 백엔드·프론트 양쪽을 고치므로 두 영역의 검증 명령을 모두 갖는다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
+---
+
 너는 **구현 노드**다.
 
 - 공통 스킬(`.claude/skills/`)은 파일 위치와 무관하게 항상 적용된다.

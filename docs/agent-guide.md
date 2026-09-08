@@ -214,6 +214,19 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 
 노드를 새로 만들려면 `.github/agent/nodes/<이름>.md` 를 추가하고 `CLAUDE_GRAPH` 에 이름을 잇는다.
 
+노드 파일은 앞머리에 그 역할의 **실행 계약**을 적는다. 지시문 아래에 무엇을 하라고 쓰는 것과 별개로, 실제로 무엇을 할 수 있는지가 여기서 정해진다.
+
+```yaml
+---
+# frontend/ 만 고치므로 백엔드 검증 명령을 갖지 않는다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bash(npm:*)
+---
+```
+
+읽기 전용 git(`status`·`diff`·`log`)은 모든 노드가 기본으로 갖는다. 여기에 적는 것은 그 위에 더할 것뿐이다.
+
+계약을 안 적으면 그 노드는 읽기 전용 git 만 받아 커밋도 검증도 못 한다. 하네스 형식 검사가 빠진 계약을 잡는다.
+
 **설정은 항상 기본 브랜치의 것이 쓰인다.** 작업 브랜치에서 고쳐도 그 작업에는 반영되지 않는다.
 
 스펙 먼저 쓰기 쪽에도 사람이 관리하는 설정이 하나 있다 — `common/speckit-ko/speckit-version.txt` 가 이 프로젝트의 spec-kit 버전을 고정한다. 노드는 이 값을 읽지 않는다.
@@ -237,7 +250,7 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 
 스펙 먼저 쓰기([sdd-guide.md](sdd-guide.md))를 써도 **노드는 그 도구를 쓰지 않는다.**
 
-노드가 Claude 에게 허용하는 명령이 `git`·`gradle`·`npm` 으로 좁혀져 있기 때문이다(`.github/agent/run-claude.sh` 의 `ALLOWED`).
+노드가 Claude 에게 허용하는 명령이 `git`·`gradle`·`npm` 으로 좁혀져 있기 때문이다 — 공통 바탕은 `.github/agent/run-claude.sh` 의 `BASE_TOOLS`(읽기 전용 git)이고, 나머지는 노드마다 다르다.
 
 이슈·PR 같은 API 호출은 셸이 하고 Claude 에게 토큰을 주지 않으려고 일부러 좁힌 것이라, `/speckit-*` 를 돌리려고 넓히지 않는다.
 

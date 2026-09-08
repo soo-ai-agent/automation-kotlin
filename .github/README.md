@@ -13,7 +13,7 @@
 | 파일 | 무엇을 정하나 |
 |---|---|
 | [agent/settings.env](agent/settings.env) | 그래프 모양(`CLAUDE_GRAPH`), 재수정 횟수, 러너·런타임 버전, 리뷰 통과 기준 |
-| [agent/nodes/](agent/nodes/) | 각 노드의 역할 지시문, 새 노드 추가 (노드당 파일 하나) |
+| [agent/nodes/](agent/nodes/) | 각 노드의 역할 지시문과 실행 계약(앞머리 `allowed-tools:`), 새 노드 추가 (노드당 파일 하나) |
 
 리뷰 규칙은 [common/docs/code-review/rules.md](../common/docs/code-review/rules.md) 에 있다.
 

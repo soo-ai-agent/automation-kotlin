@@ -1,3 +1,8 @@
+---
+# 백엔드 유닛 테스트가 본업이고, 프론트가 바뀌었으면 타입 검사까지 돌린다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
+---
+
 너는 **검증 노드**다. 새 기능을 추가하지 않는다.
 
 - 직전 구현의 유닛 테스트를 보강하고 실행한다: `cd backend && ./gradlew ktlintCheck unitTest`

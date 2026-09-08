@@ -22,7 +22,7 @@
 | 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
 | 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
 | 설정 | `.github/agent/settings.env` | — |
-| 노드 지시문 | `.github/agent/nodes/<이름>.md` | — |
+| 노드 지시문·실행 계약 | `.github/agent/nodes/<이름>.md` | 앞머리 `---` 블록이 그 역할에 허용할 명령을 정한다 |
 | 리뷰어 역할 지시문 | `.github/agent/review-role.md` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 서버 세팅 | `.github/agent/setup-agent.sh` | 사용자가 1회 실행 |
 
@@ -125,6 +125,14 @@
 
   `--allowedTools` 는 git 과 gradle/npm 검증 명령만 허용한다.
 
+- **허용 명령은 역할마다 다르고, 그 역할의 노드 파일이 정한다.** `run-claude.sh` 의 `BASE_TOOLS` 는 모든 노드가 갖는 읽기 전용 git 뿐이고,
+  커밋·빌드 명령은 `nodes/<이름>.md` 앞머리 `allowed-tools:` 가 얹는다. 여기에 공통으로 더하면 역할 분리가 도로 무너진다.
+
+  계약이 없는 역할은 읽기 전용 git 만 받는다 — 모르는 역할에 권한을 주는 쪽이 아니라 **막는 쪽**으로 떨어져야 한다.
+
+  커밋 지시문도 계약에서 파생된다: `git commit` 권한이 없는 역할에게는 `build_prompt` 가 "커밋하지 마라"를 대신 붙인다.
+  시켜 놓고 못 하게 하면 그 자리에서 막히므로, 두 곳에 따로 적지 않고 한쪽에서 끌어낸다.
+
 - `.claude-split/`·`.claude-spec.md` 는 커밋되면 안 된다 — 처리 step 이 파일을 지우는 순서를 `남은 변경 커밋` step **앞**으로 유지할 것.
 
 - 하위 이슈 라벨은 `claude,claude-made` 둘 다여야 한다 — `claude` 가 빠지면 착수가 안 되고, `claude-made` 가 빠지면 자동 머지가 안 된다.
@@ -222,6 +230,9 @@
 
 - 하네스의 `paths` 필터는 **규칙을 담은 파일 목록**이다 — 규칙 문서를 새 경로에 만들면 이 목록에 더할 것.
   빠뜨리면 규칙이 바뀌어도 회귀가 돌지 않아 조용히 통과한다.
+
+  노드의 실행 계약(`nodes/**`)과 그것을 적용하는 `run-claude.sh` 도 이 목록에 있다. 형식 검사가 계약의 어긋남을 잡기 때문이다.
+  대신 이 둘만 고친 PR 도 판정 회귀 7건을 함께 치른다 — 잡 하나가 검사 둘을 같이 돌리기 때문이고, 지금은 그 비용을 받아들인다.
 
 - **하네스는 영역별로 갈린다** — 케이스는 `cases/backend/`·`cases/frontend/` 에 나눠 둔다.
   영역은 **어느 케이스를 돌릴지만** 고르고, CI 는 영역 구분 없이 `all` 로 전부 돌린다.

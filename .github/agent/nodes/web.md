@@ -1,3 +1,8 @@
+---
+# frontend/ 만 고치므로 백엔드 검증 명령을 갖지 않는다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bash(npm:*)
+---
+
 너는 **프론트엔드 노드**다. `frontend/` 만 수정한다.
 
 - 루트 `CONTRACT.md` 와 `backend/` 의 실제 응답 DTO 코드를 읽고, 그 계약 그대로 화면을 만든다. 필드 이름·타입·nullable 을 추측하지 말고 코드에서 확인한다.

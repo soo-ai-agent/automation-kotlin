@@ -27,6 +27,11 @@ on:
       # 리뷰어의 역할 지시문과 통과 기준도 판정 기준이다 — 고치면 판정이 흔들린다
       - ".github/agent/review-role.md"
       - ".github/agent/settings.env"
+      # 노드의 실행 계약(allowed-tools)과 그것을 적용하는 실행기도 규칙이다 —
+      # 계약이 빠지면 그 노드는 읽기 전용 git 만 받고, 지시문과 권한이 어긋난 채 돈다.
+      # 형식 검사(①)가 이 어긋남을 잡으므로 여기 두 경로가 목록에 있어야 한다.
+      - ".github/agent/nodes/**"
+      - ".github/agent/run-claude.sh"
 
 permissions:
   contents: read

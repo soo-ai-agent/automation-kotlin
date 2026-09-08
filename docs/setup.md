@@ -156,7 +156,7 @@ git add common/speckit-ko/speckit-version.txt && git commit -m "chore:spec-kit �
 | 파일 | 바꿀 수 있는 것 |
 |---|---|
 | `.github/agent/settings.env` | 그래프 모양(`CLAUDE_GRAPH`), 재수정 횟수, 러너·런타임 버전, 리뷰 통과 기준 |
-| `.github/agent/nodes/<이름>.md` | 노드별 역할 지시문, 새 노드 추가 |
+| `.github/agent/nodes/<이름>.md` | 노드별 역할 지시문과 허용 명령(앞머리 `allowed-tools:`), 새 노드 추가 |
 | `common/docs/code-review/rules.md` | 리뷰 규칙 — MUST(머지 차단) / SHOULD(참고 코멘트) |
 | `.claude/skills/` (공통) · `backend/.claude/skills/` · `frontend/.claude/skills/` | 코딩 규칙 — 일꾼과 리뷰어가 자동으로 읽는다 |
 

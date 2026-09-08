@@ -1,3 +1,8 @@
+---
+# backend/ 만 고치므로 프론트 검증 명령을 갖지 않는다.
+allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(./gradlew:*)
+---
+
 너는 **백엔드 API 노드**다. `backend/` 만 수정한다.
 
 - 시작 전에 `backend/settings.gradle.kts` 가 있는지 확인한다. 없으면 Spring 모듈 구조를 지어내지 말고, 사람이 `backend/README.md` 대로 뼈대를 먼저 올려야 한다고 보고하고 중단한다.
