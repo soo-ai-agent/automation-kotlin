@@ -137,6 +137,14 @@ check_review_role_shared() {
         || missing="$missing run.sh(역할파일을_안가리킴)"
     grep -qF 'cat "$ROLE_FILE"' common/harness-tests/run.sh \
         || missing="$missing run.sh(역할파일을_프롬프트로_안넘김)"
+    # 비교용 워크플로가 있는 동안에는 그것도 같은 역할 파일을 읽어야 한다 —
+    # 자기 프롬프트를 따로 쓰면 무엇을 비교하는지 알 수 없게 된다.
+    # 비교가 끝나 파일을 지우면 이 검사도 함께 사라진다.
+    compare=".github/workflows/claude-review-compare.yml"
+    if [ -f "$compare" ]; then
+        grep -qF "origin/\$BASE_REF:.github/agent/review-role.md" "$compare" \
+            || missing="$missing claude-review-compare.yml(역할파일을_안읽음)"
+    fi
     if [ -z "$missing" ]; then
         ok "실제 리뷰어와 하네스가 같은 역할 지시문을 읽는다"
     else

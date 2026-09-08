@@ -1,0 +1,82 @@
+# 🔬 비교용 — 공식 액션(anthropics/claude-code-action)이 지금 리뷰어와 같은 판정을 내는지 본다.
+#
+# **이 워크플로는 아무것도 바꾸지 않는다.** 코멘트만 남긴다 — 머지도 재작업 호출도 하지 않고,
+# 도구도 읽기만 허용한다. 지금 리뷰어(claude-review.yml)는 그대로 돌고, 이것이 나란히 돈다.
+#
+# 왜 비교하나: 리뷰 → 수정 루프는 공식 액션이 기본으로 제공한다. 그것으로 바꾸면
+# claude-review.yml 192줄이 사라진다. 다만 우리 리뷰어는 셋을 더 한다 —
+# 영역 스킬 25종을 물리고, 자동 머지 게이트를 걸고, 판정을 하네스로 잰다.
+# 바꿔도 되는지는 **같은 케이스에서 같은 판정이 나오는가**로 정한다.
+#
+# 판정 기준을 여기 새로 쓰지 않는다. 지금 리뷰어와 하네스가 읽는 것을 그대로 읽는다 —
+# review-role.md · 리뷰 규칙 전문 · CLAUDE_REVIEW_BAR. 여기서 프롬프트를 따로 쓰면
+# 무엇을 비교하는지 알 수 없게 된다 (같은 실수를 하네스에서 이미 한 번 했다).
+#
+# 끝나면 지우는 워크플로다. 남겨 두면 PR 마다 리뷰 코멘트가 두 개씩 달린다.
+name: claude-review-compare
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 판정 기준 모으기
+        run: |
+          set -e
+          git fetch origin "$BASE_REF"
+          # 지금 리뷰어와 같은 곳에서 꺼낸다 — PR 이 자기 심사 기준을 바꾸지 못하게
+          git show "origin/$BASE_REF:.github/agent/settings.env" > /tmp/settings.env
+          git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md
+          . /tmp/settings.env
+
+          git diff "origin/$BASE_REF...HEAD" | head -c "$CLAUDE_DIFF_LIMIT_BYTES" > /tmp/diff.patch
+          if [ ! -s /tmp/diff.patch ]; then
+            echo "diff 없음 — 비교 생략"; echo "SKIP=true" >> "$GITHUB_ENV"; exit 0
+          fi
+
+          # 공식 액션은 prompt 하나만 받는다 (stdin 이 없다). 지금 리뷰어가 역할은 프롬프트로,
+          # 나머지는 stdin 으로 주는 것과 담는 자리만 다르고 내용은 같다.
+          {
+            cat /tmp/review-role.md
+            printf '\n\n## 리뷰 규칙\n\n'
+            find "$CLAUDE_REVIEW_RULES_DIR" -name '*.md' -type f -print0 | sort -z | xargs -0 -r cat
+            printf '\n\n## 통과 기준\n\n%s\n' "$CLAUDE_REVIEW_BAR"
+            printf '\n\n## DIFF\n\n'
+            cat /tmp/diff.patch
+          } > /tmp/prompt.txt
+
+          {
+            echo 'PROMPT<<PROMPTEOF'
+            cat /tmp/prompt.txt
+            echo 'PROMPTEOF'
+          } >> "$GITHUB_ENV"
+
+      - name: 공식 액션으로 판정
+        if: env.SKIP != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          prompt: ${{ env.PROMPT }}
+          # --add-dir 이 없으면 kotlin-*·frontend-* 가 세션 스킬 목록에 안 오른다
+          # (실측: 없이 0개, 붙이면 17개·8개). 비교의 핵심이 이 플래그가 통하는지다.
+          #
+          # 읽기 도구만 준다 — 이 워크플로는 코드를 고치지 않는다.
+          claude_args: >-
+            --add-dir backend --add-dir frontend
+            --allowedTools Read,Grep,Glob
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

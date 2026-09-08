@@ -52,6 +52,7 @@ bash .github/agent/setup-speckit.sh
 | [workflows/claude-review.yml](workflows/claude-review.yml) | 리뷰어 — PR diff 판정, 자동 머지, 재작업 트리거 |
 | [agent/review-role.md](agent/review-role.md) | 리뷰어 역할 지시문 — 위 리뷰어와 하네스가 **같은 파일**을 읽는다 |
 | [workflows/deploy.yml](workflows/deploy.yml) | main 머지 시 빌드·배포 ([docs/deploy.md](../docs/deploy.md)) |
+| [workflows/claude-review-compare.yml](workflows/claude-review-compare.yml) | **🔬 시험 중, 끝나면 지운다** — 공식 액션이 지금 리뷰어와 같은 판정을 내는지 나란히 돌려 본다. 코멘트만 남기고 아무것도 바꾸지 않는다 |
 
 ---
 
