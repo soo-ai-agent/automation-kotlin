@@ -1,0 +1,10 @@
+# 라운드를 다 썼어도 통과했으면 끝난 것이다 — 상한은 일을 더 시키지 않으려는 것이고,
+# 통과는 시킬 일이 없다는 뜻이라 상한에 걸릴 이유가 없다.
+# expect: done
+# verdict: PASS
+# rounds: 3
+# max-rounds: 3
+# has-pat: true
+# step: 1
+# max-steps: 12
+# broken: 0

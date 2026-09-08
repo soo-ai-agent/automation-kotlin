@@ -1,0 +1,9 @@
+# 라운드 상한이 실행 횟수 상한보다 앞선다 — 이유를 사람에게 정확히 알려야 한다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# rounds: 3
+# max-rounds: 3
+# has-pat: true
+# step: 99
+# max-steps: 12
+# broken: 0

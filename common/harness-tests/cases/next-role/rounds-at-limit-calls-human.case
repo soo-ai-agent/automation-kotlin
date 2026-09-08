@@ -1,0 +1,9 @@
+# 같은 PR 을 상한만큼 다시 봤다 — 더 고치라고 시키지 않고 사람을 부른다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# rounds: 3
+# max-rounds: 3
+# has-pat: true
+# step: 1
+# max-steps: 12
+# broken: 0

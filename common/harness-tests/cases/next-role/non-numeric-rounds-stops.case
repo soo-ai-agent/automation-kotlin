@@ -1,9 +1,9 @@
-# 상한을 이미 넘겼다.
+# 라운드를 숫자로 못 읽는다 — 비교할 수 없으면 멈춘다.
 # expect: human
 # verdict: CHANGES_REQUESTED
-# step: 15
-# rounds: 0
+# rounds: 많이
 # max-rounds: 3
 # has-pat: true
+# step: 1
 # max-steps: 12
 # broken: 0

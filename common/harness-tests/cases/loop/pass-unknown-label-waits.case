@@ -3,6 +3,3 @@
 # verdict: PASS
 # head-ref: claude/issue-42
 # agent-made: unknown
-# rounds: 1
-# max-rounds: 3
-# has-pat: true

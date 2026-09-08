@@ -240,14 +240,14 @@ check_loop_decision_shared() {
     [ -f "$decide" ] || bad="$bad $decide(없음)"
     grep -qF "origin/\$BASE_REF:.github/agent/loop-decision.sh" "$wf" \
         || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
-    grep -qE '^[[:space:]]*DECISION=.*bash /tmp/loop-decision\.sh' "$wf" \
-        || bad="$bad claude-review.yml(결정을_스크립트에_안물음)"
+    grep -qE '^[[:space:]]*MERGE=' "$wf" \
+        || bad="$bad claude-review.yml(머지_결정을_스크립트에_안물음)"
     grep -qF 'DECIDE=".github/agent/loop-decision.sh"' common/harness-tests/loop.sh \
         || bad="$bad harness-tests/loop.sh(같은_파일을_안가리킴)"
 
     # 물어보고 답을 버리면 판단이 되돌아간 것과 같다 — 결정대로 실행하는지까지 본다
-    grep -qF 'case "$DECISION" in' "$wf" \
-        || bad="$bad claude-review.yml(결정대로_실행하지_않음)"
+    grep -qF 'case "$MERGE" in' "$wf" \
+        || bad="$bad claude-review.yml(머지_결정대로_실행하지_않음)"
 
     if [ -z "$bad" ]; then
         ok "실제 리뷰어와 하네스가 같은 루프 판단 스크립트를 쓴다"
@@ -287,19 +287,25 @@ check_state_shared() {
     fi
 }
 
-# ── ⑪ 전이 규칙이 값만 받는 스크립트로 서 있는가 ─────────────────────
-# 다음 역할을 고르는 규칙은 아직 아무도 부르지 않는다 — 리뷰어는 여전히 fix 를 이름으로 박는다.
-# 그래도 지금부터 검사한다. 규칙이 워크플로 셸로 들어가 버리면 하네스가 못 재고,
-# 그 상태로 부르는 쪽만 옮기면 전이 규칙에는 테스트가 없는 채로 굳는다.
-#
-# 부르는 쪽까지 검사하는 것은 리뷰어를 옮기는 다음 단계의 몫이다.
+# ── ⑪ 전이 규칙을 리뷰어와 하네스가 같은 파일로 쓰는가 ────────────────
+# 리뷰어는 역할 이름을 상수로 박지 않고 이 규칙에 물어봐야 한다. 되돌아가면
+# 상황을 볼 자리가 다시 사라지고, 하네스가 아무리 통과해도 실제 루프는 그대로다.
 check_next_role_testable() {
     next=".github/agent/next-role.sh"
+    wf=".github/workflows/claude-review.yml"
     bad=""
     [ -f "$next" ] || bad="$bad $next(없음)"
     grep -qF 'NEXT=".github/agent/next-role.sh"' common/harness-tests/next-role.sh \
         || bad="$bad harness-tests/next-role.sh(같은_파일을_안가리킴)"
     grep -qE '^[[:space:]]*(gh|curl|git) ' "$next" && bad="$bad next-role.sh(바깥을_부름)"
+
+    grep -qF "origin/\$BASE_REF:.github/agent/next-role.sh" "$wf" \
+        || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
+    grep -qE '^[[:space:]]*ROLE=' "$wf" || bad="$bad claude-review.yml(역할을_안물음)"
+    grep -qF 'case "$ROLE" in' "$wf" || bad="$bad claude-review.yml(역할대로_실행하지_않음)"
+    # 역할 이름을 상수로 박아 두면 규칙에 물어본 답이 버려진다
+    grep -qE 'node="(fix|code|plan|split|test|e2e|api|web)"' "$wf" \
+        && bad="$bad claude-review.yml(역할_이름이_상수로_박힘)"
 
     # 규칙이 늘어도 낼 수 있는 값은 셋뿐이다 — done · human · 역할 이름.
     # 역할 이름을 내놓으려면 그 역할 파일이 있어야 한다.

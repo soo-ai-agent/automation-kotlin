@@ -1,8 +1,0 @@
-# 사람이 올린 PR 이라도 지적이 있으면 재작업한다 — 머지 게이트와 재작업 게이트는 별개다.
-# expect: fix
-# verdict: CHANGES_REQUESTED
-# head-ref: feat/hand-written
-# agent-made: false
-# rounds: 0
-# max-rounds: 3
-# has-pat: true

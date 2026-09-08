@@ -1,0 +1,9 @@
+# PAT 이 없어도 통과했으면 끝난 것이다 — 루프가 꺼진 것과 일이 끝난 것은 다르다.
+# expect: done
+# verdict: PASS
+# rounds: 0
+# max-rounds: 3
+# has-pat: false
+# step: 1
+# max-steps: 12
+# broken: 0

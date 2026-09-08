@@ -2,5 +2,8 @@
 # expect: fix
 # verdict: CHANGES_REQUESTED
 # step: 3
+# rounds: 0
+# max-rounds: 3
+# has-pat: true
 # max-steps: 12
 # broken: 0

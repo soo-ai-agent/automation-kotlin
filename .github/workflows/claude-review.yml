@@ -57,9 +57,12 @@ jobs:
           git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh
           # 루프 상태의 단일 원본 — 노드도 리뷰어도 이 도구로만 상태를 읽고 쓴다
           git show "origin/$BASE_REF:.github/agent/state.sh" > /tmp/state.sh
+          # 다음에 어느 역할을 부를지 정하는 규칙 — 이것도 기준 브랜치 것을 쓴다
+          git show "origin/$BASE_REF:.github/agent/next-role.sh" > /tmp/next-role.sh
           . /tmp/settings.env
           {
             echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
+            echo "MAX_STEPS=$CLAUDE_MAX_STEPS"
             echo "RULES_DIR=$CLAUDE_REVIEW_RULES_DIR"
             echo "DIFF_LIMIT=$CLAUDE_DIFF_LIMIT_BYTES"
             echo 'REVIEW_BAR<<BAREOF'
@@ -156,9 +159,10 @@ jobs:
           } > /tmp/note.md
           gh pr comment "$PR" --body-file /tmp/note.md
 
-      # 무엇을 할지는 /tmp/loop-decision.sh 가 정하고, 여기서는 그대로 실행만 한다.
-      # 판단을 이 셸에 되돌려 놓으면 하네스가 루프를 돌려 볼 수 없게 된다
-      # (common/harness-tests/loop.sh — 상황 10건을 모델도 PR 도 없이 잰다).
+      # 판단은 둘 다 /tmp 의 스크립트가 하고, 여기서는 그대로 실행만 한다.
+      #   머지할까      → loop-decision.sh  (하네스: common/harness-tests/loop.sh)
+      #   다음에 무엇을 → next-role.sh      (하네스: common/harness-tests/next-role.sh)
+      # 판단을 이 셸에 되돌려 놓으면 하네스가 루프를 돌려 볼 수 없게 된다.
       - name: 루프 결정과 실행
         if: env.SKIP != 'true'
         run: |
@@ -166,16 +170,24 @@ jobs:
           if head -n 1 /tmp/review.md | grep -q "PASS"; then VERDICT=PASS; else VERDICT=CHANGES_REQUESTED; fi
 
           # 브랜치명 해석은 스크립트가 한다 — 여기서 또 하면 두 곳이 어긋난다
-          N=$(VERDICT="$VERDICT" bash /tmp/loop-decision.sh issue)
+          N=$(HEAD_REF="$HEAD_REF" bash /tmp/loop-decision.sh issue)
           AGENT_MADE=unknown
           if [ -n "$N" ] && LABELS=$(gh issue view "$N" --json labels --jq '.labels[].name' 2>/dev/null); then
             if printf '%s\n' "$LABELS" | grep -qx "claude-made"; then AGENT_MADE=true; else AGENT_MADE=false; fi
           fi
 
-          DECISION=$(VERDICT="$VERDICT" AGENT_MADE="$AGENT_MADE" bash /tmp/loop-decision.sh)
-          echo "루프 결정: $DECISION (판정=$VERDICT 라벨=$AGENT_MADE 라운드=$ROUNDS/$MAX_ROUNDS)"
+          # 루프 상태에서 실행 횟수를 읽는다. 코멘트는 '코멘트 게시' step 이 이미 받아 뒀다.
+          STEP=$(bash /tmp/state.sh read < /tmp/comments.txt | sed -n 's/^step=//p')
+          BROKEN=$(bash /tmp/state.sh read < /tmp/comments.txt | sed -n 's/^broken=//p')
 
-          case "$DECISION" in
+          MERGE=$(VERDICT="$VERDICT" HEAD_REF="$HEAD_REF" AGENT_MADE="$AGENT_MADE" \
+                    bash /tmp/loop-decision.sh)
+          ROLE=$(VERDICT="$VERDICT" ROUNDS="$ROUNDS" MAX_ROUNDS="$MAX_ROUNDS" \
+                 STEP="$STEP" MAX_STEPS="$MAX_STEPS" BROKEN="$BROKEN" HAS_PAT="$HAS_PAT" \
+                    bash /tmp/next-role.sh 2>/tmp/why.txt)
+          echo "머지: $MERGE · 다음 역할: $ROLE (판정=$VERDICT 라벨=$AGENT_MADE 라운드=$ROUNDS/$MAX_ROUNDS 실행=$STEP/$MAX_STEPS)"
+
+          case "$MERGE" in
             merge)
               if gh pr merge "$PR" --squash --delete-branch; then
                 echo "자동 머지 완료"
@@ -187,22 +199,28 @@ jobs:
             human-merge)
               echo "머지는 사람 몫 (이슈 기반이 아니거나, 사람이 올린 이슈이거나, 판별 불가)"
               ;;
-            fix)
+            no-merge) ;;
+            *) echo "모르는 머지 결정: $MERGE"; exit 1 ;;
+          esac
+
+          case "$ROLE" in
+            done)
+              echo "더 부를 역할 없음"
+              ;;
+            human)
+              # 멈춘 이유는 규칙이 stderr 로 알려준다 — 여기서 짐작해 지어내지 않는다
+              gh pr comment "$PR" --body "⚠️ $(cat /tmp/why.txt) 사람이 확인해 주세요."
+              ;;
+            loop-off)
+              echo "$(cat /tmp/why.txt) (GITHUB_TOKEN 은 다른 워크플로를 깨우지 못한다)"
+              ;;
+            *)
               gh workflow run claude-agent.yml \
                 -f prompt="$(cat /tmp/review.md)" \
-                -f node="fix" \
+                -f node="$ROLE" \
                 -f branch="$HEAD_REF" \
                 -f issue="$PR" \
                 -f context_type="pr"
-              echo "재작업 트리거됨 (라운드 $ROUNDS)"
-              ;;
-            human-stop)
-              gh pr comment "$PR" --body "⚠️ 리뷰 ${ROUNDS}회 후에도 지적이 남아 자동 재작업을 멈춰요. 사람이 확인해 주세요."
-              ;;
-            loop-off)
-              echo "AGENT_PAT 없음 — 재작업 루프 꺼짐 (GITHUB_TOKEN 은 다른 워크플로를 깨우지 못한다)"
-              ;;
-            *)
-              echo "모르는 결정: $DECISION"; exit 1
+              echo "재작업 트리거됨 — 역할 $ROLE (라운드 $ROUNDS)"
               ;;
           esac

@@ -2,5 +2,8 @@
 # expect: human
 # verdict: CHANGES_REQUESTED
 # step: 0
+# rounds: 0
+# max-rounds: 3
+# has-pat: true
 # max-steps: 0
 # broken: 0

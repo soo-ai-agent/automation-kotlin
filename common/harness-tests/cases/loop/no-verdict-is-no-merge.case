@@ -1,0 +1,5 @@
+# 판정이 없다 — 통과를 확인하지 못했으므로 머지하지 않는다.
+# expect: no-merge
+# verdict:
+# head-ref: claude/issue-42
+# agent-made: true

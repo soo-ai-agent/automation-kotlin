@@ -22,10 +22,10 @@
 | 하네스 케이스 | `common/harness-tests/cases/<영역>/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
 | 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
 | 하네스 그래프 회귀 | `common/harness-tests/graph.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `graph.sh '<표현식>'`) |
-| 하네스 루프 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
-| 루프 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
+| 하네스 머지 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
+| 머지 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 루프 상태 | `.github/agent/state.sh` | 노드·리뷰어·하네스가 **같은 도구**로 읽고 씀 |
-| 전이 규칙 | `.github/agent/next-role.sh` | 리뷰 뒤 어느 역할을 부를지 — **아직 아무도 안 부름** |
+| 전이 규칙 | `.github/agent/next-role.sh` | 리뷰 뒤 어느 역할을 부를지 — 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 하네스 전이 회귀 | `common/harness-tests/next-role.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `next-role.sh table`) |
 | 하네스 상태 회귀 | `common/harness-tests/state.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `state.sh show`) |
 | 설정 | `.github/agent/settings.env` | — |
@@ -260,21 +260,25 @@
   | 순서 | 상황 | 결과 |
   |---|---|---|
   | ① | 상태를 못 읽음(`broken=1`) | `human` |
-  | ② | 실행 횟수가 숫자가 아님 | `human` |
+  | ② | 횟수가 숫자가 아님 | `human` |
   | ③ | 통과(`PASS`) | `done` |
-  | ④ | 실행 횟수가 `CLAUDE_MAX_STEPS` 이상 | `human` |
-  | ⑤ | 지적 남음(`CHANGES_REQUESTED`) | `fix` |
-  | ⑥ | 판정이 없거나 모르는 값 | `human` |
+  | ④ | 라운드가 `CLAUDE_MAX_ROUNDS` 이상 | `human` |
+  | ⑤ | 실행 횟수가 `CLAUDE_MAX_STEPS` 이상 | `human` |
+  | ⑥ | `AGENT_PAT` 없음 | `loop-off` |
+  | ⑦ | 지적 남음(`CHANGES_REQUESTED`) | `fix` |
+  | ⑧ | 판정이 없거나 모르는 값 | `human` |
 
-  **③ 을 ④ 보다 앞에 두는 것이 중요하다.** 상한은 일을 더 시키지 않으려는 것이고 통과는 시킬 일이 없다는 뜻이라,
-  순서를 뒤집으면 상한에 닿은 순간 통과한 PR 까지 사람을 부르며 막힌다.
+  **③ 을 ④⑤⑥ 보다 앞에 두는 것이 중요하다.** 상한과 PAT 은 일을 더 시킬 수 있는지를 재는 것이고
+  통과는 시킬 일이 없다는 뜻이라, 순서를 뒤집으면 통과한 PR 까지 사람을 부르며 막힌다.
 
-  `CLAUDE_MAX_STEPS` 는 `CLAUDE_MAX_ROUNDS` 와 다른 상한이다 — 저쪽은 같은 PR 을 몇 번 다시 보는지,
+  `CLAUDE_MAX_ROUNDS` 와 `CLAUDE_MAX_STEPS` 는 다른 상한이다 — 저쪽은 같은 PR 을 몇 번 다시 보는지,
   이쪽은 작업 하나에서 노드가 통틀어 몇 번 도는지다.
 
-  **아직 아무도 이 규칙을 부르지 않는다.** 리뷰어는 여전히 `fix` 를 이름으로 박아 부른다(`claude-review.yml` 의 `-f node="fix"`).
-  부르는 쪽을 옮기는 것은 다음 단계다. 그래도 지금부터 검사하는 이유는, 규칙이 워크플로 셸로 들어가 버리면
-  하네스가 못 재고 그 상태로 굳기 때문이다.
+  **왜 그렇게 정했는지는 stdout 이 아니라 stderr 로 낸다.** stdout 은 대조할 수 있게 한 단어로 두고,
+  사람에게 남길 말은 따로 보낸다 — 리뷰어가 이유를 짐작해 지어내지 않게.
+
+  **두 판단의 경계를 지킬 것.** `loop-decision.sh` 는 머지만, `next-role.sh` 는 다음에 무엇을 돌릴지만 정한다.
+  "계속할까"를 양쪽에서 재면 상한 하나를 바꿀 때 두 군데를 고쳐야 한다.
 
 - **루프 상태는 이슈·PR 코멘트 안의 숨은 블록에 있다.** 노드가 실행 횟수와 마지막 역할·결과를,
   리뷰어가 라운드와 판정을 얹는다. 코멘트가 쌓이면 블록도 쌓이고, **가장 나중 블록이 지금 상태**다.
