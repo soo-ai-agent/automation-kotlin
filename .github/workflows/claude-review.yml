@@ -47,20 +47,32 @@ jobs:
         run: |
           set -e
           git fetch origin "$BASE_REF"
-          # 설정·도구는 항상 기본 브랜치 것 — PR 브랜치가 리뷰 기준을 바꾸지 못하게
-          git show "origin/$BASE_REF:.github/agent/settings.env" > /tmp/settings.env
-          git show "origin/$BASE_REF:.github/agent/stream.js" > /tmp/stream.js
+          # 설정·도구는 항상 기본 브랜치 것 — PR 브랜치가 리뷰 기준을 바꾸지 못하게.
+          #
+          # 각 줄의 || 폴백: 그 파일을 **처음 들여오는 PR** 에서는 기준 브랜치에 아직 없어서,
+          # set -e 아래의 git show 가 잡을 통째로 죽인다 — review-role.md 를 들여온 PR #5 가
+          # 실제로 그렇게 죽었다. 없을 때만 경고를 남기고 PR 것을 쓴다. 폴백은 기준 브랜치에
+          # 파일이 없을 때만 타므로, 머지된 뒤에는 다시 타지 않는다.
+          fb() { echo "::warning::기준 브랜치에 $1 이 없어 이번만 PR 것을 씁니다"; cp "$1" "$2"; }
+          git show "origin/$BASE_REF:.github/agent/settings.env" > /tmp/settings.env 2>/dev/null \
+            || fb .github/agent/settings.env /tmp/settings.env
+          git show "origin/$BASE_REF:.github/agent/stream.js" > /tmp/stream.js 2>/dev/null \
+            || fb .github/agent/stream.js /tmp/stream.js
           # 리뷰어 역할 지시문 — 하네스(tests/run.sh)도 같은 파일을 읽는다.
           # 여기 인라인으로 두면 하네스가 자기 프롬프트를 따로 쓰게 되고, 그러면 하네스가
           # 통과해도 실제 리뷰어의 회귀는 못 잡는다.
-          git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md
+          git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md 2>/dev/null \
+            || fb .github/agent/review-role.md /tmp/review-role.md
           # 루프 판단(자동 머지 게이트 포함) — PR 브랜치가 자기 머지 조건을 바꾸지 못하게 기준 브랜치 것.
           # 하네스(tests/cases.sh)도 같은 파일을 돌린다.
-          git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh
+          git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh 2>/dev/null \
+            || fb .github/agent/loop-decision.sh /tmp/loop-decision.sh
           # 루프 상태의 단일 원본 — 노드도 리뷰어도 이 도구로만 상태를 읽고 쓴다
-          git show "origin/$BASE_REF:.github/agent/state.sh" > /tmp/state.sh
+          git show "origin/$BASE_REF:.github/agent/state.sh" > /tmp/state.sh 2>/dev/null \
+            || fb .github/agent/state.sh /tmp/state.sh
           # 다음에 어느 역할을 부를지 정하는 규칙 — 이것도 기준 브랜치 것을 쓴다
-          git show "origin/$BASE_REF:.github/agent/next-role.sh" > /tmp/next-role.sh
+          git show "origin/$BASE_REF:.github/agent/next-role.sh" > /tmp/next-role.sh 2>/dev/null \
+            || fb .github/agent/next-role.sh /tmp/next-role.sh
           . /tmp/settings.env
           {
             echo "MAX_ROUNDS=$CLAUDE_MAX_ROUNDS"
