@@ -1,5 +1,6 @@
 # 6단계. 예전에는 4개가 상한이었다.
+# run: walk
 # expect: plan | api web | e2e | test | code | fix
-# graph: plan>api+web>e2e>test>code>fix
+# claude-graph: plan>api+web>e2e>test>code>fix
 # max-steps: 12
 # has-pat: true

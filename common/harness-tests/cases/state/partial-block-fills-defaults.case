@@ -1,5 +1,7 @@
 # 일부만 적힌 블록 — 빠진 숫자는 0, 빠진 글자는 빈 값. 망가진 것이 아니다.
+# run: bash .github/agent/state.sh read
 # expect: round=7 step=0 last_role=test last_status= verdict= broken=0
+---
 <!-- claude-state
 round=7
 last_role=test

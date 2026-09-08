@@ -1,4 +1,5 @@
 # 계획에 남은 단계가 없다 — 리뷰는 PR 이 열린 뒤 따로 돈다.
+# run: bash .github/agent/next-role.sh
 # expect: done
 # verdict: 
 # rounds: 0

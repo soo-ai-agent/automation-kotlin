@@ -1,4 +1,5 @@
 # 실행 횟수를 못 읽으면 통과 판정보다 그것이 앞선다 — 받은 값을 못 믿는 상황이다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: PASS
 # step: 많이

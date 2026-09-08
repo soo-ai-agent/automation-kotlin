@@ -1,5 +1,7 @@
 # 온전한 블록 — 적힌 그대로 읽는다.
+# run: bash .github/agent/state.sh read
 # expect: round=2 step=5 last_role=code last_status=0 verdict=PASS broken=0
+---
 ## 🔍 Claude 코드 리뷰 — ✅ 통과
 <!-- claude-state
 round=2

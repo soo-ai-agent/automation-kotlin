@@ -6,7 +6,7 @@
 #
 # 여기에는 GitHub API 호출도 파일 쓰기도 없다. 값을 받아 한 단어를 stdout 에 낸다.
 # 그래야 하네스가 모델도 GitHub 도 없이 전이 규칙을 통째로 돌려 볼 수 있다
-# (common/harness-tests/next-role.sh — 케이스는 cases/next-role/).
+# (common/harness-tests/cases.sh — 케이스는 cases/next-role/).
 #
 # 받는 값 (환경변수):
 #   VERDICT     PASS | CHANGES_REQUESTED   마지막 리뷰 판정. 리뷰 전이면 빈 값

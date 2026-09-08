@@ -1,6 +1,7 @@
 # 계획 모드에는 라운드 값이 넘어오지 않는다 — 리뷰가 돈 적이 없으니 셀 것이 없다.
 # 그러면 rounds 도 max-rounds 도 기본값 0 이 되는데, 라운드 상한을 계획보다 앞에서 재면
 # `0 >= 0` 이 걸려 루프가 첫 걸음에서 막힌다. 실제로 그렇게 막혔다.
+# run: bash .github/agent/next-role.sh
 # expect: code
 # verdict: 
 # rounds: 

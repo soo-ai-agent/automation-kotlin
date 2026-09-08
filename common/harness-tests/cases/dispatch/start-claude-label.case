@@ -1,5 +1,5 @@
 # claude 라벨만 붙었다 — 기본 그래프로 착수한다.
+# run: python3 .github/agent/dispatch_rules.py start
 # expect: code
-# decision: start
 # has-pat: true
 # labels: claude

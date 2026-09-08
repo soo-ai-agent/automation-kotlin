@@ -1,4 +1,5 @@
 # 상한을 이미 넘겼다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: CHANGES_REQUESTED
 # step: 15

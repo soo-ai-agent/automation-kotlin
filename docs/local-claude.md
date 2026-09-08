@@ -83,39 +83,31 @@ launcher 는 `--dangerously-skip-permissions` 를 붙여 연다. 파일을 고�
 
 ## 하네스로 확인한다
 
-규칙이나 자동화를 고쳤으면 하네스로 확인한다. 검사는 여덟이고, **싼 것부터** 돌린다.
-앞의 일곱은 모델을 부르지 않아 공짜이고, 마지막 하나만 claude 호출을 쓴다.
+규칙이나 자동화를 고쳤으면 하네스로 확인한다. 검사는 셋이고, **싼 것부터** 돌린다.
 
 ```bash
-bash common/harness-tests/static.sh      # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
-bash common/harness-tests/graph.sh       # ② 그래프가 의도한 단계로 펼쳐지는지
-bash common/harness-tests/loop.sh        # ③ 리뷰 통과 뒤 머지할지 사람에게 넘길지
-bash common/harness-tests/state.sh       # ④ 코멘트에 남긴 루프 상태를 읽고 갱신하는지
-bash common/harness-tests/next-role.sh   # ⑤ 다음에 어느 역할을 부를지
-bash common/harness-tests/plan.sh        # ⑥ 계획이 첫 단계부터 끝까지 도는지
-bash common/harness-tests/dispatch.sh    # ⑦ 이슈를 착수시킬지, 끝난 것을 치울지
-bash common/harness-tests/run.sh backend # ⑧ 판정 회귀 — 백엔드 케이스만 (claude 5회)
+bash common/harness-tests/static.sh          # ① 형식 — 링크·경로·케이스 형식·노드 실행 계약
+bash common/harness-tests/cases.sh           # ② 케이스 81건 — 그래프·머지·상태·전이·계획·정리
+bash common/harness-tests/cases.sh next-role # ②의 한 갈래만
+bash common/harness-tests/run.sh backend     # ③ 판정 회귀 — 백엔드 케이스만 (claude 5회)
 ```
 
-**①~⑦은 모델을 부르지 않는다.** ①은 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 본다 —
+**①②는 모델을 부르지 않는다.** ①은 규칙이 옳은지가 아니라 **규칙이 읽히기는 하는지**를 본다 —
 스킬 색인의 링크가 죽지 않았는지, 하네스가 돌아야 할 경로가 워크플로 필터에 다 들어 있는지.
 
-②~⑦은 **동작을 재지만 모델이 필요 없다.** 그래프·머지·상태·전이·계획·정리가 값을 받아 값을 내는
-스크립트로 나와 있기 때문이다. 그것이 워크플로 셸로 되돌아가면 이 검사들이 죽고, ①이 그것을 막는다.
+②는 **동작을 재지만 모델이 필요 없다.** 그래프·머지·상태·전이·계획·정리가 값을 받아 값을 내는
+스크립트로 나와 있기 때문이다. 그것이 워크플로 셸로 되돌아가면 이 검사가 죽고, ①이 그것을 막는다.
 
-**⑧만 케이스 하나가 claude 호출 1건**이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다.
-영역은 어느 케이스를 돌릴지만 고르고, 리뷰어는 언제나 실제 PR 리뷰어와 똑같은 방식으로 불린다.
+**③만 케이스 하나가 claude 호출 1건**이다. 백엔드 스킬만 고쳤으면 `backend` 만 돌리면 된다.
 
-고치기 전에 결과를 미리 보고 싶으면 아래를 쓴다. 워크플로를 돌리지 않아도 된다.
+고치기 전에 결과를 미리 보려면 도구를 직접 부른다. 워크플로도 모델도 필요 없다.
 
 ```bash
-bash common/harness-tests/graph.sh 'api+web>e2e'   # 이 그래프가 어떤 단계로 펼쳐지나
-bash common/harness-tests/plan.sh 'plan>code>test' # 이 계획이 몇 바퀴에 걸쳐 어떻게 도나
-bash common/harness-tests/loop.sh table            # 상황별 머지 결정
-bash common/harness-tests/next-role.sh table       # 상황별 다음 역할
-bash common/harness-tests/state.sh show            # 상태를 읽고 갱신해 다시 쓰는 과정
-bash common/harness-tests/dispatch.sh table         # 상황별 착수·정리 결정
+CLAUDE_GRAPH='api+web>e2e' node .github/agent/graph.js               # 이 그래프가 어떻게 펼쳐지나
+HAS_PAT=true LABELS=claude python3 .github/agent/dispatch_rules.py start   # 이 이슈를 착수시킬까
 ```
+
+상황별 표가 따로 필요하지 않다 — `cases.sh` 의 출력이 그것이다. 케이스 이름이 상황이고 오른쪽이 결정이다.
 
 ## 맥에서 (macOS)
 

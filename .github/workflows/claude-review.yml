@@ -53,7 +53,7 @@ jobs:
           # 통과해도 실제 리뷰어의 회귀는 못 잡는다.
           git show "origin/$BASE_REF:.github/agent/review-role.md" > /tmp/review-role.md
           # 루프 판단(자동 머지 게이트 포함) — PR 브랜치가 자기 머지 조건을 바꾸지 못하게 기준 브랜치 것.
-          # 하네스(common/harness-tests/loop.sh)도 같은 파일을 돌린다.
+          # 하네스(common/harness-tests/cases.sh)도 같은 파일을 돌린다.
           git show "origin/$BASE_REF:.github/agent/loop-decision.sh" > /tmp/loop-decision.sh
           # 루프 상태의 단일 원본 — 노드도 리뷰어도 이 도구로만 상태를 읽고 쓴다
           git show "origin/$BASE_REF:.github/agent/state.sh" > /tmp/state.sh
@@ -160,8 +160,8 @@ jobs:
           gh pr comment "$PR" --body-file /tmp/note.md
 
       # 판단은 둘 다 /tmp 의 스크립트가 하고, 여기서는 그대로 실행만 한다.
-      #   머지할까      → loop-decision.sh  (하네스: common/harness-tests/loop.sh)
-      #   다음에 무엇을 → next-role.sh      (하네스: common/harness-tests/next-role.sh)
+      #   머지할까      → loop-decision.sh   (하네스 케이스: cases/loop/)
+      #   다음에 무엇을 → next-role.sh       (하네스 케이스: cases/next-role/)
       # 판단을 이 셸에 되돌려 놓으면 하네스가 루프를 돌려 볼 수 없게 된다.
       - name: 루프 결정과 실행
         if: env.SKIP != 'true'

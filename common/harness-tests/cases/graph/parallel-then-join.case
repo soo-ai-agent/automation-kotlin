@@ -1,5 +1,5 @@
 # 병렬 뒤 합류. PR 은 마지막 단계의 마지막 노드 하나만 연다 —
 # 중간에 열면 완성 전 코드가 리뷰된다.
-# expect: PASS
-# graph: api+web>e2e
-stages=[[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}],[{"node":"e2e","label":"e2e","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}],[{"node":"e2e","label":"e2e","rescue":"","make_pr":"true"}]]
+# claude-graph: api+web>e2e

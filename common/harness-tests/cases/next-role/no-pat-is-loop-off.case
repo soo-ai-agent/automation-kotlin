@@ -1,4 +1,5 @@
 # PAT 이 없으면 루프가 아예 안 돈다 — 도는 척하지 않고 꺼졌다고 말한다.
+# run: bash .github/agent/next-role.sh
 # expect: loop-off
 # verdict: CHANGES_REQUESTED
 # rounds: 0

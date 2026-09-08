@@ -1,4 +1,4 @@
 # 순차 3단계 + 수습. 수습은 별도 단계가 아니라 그 노드 잡 안에서 처리된다.
-# expect: PASS
-# graph: plan>code?fix>test
-stages=[[{"node":"plan","label":"plan","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"fix","make_pr":"false"}],[{"node":"test","label":"test","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"plan","label":"plan","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"fix","make_pr":"false"}],[{"node":"test","label":"test","rescue":"","make_pr":"true"}]]
+# claude-graph: plan>code?fix>test

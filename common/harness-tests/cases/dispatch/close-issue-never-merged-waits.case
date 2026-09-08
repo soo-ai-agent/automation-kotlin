@@ -1,6 +1,6 @@
 # 머지된 적이 없다 — 사람이 판단할 몫이다.
+# run: python3 .github/agent/dispatch_rules.py close-issue
 # expect: keep
-# decision: close-issue
 # labels: claude claude-sent
 # pr-open: false
 # pr-merged: false

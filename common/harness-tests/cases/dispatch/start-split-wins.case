@@ -1,5 +1,5 @@
 # claude 와 claude-split 이 함께 붙으면 쪼개는 쪽이 먼저다.
+# run: python3 .github/agent/dispatch_rules.py start
 # expect: split
-# decision: start
 # has-pat: true
 # labels: claude claude-split

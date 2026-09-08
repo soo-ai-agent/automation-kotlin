@@ -1,4 +1,4 @@
 # 노드 이름은 파일 이름이 된다. 대문자·공백을 통과시키면 없는 파일을 찾게 된다.
-# expect: FAIL
-# graph: Plan>code
-잘못된 노드 이름 'Plan'
+# run: node .github/agent/graph.js
+# expect-stderr: 잘못된 노드 이름 'Plan'
+# claude-graph: Plan>code

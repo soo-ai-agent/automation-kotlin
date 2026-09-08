@@ -1,4 +1,5 @@
 # 계획을 밟는 중이다 — 판정이 없다. 이번 단계의 역할을 그대로 돌린다.
+# run: bash .github/agent/next-role.sh
 # expect: code
 # verdict: 
 # rounds: 0

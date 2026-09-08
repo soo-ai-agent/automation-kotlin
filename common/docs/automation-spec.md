@@ -16,7 +16,7 @@
 | 그래프 펼치기 | `.github/agent/graph.js` | 진입점의 `graph` 잡이 실행 |
 | 디스패처 로직 | `.github/agent/dispatch.py` | `claude-dispatch.yml` 이 `start`·`cleanup` 두 번 실행 |
 | 디스패처 판단 | `.github/agent/dispatch_rules.py` | 착수·마감·삭제를 정한다 — 디스패처와 하네스가 **같은 파일**을 읽음 |
-| 하네스 디스패처 회귀 | `common/harness-tests/dispatch.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `dispatch.sh table`) |
+| 하네스 동작 회귀 | `common/harness-tests/cases.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 갈래 하나만은 `cases.sh <갈래>`) |
 | 노드의 Claude 실행 | `.github/agent/run-claude.sh` | 노드가 기본 브랜치에서 꺼내 씀 |
 | 로그 정리기 | `.github/agent/stream.js` | 노드·리뷰어가 기본 브랜치에서 꺼내 씀 |
 | 리뷰어 | `.github/workflows/claude-review.yml` | `pull_request` 열림/갱신 |
@@ -24,15 +24,10 @@
 | 하네스 판정 케이스 | `common/harness-tests/cases/backend/`·`cases/frontend/` | 위 워크플로가 실행 (수동은 `bash common/harness-tests/run.sh [backend\|frontend\|all]`) |
 | 하네스 동작 케이스 | `cases/graph/`·`cases/loop/`·`cases/state/`·`cases/next-role/`·`cases/plan/` | 같은 워크플로 (영역과 무관 — 오케스트레이션이다) |
 | 하네스 형식 검사 | `common/harness-tests/static.sh` | 위 워크플로가 판정 회귀보다 **먼저** 실행 (모델 호출 없음) |
-| 하네스 그래프 회귀 | `common/harness-tests/graph.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `graph.sh '<표현식>'`) |
-| 하네스 머지 회귀 | `common/harness-tests/loop.sh` | 같은 워크플로 (모델 호출 없음, 수동은 `loop.sh table`) |
 | 머지 판단 | `.github/agent/loop-decision.sh` | 리뷰어와 하네스가 **같은 파일**을 읽음 |
 | 루프 상태 | `.github/agent/state.sh` | 노드·리뷰어·하네스가 **같은 도구**로 읽고 씀 |
 | 전이 규칙 | `.github/agent/next-role.sh` | 다음에 어느 역할을 부를지 — 리뷰어·계획·하네스가 **같은 파일**을 읽음 |
 | 계획 한 단계 | `.github/agent/plan-stage.sh` | 이번 단계의 역할과 매트릭스 — 워크플로와 하네스가 **같은 파일**을 읽음 |
-| 하네스 계획 루프 회귀 | `common/harness-tests/plan.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `plan.sh '<계획>'`) |
-| 하네스 전이 회귀 | `common/harness-tests/next-role.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `next-role.sh table`) |
-| 하네스 상태 회귀 | `common/harness-tests/state.sh` | 같은 워크플로 (모델·GitHub 호출 없음, 수동은 `state.sh show`) |
 | 설정 | `.github/agent/settings.env` | — |
 | 노드 지시문·실행 계약 | `.github/agent/nodes/<이름>.md` | 앞머리 `---` 블록이 그 역할에 허용할 명령을 정한다 |
 | 리뷰어 역할 지시문 | `.github/agent/review-role.md` | 리뷰어와 하네스가 **같은 파일**을 읽음 |

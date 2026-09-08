@@ -1,4 +1,5 @@
 # 계획 중이라도 실행 상한에 닿으면 멈춘다 — 단계 수에 상한이 없으니 이것이 유일한 정지선이다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: 
 # rounds: 0

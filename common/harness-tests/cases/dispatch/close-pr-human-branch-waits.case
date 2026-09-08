@@ -1,5 +1,5 @@
 # 사람이 만든 브랜치의 PR 은 건드리지 않는다.
+# run: python3 .github/agent/dispatch_rules.py close-pr
 # expect: keep
-# decision: close-pr
 # head-ref: feat/hand-written
 # issue-state: closed

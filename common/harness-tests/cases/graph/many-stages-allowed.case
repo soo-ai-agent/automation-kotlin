@@ -1,5 +1,5 @@
 # 순차 6단계. 예전에는 4개가 상한이었다 — 워크플로가 단계마다 잡을 미리 선언해야 했기 때문이다.
 # 지금은 잡 하나가 자기를 다시 부르므로 상한이 없다. 루프를 멈추는 것은 CLAUDE_MAX_STEPS 다.
-# expect: PASS
-# graph: plan>api+web>e2e>test>code>fix
-stages=[[{"node":"plan","label":"plan","rescue":"","make_pr":"false"}],[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}],[{"node":"e2e","label":"e2e","rescue":"","make_pr":"false"}],[{"node":"test","label":"test","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"fix","label":"fix","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"plan","label":"plan","rescue":"","make_pr":"false"}],[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"false"}],[{"node":"e2e","label":"e2e","rescue":"","make_pr":"false"}],[{"node":"test","label":"test","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"fix","label":"fix","rescue":"","make_pr":"true"}]]
+# claude-graph: plan>api+web>e2e>test>code>fix

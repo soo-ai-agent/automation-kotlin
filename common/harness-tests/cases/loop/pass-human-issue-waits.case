@@ -1,4 +1,5 @@
 # 사람이 올린 이슈의 PR — 통과해도 머지는 사람 몫이다.
+# run: bash .github/agent/loop-decision.sh
 # expect: human-merge
 # verdict: PASS
 # head-ref: claude/issue-42

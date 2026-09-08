@@ -1,5 +1,6 @@
 # 실행 상한이 계획 도중에 끊는다 — 단계 수에 상한이 없으니 이것이 유일한 정지선이다.
+# run: walk
 # expect: plan | api web | human
-# graph: plan>api+web>e2e>test>code>fix
+# claude-graph: plan>api+web>e2e>test>code>fix
 # max-steps: 3
 # has-pat: true

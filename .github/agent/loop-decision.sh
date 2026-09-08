@@ -6,7 +6,7 @@
 #
 # 여기에는 GitHub API 호출도 파일 쓰기도 없다. 값을 받아 결정 한 단어를 stdout 에 낸다.
 # 그래야 하네스가 모델도 GitHub 도 없이 루프를 통째로 돌려 볼 수 있다
-# (common/harness-tests/loop.sh — 케이스는 cases/loop/).
+# (common/harness-tests/cases.sh — 케이스는 cases/loop/).
 #
 # **여기는 머지만 정한다.** 다음에 무엇을 돌릴지는 next-role.sh 가 정한다 —
 # 두 판단을 한 곳에 두면 "계속할까"를 양쪽이 각자 재게 되고, 상한을 하나 바꿀 때

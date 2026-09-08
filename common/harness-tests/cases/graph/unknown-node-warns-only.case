@@ -2,6 +2,6 @@
 #
 # 이건 결함이다. 그 노드는 빈 지시문으로 돌고, 실행 계약도 없어서 읽기 전용 git 만 받아
 # 아무것도 못 한 채 성공으로 끝난다. 고칠 때 이 케이스의 expect 를 FAIL 로 뒤집는다.
-# expect: PASS
-# graph: nope>code
-stages=[[{"node":"nope","label":"nope","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"nope","label":"nope","rescue":"","make_pr":"false"}],[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]
+# claude-graph: nope>code

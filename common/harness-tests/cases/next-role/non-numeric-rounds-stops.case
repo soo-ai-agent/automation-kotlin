@@ -1,4 +1,5 @@
 # 라운드를 숫자로 못 읽는다 — 비교할 수 없으면 멈춘다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: CHANGES_REQUESTED
 # rounds: 많이

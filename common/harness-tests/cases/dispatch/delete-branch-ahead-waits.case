@@ -1,6 +1,6 @@
 # 기본 브랜치에 없는 커밋이 남아 있다 — 지우면 그 커밋이 사라진다.
+# run: python3 .github/agent/dispatch_rules.py delete-branch
 # expect: keep
-# decision: delete-branch
 # branch: claude/issue-42
 # pr-open: false
 # ahead-by: 3

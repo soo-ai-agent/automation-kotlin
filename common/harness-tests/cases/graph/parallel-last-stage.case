@@ -1,4 +1,4 @@
 # 마지막 단계가 병렬이면 그중 마지막 하나만 PR 을 연다. 둘 다 열면 PR 이 두 개 생긴다.
-# expect: PASS
-# graph: code>api+web
-stages=[[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"api","label":"api","rescue":"","make_pr":"false"},{"node":"web","label":"web","rescue":"","make_pr":"true"}]]
+# claude-graph: code>api+web

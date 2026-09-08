@@ -1,5 +1,5 @@
 # claude/issue- 로 시작하지만 뒤가 숫자가 아니다 — 판별 불가.
+# run: python3 .github/agent/dispatch_rules.py close-pr
 # expect: keep
-# decision: close-pr
 # head-ref: claude/issue-abc
 # issue-state: closed

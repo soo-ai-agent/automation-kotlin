@@ -3,6 +3,7 @@
 # CHANGES_REQUESTED 로 정한다) 그 상황이 생기지 않는다.
 #
 # 대신 계획 역할이 비어 있으면 계획이 끝난 것이다.
+# run: bash .github/agent/next-role.sh
 # expect: done
 # verdict: 
 # rounds: 0

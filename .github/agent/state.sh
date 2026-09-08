@@ -10,7 +10,7 @@
 #
 # 여기에는 GitHub API 호출이 없다. 코멘트 본문을 stdin 으로 받아 값을 내고, 값을 받아
 # 블록을 낸다. 그래야 하네스가 GitHub 없이 상태를 통째로 돌려 볼 수 있다
-# (common/harness-tests/state.sh — 케이스는 cases/state/).
+# (common/harness-tests/cases.sh — 케이스는 cases/state/).
 #
 # 사용:
 #   state.sh read              stdin(코멘트 모음) → key=value 줄들. 블록이 여럿이면 마지막 것.

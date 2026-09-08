@@ -1,4 +1,5 @@
 # 첫 실행에서 바로 갱신 — 상태가 없어도 갱신은 얹힌다.
+# run: bash .github/agent/state.sh read | bash .github/agent/state.sh merge step=1 last_role=plan last_status=0
 # expect: round=0 step=1 last_role=plan last_status=0 verdict= broken=0
-# merge: step=1 last_role=plan last_status=0
+---
 아직 상태 없음

@@ -1,6 +1,7 @@
 # 갱신은 읽은 값 위에 얹힌다 — 안 건드린 항목은 그대로 남는다.
+# run: bash .github/agent/state.sh read | bash .github/agent/state.sh merge round=3 last_role=fix
 # expect: round=3 step=5 last_role=fix last_status=0 verdict=PASS broken=0
-# merge: round=3 last_role=fix
+---
 <!-- claude-state
 round=2
 step=5

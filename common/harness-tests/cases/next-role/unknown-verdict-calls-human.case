@@ -1,4 +1,5 @@
 # 모르는 판정 — 리뷰 출력 형식이 바뀌었다는 뜻이라 사람이 봐야 한다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: APPROVED
 # step: 0

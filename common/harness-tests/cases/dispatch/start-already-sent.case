@@ -1,5 +1,5 @@
 # claude-sent 는 이미 착수했다는 표시다 — 같은 이슈를 두 번 부르지 않는다.
+# run: python3 .github/agent/dispatch_rules.py start
 # expect: skip
-# decision: start
 # has-pat: true
 # labels: claude claude-sent

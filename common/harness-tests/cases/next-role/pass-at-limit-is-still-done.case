@@ -1,4 +1,5 @@
 # 상한에 닿았어도 통과했으면 끝난 것이다 — 멈출 이유가 없다.
+# run: bash .github/agent/next-role.sh
 # expect: done
 # verdict: PASS
 # step: 12

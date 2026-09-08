@@ -224,13 +224,12 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 그래프나 루프를 바꾸기 전에 아래를 돌리면 워크플로를 돌리지 않고 결과를 볼 수 있다. 모델도 GitHub 도 부르지 않는다.
 
 ```bash
-bash common/harness-tests/plan.sh 'plan>api+web>e2e'   # 이 계획이 몇 바퀴에 걸쳐 어떻게 도나
-bash common/harness-tests/graph.sh 'api+web>e2e'       # 이 그래프가 어떤 단계로 펼쳐지나
-bash common/harness-tests/next-role.sh table           # 상황별로 어느 역할이 불리나
-bash common/harness-tests/loop.sh table                # 상황별 머지 결정
+CLAUDE_GRAPH='api+web>e2e' node .github/agent/graph.js    # 이 그래프가 어떤 단계로 펼쳐지나
+VERDICT=PASS ROUNDS=0 MAX_ROUNDS=3 STEP=1 MAX_STEPS=12 \
+  BROKEN=0 HAS_PAT=true bash .github/agent/next-role.sh   # 이 상황에 어느 역할이 불리나
 ```
 
-바꾼 뒤에는 하네스로 확인한다 — 검사 일곱과 돌리는 순서는 [local-claude.md](local-claude.md#하네스로-확인한다) 에 있다.
+바꾼 뒤에는 하네스로 확인한다 — 검사 셋과 돌리는 순서는 [local-claude.md](local-claude.md#하네스로-확인한다) 에 있다.
 
 ### 노드 추가하기
 

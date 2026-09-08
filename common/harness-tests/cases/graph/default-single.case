@@ -1,4 +1,4 @@
 # 설정 기본값 — 노드 하나. 그 하나가 PR 을 연다.
-# expect: PASS
-# graph: code
-stages=[[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"code","label":"code","rescue":"","make_pr":"true"}]]
+# claude-graph: code

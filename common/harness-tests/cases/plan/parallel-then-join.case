@@ -1,5 +1,6 @@
 # 병렬 뒤 합류 — 첫 바퀴에 둘이 나란히 돌고 실행 횟수가 2 오른다.
+# run: walk
 # expect: api web | e2e
-# graph: api+web>e2e
+# claude-graph: api+web>e2e
 # max-steps: 12
 # has-pat: true

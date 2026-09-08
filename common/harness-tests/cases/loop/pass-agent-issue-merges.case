@@ -1,4 +1,5 @@
 # 에이전트가 쪼갠 하위 이슈의 PR — 통과하면 자동 머지한다.
+# run: bash .github/agent/loop-decision.sh
 # expect: merge
 # verdict: PASS
 # head-ref: claude/issue-42

@@ -1,4 +1,5 @@
 # 상한에 닿았다 — >= 로 재는지 본다. > 로 재면 한 번 더 돈다.
+# run: bash .github/agent/next-role.sh
 # expect: human
 # verdict: CHANGES_REQUESTED
 # step: 12

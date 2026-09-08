@@ -40,14 +40,10 @@ check_case_expectations() {
         [ -e "$f" ] || continue
         head -n 1 "$f" | grep -qE '^# expect: (PASS|CHANGES_REQUESTED)$' || bad="$bad $f"
     done
-    for f in common/harness-tests/cases/graph/*.case; do
+    for f in common/harness-tests/cases/*/*.case; do
         [ -e "$f" ] || continue
-        grep -qE '^# expect: (PASS|FAIL)$' "$f" || bad="$bad $f(expect없음)"
-        grep -q '^# graph: ' "$f" || bad="$bad $f(graph없음)"
-    done
-    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case common/harness-tests/cases/plan/*.case common/harness-tests/cases/dispatch/*.case; do
-        [ -e "$f" ] || continue
-        grep -q '^# expect: ' "$f" || bad="$bad $f(expect없음)"
+        grep -q '^# run: ' "$f" || bad="$bad $f(run없음)"
+        grep -qE '^# expect(-stderr)?: ' "$f" || bad="$bad $f(expect없음)"
     done
     if [ -z "$bad" ]; then
         ok "케이스마다 '# expect:' 기대값이 있다"
@@ -214,8 +210,8 @@ check_graph_loop_shape() {
         || bad="$bad claude-agent.yml(계획_계산을_스크립트에_안맡김)"
     grep -qF 'bash .github/agent/next-role.sh' .github/agent/plan-stage.sh \
         || bad="$bad plan-stage.sh(계속할지를_규칙에_안물음)"
-    grep -qF 'PLAN=".github/agent/plan-stage.sh"' common/harness-tests/plan.sh \
-        || bad="$bad harness-tests/plan.sh(같은_파일을_안가리킴)"
+    grep -qF 'bash .github/agent/plan-stage.sh' common/harness-tests/cases.sh \
+        || bad="$bad cases.sh(계획을_안가리킴)"
     # 계획 계산이 워크플로 셸로 돌아오면 하네스가 그것을 베껴 쓰게 된다
     grep -qF 'node .github/agent/graph.js' "$wf" \
         && bad="$bad claude-agent.yml(계획_계산이_셸로_되돌아옴)"
@@ -244,8 +240,8 @@ check_loop_decision_shared() {
         || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
     grep -qE '^[[:space:]]*MERGE=' "$wf" \
         || bad="$bad claude-review.yml(머지_결정을_스크립트에_안물음)"
-    grep -qF 'DECIDE=".github/agent/loop-decision.sh"' common/harness-tests/loop.sh \
-        || bad="$bad harness-tests/loop.sh(같은_파일을_안가리킴)"
+    grep -qrF 'bash .github/agent/loop-decision.sh' common/harness-tests/cases/loop/ \
+        || bad="$bad cases/loop(같은_파일을_안가리킴)"
 
     # 물어보고 답을 버리면 판단이 되돌아간 것과 같다 — 결정대로 실행하는지까지 본다
     grep -qF 'case "$MERGE" in' "$wf" \
@@ -276,8 +272,8 @@ check_state_shared() {
         || bad="$bad claude-review.yml(기준_브랜치에서_안꺼냄)"
     grep -qF 'bash /tmp/state.sh merge' .github/workflows/claude-review.yml \
         || bad="$bad claude-review.yml(상태를_안씀)"
-    grep -qF 'STATE=".github/agent/state.sh"' common/harness-tests/state.sh \
-        || bad="$bad harness-tests/state.sh(같은_파일을_안가리킴)"
+    grep -qrF 'bash .github/agent/state.sh' common/harness-tests/cases/state/ \
+        || bad="$bad cases/state(같은_파일을_안가리킴)"
 
     # 도구 안에 GitHub 호출이 들어오면 하네스가 상태를 돌려 볼 수 없게 된다
     grep -qE '^[[:space:]]*(gh|curl) ' "$state" && bad="$bad state.sh(GitHub_호출이_들어옴)"
@@ -297,8 +293,8 @@ check_next_role_testable() {
     wf=".github/workflows/claude-review.yml"
     bad=""
     [ -f "$next" ] || bad="$bad $next(없음)"
-    grep -qF 'NEXT=".github/agent/next-role.sh"' common/harness-tests/next-role.sh \
-        || bad="$bad harness-tests/next-role.sh(같은_파일을_안가리킴)"
+    grep -qrF 'bash .github/agent/next-role.sh' common/harness-tests/cases/next-role/ \
+        || bad="$bad cases/next-role(같은_파일을_안가리킴)"
     grep -qE '^[[:space:]]*(gh|curl|git) ' "$next" && bad="$bad next-role.sh(바깥을_부름)"
 
     grep -qF "origin/\$BASE_REF:.github/agent/next-role.sh" "$wf" \
@@ -393,8 +389,8 @@ check_dispatch_rules_shared() {
     for fn in start_issue close_issue close_pr delete_branch issue_of; do
         grep -qF "dispatch_rules.$fn" "$dp" || bad="$bad dispatch.py(${fn}_를_안물음)"
     done
-    grep -qF 'RULES=".github/agent/dispatch_rules.py"' common/harness-tests/dispatch.sh \
-        || bad="$bad harness-tests/dispatch.sh(같은_파일을_안가리킴)"
+    grep -qrF 'python3 .github/agent/dispatch_rules.py' common/harness-tests/cases/dispatch/ \
+        || bad="$bad cases/dispatch(같은_파일을_안가리킴)"
     # 규칙 안에서 바깥을 부르면 하네스가 못 돌린다
     grep -qE '^[[:space:]]*(import (urllib|requests|subprocess)|from (urllib|subprocess))' "$rules" \
         && bad="$bad dispatch_rules.py(바깥을_부름)"

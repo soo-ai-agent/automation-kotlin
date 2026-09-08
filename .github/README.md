@@ -17,10 +17,8 @@
 
 리뷰 규칙은 [common/docs/code-review/rules.md](../common/docs/code-review/rules.md) 에 있다.
 
-그래프·루프·상태는 모델 없이 돌려 볼 수 있다 — `bash common/harness-tests/graph.sh '<표현식>'` 로 단계 매트릭스를,
-`bash common/harness-tests/loop.sh table` 로 상황별 머지·재작업 결정을, `bash common/harness-tests/state.sh show` 로 상태를 읽고 쓰는 과정을,
-`bash common/harness-tests/next-role.sh table` 로 다음 역할을,
-`bash common/harness-tests/plan.sh '<계획>'` 으로 계획이 첫 단계부터 끝까지 어떻게 도는지 본다.
+그래프·머지·상태·전이·계획·정리는 모델 없이 확인할 수 있다 — `bash common/harness-tests/cases.sh` 가 케이스 81건을 돌린다.
+갈래 하나만 보려면 `cases.sh next-role` 처럼 폴더 이름을 붙인다.
 
 ## 사람이 실행하는 파일 (처음 한 번)
 

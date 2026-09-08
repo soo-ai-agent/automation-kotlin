@@ -1,5 +1,6 @@
 # 병렬은 실행 횟수를 둘 올린다 — 하나로 세면 상한을 넘겨 돈다.
+# run: walk
 # expect: api web | api web | human
-# graph: api+web>api+web>e2e
+# claude-graph: api+web>api+web>e2e
 # max-steps: 4
 # has-pat: true

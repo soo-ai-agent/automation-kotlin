@@ -1,6 +1,6 @@
 # 비교 조회에 실패했다 — 못 물어봤다는 것이 없다는 뜻은 아니다.
+# run: python3 .github/agent/dispatch_rules.py delete-branch
 # expect: keep
-# decision: delete-branch
 # branch: claude/issue-42
 # pr-open: false
 # ahead-by: 

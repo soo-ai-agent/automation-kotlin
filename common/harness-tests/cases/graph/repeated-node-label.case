@@ -1,4 +1,4 @@
 # 같은 노드가 두 번 나오면 진행 화면에서 구분되게 라벨에 -2 가 붙는다.
-# expect: PASS
-# graph: code>code
-stages=[[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"code","label":"code-2","rescue":"","make_pr":"true"}]]
+# run: node .github/agent/graph.js
+# expect: stages=[[{"node":"code","label":"code","rescue":"","make_pr":"false"}],[{"node":"code","label":"code-2","rescue":"","make_pr":"true"}]]
+# claude-graph: code>code

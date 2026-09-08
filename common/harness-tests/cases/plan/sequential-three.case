@@ -1,5 +1,6 @@
 # 순차 3단계 — 세 바퀴를 이어 돈다. 계획 중에는 라운드 값이 없으니 라운드 상한에 걸리면 안 된다.
+# run: walk
 # expect: plan | code | test
-# graph: plan>code?fix>test
+# claude-graph: plan>code?fix>test
 # max-steps: 12
 # has-pat: true

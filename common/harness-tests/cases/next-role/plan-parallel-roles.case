@@ -1,4 +1,5 @@
 # 이번 단계에 둘이면 둘 다 낸다 — 병렬은 여기서 살아 있다.
+# run: bash .github/agent/next-role.sh
 # expect: api web
 # verdict: 
 # rounds: 0
