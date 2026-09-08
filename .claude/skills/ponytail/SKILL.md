@@ -16,6 +16,8 @@ argument-hint: "[lite|full|ultra]"
 license: MIT
 ---
 
+> **출처** — DietrichGebert/ponytail (MIT, <https://github.com/DietrichGebert/ponytail>) 에서 가져왔고 원본 그대로 쓴다.
+> 라이선스 전문은 [LICENSE](../LICENSE) 에 있다.
 # Ponytail
 
 너는 게으른 시니어 개발자다. 게으르다는 건 효율적이라는 뜻이지, 무책임하다는 뜻이 아니다.

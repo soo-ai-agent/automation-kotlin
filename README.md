@@ -10,7 +10,7 @@
 |---|---|---|
 | `claude` CLI · `.claude/` 폴더 규약 | **Anthropic 공식** — <https://docs.claude.com/claude-code> | 도구 설치물. 저장소에는 규약이 정한 폴더만 있다 |
 | `claude-code-action` | **Anthropic 공식** — <https://github.com/anthropics/claude-code-action> | `.github/workflows/claude-review-compare.yml` 한 곳 (비교 실험용) |
-| `ponytail`·`ponytail-review`·`ponytail-audit`·`ponytail-debt` 스킬 4종 | DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail> | `.claude/skills/ponytail*` ([LICENSE](.claude/skills/LICENSE)) |
+| `ponytail`·`ponytail-review` 스킬 2종 | DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail> | `.claude/skills/ponytail*` ([LICENSE](.claude/skills/LICENSE)) |
 | spec-kit — `speckit-*` 스킬 10종과 `.specify/` 설치물 | GitHub, Inc., MIT — <https://github.com/github/spec-kit> | 설치물이라 커밋되지 않는다. 한국어 번역만 `.specify/preset-ko/` |
 | **그 밖의 전부** — 자동화 스크립트·워크플로, 코딩 규칙 스킬 29종, 하네스, 프론트엔드 앱 | 이 저장소 자체 작성 | — |
 
@@ -30,7 +30,7 @@
 
 - **스펙 먼저 쓰기(SDD)** — 새 기능은 `specs/` 에 스펙을 먼저 쓰고 그 스펙으로 구현한다. 산출물은 한국어로 나온다
 
-- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 33종 (백엔드 17 · 프론트 8 · 공통 8)
+- **코딩 규칙** — Claude 가 코드를 쓸 때와 리뷰할 때 따르는 규칙 문서 31종 (백엔드 17 · 프론트 8 · 공통 6)
 
 - **앱 뼈대** — 바로 실행되는 Expo(React Native) 앱(iOS·Android·웹 한 코드)과, Spring 멀티모듈을 채워 넣을 백엔드 자리
 
@@ -162,7 +162,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
 **코딩 규칙이 세 곳으로 나뉜 데는 이유가 있다.** 고치는 파일의 위치가 어느 규칙을 붙일지 고른다.
 
-    .claude/skills/           공통 8종 — 위치와 무관하게 항상 적용
+    .claude/skills/           공통 6종 — 위치와 무관하게 항상 적용
     backend/.claude/skills/   kotlin-* 17종 — backend/ 를 고칠 때만
     frontend/.claude/skills/  frontend-* 8종 — frontend/ 를 고칠 때만
 
@@ -174,7 +174,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 
 ## 어떤 코드가 나오나
 
-에이전트는 아무렇게나 짜지 않는다. 코딩 규칙 스킬 33종을 따르도록 강제되고, 어기면 리뷰어가 머지를 막는다.
+에이전트는 아무렇게나 짜지 않는다. 코딩 규칙 스킬 31종을 따르도록 강제되고, 어기면 리뷰어가 머지를 막는다.
 
 레이어 구조와 규칙 체계는 [docs/architecture.html](docs/architecture.html) 한 장에 그려져 있고, 규칙 전문은 각 모듈 `.claude/skills/` 의 색인(README)이 안내한다.
 

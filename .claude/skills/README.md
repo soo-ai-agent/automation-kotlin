@@ -4,7 +4,7 @@
 
 스택별 규칙은 각 모듈에 있다 — 백엔드 [backend/.claude/skills/](../../backend/.claude/skills/README.md)(17종), 프론트엔드 [frontend/.claude/skills/](../../frontend/.claude/skills/README.md)(8종).
 
-**출처 표시** — 아래 표의 8종 가운데 `ponytail` 계열 4종만 밖에서 가져온 것이다 (DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail>).
+**출처 표시** — 아래 표의 6종 가운데 `ponytail` 계열 2종만 밖에서 가져온 것이다 (DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail>).
 나머지 4종과 `backend/`·`frontend/` 의 스킬 25종은 이 저장소가 쓴 것이다. 이 폴더에 함께 깔리는 `speckit-*` 10종은 spec-kit(GitHub, Inc., MIT — <https://github.com/github/spec-kit>) 설치물이라 커밋되지 않는다.
 자세한 것은 [docs/upstream.md](../../docs/upstream.md).
 
@@ -15,8 +15,6 @@
 | [core-principles](core-principles/SKILL.md) | **최상위 3대 원칙** — 단순함 최우선, 최소 수정·무파괴, 데이터의 흐름과 통제. 다른 모든 규칙이 종속된다 | 모든 코드·규칙 문서 작업 |
 | [ponytail](ponytail/SKILL.md) | 가장 게으른 해법 — YAGNI, 표준 라이브러리 우선, 가장 짧은 diff | 모든 코딩 작업 |
 | [ponytail-review](ponytail-review/SKILL.md) | diff 에서 오버엔지니어링만 골라내는 리뷰 | "뭘 지울 수 있어?" |
-| [ponytail-audit](ponytail-audit/SKILL.md) | 저장소 전체 오버엔지니어링 감사 | "이 저장소에서 뭘 덜어낼 수 있어?" |
-| [ponytail-debt](ponytail-debt/SKILL.md) | `ponytail:` 주석을 모아 만든 부채 장부 | "미뤄둔 게 뭐야?" |
 | [oop-responsibility-design](oop-responsibility-design/SKILL.md) | 책임주도 설계 — 책임 배치, 다형성, 캡슐화, GRASP | "이 로직을 어느 클래스에 두나" |
 | [md-doc](md-doc/SKILL.md) | 이슈 분석·기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선 | md 문서를 쓰거나 고칠 때 |
 | [api-contract](api-contract/SKILL.md) | 서버-클라이언트 계약 — CONTRACT.md 미러링, nullable 대칭, enum 정규화, 와이어 단위 | API 타입·DTO·필드를 추가·변경할 때 |
@@ -39,7 +37,7 @@
 
 ## 라이선스
 
-[LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail*` 스킬 4종에만** 적용된다 — 각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
+[LICENSE](LICENSE) (MIT, © DietrichGebert) 는 **`ponytail`·`ponytail-review` 두 스킬에만** 적용된다 — 각 파일의 frontmatter `license: MIT` 로도 표시되어 있다.
 
 원본은 <https://github.com/DietrichGebert/ponytail> 이고, 무엇을 가져왔는지는 [docs/upstream.md](../../docs/upstream.md) 에 정리돼 있다.
 

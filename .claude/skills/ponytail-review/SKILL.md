@@ -10,6 +10,8 @@ description: >
 license: MIT
 ---
 
+> **출처** — DietrichGebert/ponytail (MIT, <https://github.com/DietrichGebert/ponytail>) 에서 가져왔고 원본 그대로 쓴다.
+> 라이선스 전문은 [LICENSE](../LICENSE) 에 있다.
 diff 에서 불필요한 복잡성을 리뷰한다. 지적 하나당 한 줄: 위치, 잘라낼 것, 대체물. 이 diff 의 최선의 결말은 더 짧아지는 것이다.
 
 ## 형식

@@ -1,3 +1,4 @@
+// 출처: 이 저장소 자체 작성.
 export const meta = {
   name: 'work',
   description: '계획을 단계별로 돌려 코드를 만든다 — 노드 역할을 서브에이전트로 부른다',

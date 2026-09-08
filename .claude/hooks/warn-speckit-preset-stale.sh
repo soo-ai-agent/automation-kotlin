@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 출처: 이 저장소 자체 작성.
 # 한국어 프리셋 원본이 바뀌었는데 설치본이 그대로일 때 알린다 — PostToolUse(Write|Edit) 훅.
 #
 # 왜 필요한가: `specify preset add --dev` 는 심볼릭 링크가 아니라 **복사**다.

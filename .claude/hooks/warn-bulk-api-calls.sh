@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 출처: 이 저장소 자체 작성.
 # 외부 API 대량 호출 경고 — PreToolUse(Bash) 훅.
 #
 # 규칙(CLAUDE.md "시작 전에 승인을 받는 작업"): 외부 API 를 30건 이상 호출하는 작업은
