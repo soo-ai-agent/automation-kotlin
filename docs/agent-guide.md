@@ -194,6 +194,7 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | 규칙을 고쳤을 때 판정 회귀 | `.github/workflows/claude-harness.yml` |
 | 리뷰 뒤 머지·재작업 판단 | `.github/agent/loop-decision.sh` |
 | 루프 상태 (코멘트 안 숨은 블록) | `.github/agent/state.sh` |
+| 리뷰 뒤 다음 역할 고르기 | `.github/agent/next-role.sh` |
 | 노드 역할 정의 | `.github/agent/nodes/<이름>.md` |
 | 공통 스위치 | `.github/agent/settings.env` |
 | 배포 | `.github/workflows/deploy.yml` ([deploy.md](deploy.md)) |
@@ -208,7 +209,8 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | 변수 | 기본값 | 바꾸면 |
 |---|---|---|
 | `CLAUDE_GRAPH` | `code` | 노드 구성 (`>` 순차 · `+` 병렬 · `?` 수습) |
-| `CLAUDE_MAX_ROUNDS` | `3` | 재수정 횟수 |
+| `CLAUDE_MAX_ROUNDS` | `3` | 재수정 횟수 (같은 PR 을 다시 보는 횟수) |
+| `CLAUDE_MAX_STEPS` | `12` | 작업 하나에서 노드가 도는 총 횟수 상한 |
 | `CLAUDE_RUNNER` | `ubuntu-latest` | 잡이 도는 러너 (self-hosted 등) |
 | `CLAUDE_JAVA_VERSION` · `CLAUDE_NODE_VERSION` | `25` · `22` | 런타임 버전 |
 | `CLAUDE_REVIEW_BAR` | — | 머지를 막는 기준 |

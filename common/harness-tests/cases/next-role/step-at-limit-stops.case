@@ -1,0 +1,6 @@
+# 상한에 닿았다 — >= 로 재는지 본다. > 로 재면 한 번 더 돈다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 12
+# max-steps: 12
+# broken: 0

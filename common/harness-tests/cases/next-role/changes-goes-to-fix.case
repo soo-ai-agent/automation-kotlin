@@ -1,0 +1,6 @@
+# 지적이 남았다 — fix 가 고친다. 오늘도 이렇게 돈다.
+# expect: fix
+# verdict: CHANGES_REQUESTED
+# step: 3
+# max-steps: 12
+# broken: 0

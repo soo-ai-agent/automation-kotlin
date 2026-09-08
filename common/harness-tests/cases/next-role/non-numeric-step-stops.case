@@ -1,0 +1,6 @@
+# 실행 횟수가 숫자가 아니다 — 비교할 수 없으면 멈춘다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 많이
+# max-steps: 12
+# broken: 0

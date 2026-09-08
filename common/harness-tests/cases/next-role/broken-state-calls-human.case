@@ -1,0 +1,6 @@
+# 상태를 못 읽었다 — 몇 번 돌았는지 모르는 채로 이어가지 않는다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 3
+# max-steps: 12
+# broken: 1

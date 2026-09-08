@@ -1,0 +1,6 @@
+# 통과했다 — 더 부를 역할이 없다. 머지 여부는 loop-decision.sh 가 따로 정한다.
+# expect: done
+# verdict: PASS
+# step: 3
+# max-steps: 12
+# broken: 0

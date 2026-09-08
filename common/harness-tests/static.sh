@@ -45,7 +45,7 @@ check_case_expectations() {
         grep -qE '^# expect: (PASS|FAIL)$' "$f" || bad="$bad $f(expect없음)"
         grep -q '^# graph: ' "$f" || bad="$bad $f(graph없음)"
     done
-    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case; do
+    for f in common/harness-tests/cases/loop/*.case common/harness-tests/cases/state/*.case common/harness-tests/cases/next-role/*.case; do
         [ -e "$f" ] || continue
         grep -q '^# expect: ' "$f" || bad="$bad $f(expect없음)"
     done
@@ -102,7 +102,7 @@ check_skill_index_links() {
 check_harness_paths_filter() {
     wf=".github/workflows/claude-harness.yml"
     missing=""
-    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml"; do
+    for needed in "**/.claude/skills/**" "common/docs/code-review/rules.md" "CLAUDE.md" "common/harness-tests/**" ".github/agent/review-role.md" ".github/agent/settings.env" ".github/agent/nodes/**" ".github/agent/run-claude.sh" ".github/agent/graph.js" ".github/workflows/claude-agent.yml" ".github/agent/loop-decision.sh" ".github/workflows/claude-review.yml" ".github/agent/state.sh" ".github/workflows/claude-node.yml" ".github/agent/next-role.sh"; do
         grep -qF "\"$needed\"" "$wf" || missing="$missing $needed"
     done
     if [ -z "$missing" ]; then
@@ -287,6 +287,36 @@ check_state_shared() {
     fi
 }
 
+# ── ⑪ 전이 규칙이 값만 받는 스크립트로 서 있는가 ─────────────────────
+# 다음 역할을 고르는 규칙은 아직 아무도 부르지 않는다 — 리뷰어는 여전히 fix 를 이름으로 박는다.
+# 그래도 지금부터 검사한다. 규칙이 워크플로 셸로 들어가 버리면 하네스가 못 재고,
+# 그 상태로 부르는 쪽만 옮기면 전이 규칙에는 테스트가 없는 채로 굳는다.
+#
+# 부르는 쪽까지 검사하는 것은 리뷰어를 옮기는 다음 단계의 몫이다.
+check_next_role_testable() {
+    next=".github/agent/next-role.sh"
+    bad=""
+    [ -f "$next" ] || bad="$bad $next(없음)"
+    grep -qF 'NEXT=".github/agent/next-role.sh"' common/harness-tests/next-role.sh \
+        || bad="$bad harness-tests/next-role.sh(같은_파일을_안가리킴)"
+    grep -qE '^[[:space:]]*(gh|curl|git) ' "$next" && bad="$bad next-role.sh(바깥을_부름)"
+
+    # 규칙이 늘어도 낼 수 있는 값은 셋뿐이다 — done · human · 역할 이름.
+    # 역할 이름을 내놓으려면 그 역할 파일이 있어야 한다.
+    for role in $(sed -n 's/^[[:space:]]*echo "\([a-z][a-z0-9_]*\)"$/\1/p' "$next" | sort -u); do
+        case "$role" in
+            done | human) continue ;;
+        esac
+        [ -f ".github/agent/nodes/$role.md" ] || bad="$bad next-role.sh(없는_역할:$role)"
+    done
+
+    if [ -z "$bad" ]; then
+        ok "전이 규칙이 값만 받는 스크립트이고, 내놓는 역할이 모두 실재한다"
+    else
+        ng "전이 규칙을 하네스가 잴 수 없다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -297,6 +327,7 @@ check_node_contracts
 check_graph_stage_jobs
 check_loop_decision_shared
 check_state_shared
+check_next_role_testable
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

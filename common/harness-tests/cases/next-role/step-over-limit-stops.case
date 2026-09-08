@@ -1,0 +1,6 @@
+# 상한을 이미 넘겼다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 15
+# max-steps: 12
+# broken: 0

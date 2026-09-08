@@ -1,0 +1,6 @@
+# 상한이 지적보다 앞선다 — 순서가 뒤집히면 영원히 fix 를 부른다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 99
+# max-steps: 12
+# broken: 0

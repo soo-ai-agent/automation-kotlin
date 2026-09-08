@@ -1,0 +1,6 @@
+# 상태를 못 읽었으면 통과 판정보다 그것이 앞선다 — 그 판정도 못 믿는다.
+# expect: human
+# verdict: PASS
+# step: 3
+# max-steps: 12
+# broken: 1

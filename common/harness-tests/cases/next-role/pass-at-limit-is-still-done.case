@@ -1,0 +1,6 @@
+# 상한에 닿았어도 통과했으면 끝난 것이다 — 멈출 이유가 없다.
+# expect: done
+# verdict: PASS
+# step: 12
+# max-steps: 12
+# broken: 0

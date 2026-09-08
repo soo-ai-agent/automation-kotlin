@@ -1,0 +1,6 @@
+# 상한이 0 이면 시작하자마자 멈춘다 — 루프를 끄는 방법이기도 하다.
+# expect: human
+# verdict: CHANGES_REQUESTED
+# step: 0
+# max-steps: 0
+# broken: 0
