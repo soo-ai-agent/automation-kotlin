@@ -1,5 +1,7 @@
 ---
 # frontend/ 만 고치므로 백엔드 검증 명령을 갖지 않는다.
+# frontend/ 만 고치므로 프론트 스킬만 붙인다.
+add-dir: frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bash(npm:*)
 ---
 

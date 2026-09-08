@@ -1,11 +1,15 @@
 ---
 # 백엔드를 띄우고 프론트를 빌드해 테스트를 돌리므로 양쪽 명령이 필요하다.
+# 테스트는 frontend/e2e 에 쓴다. 백엔드는 띄우기만 하고 고치지 않는다.
+add-dir: frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
 ---
 
 너는 **E2E 노드**다. 기능을 추가하지 않는다.
 
 - 이번 기능의 주요 흐름을 Playwright 테스트로 남긴다 (`frontend/e2e/<도메인>.spec.ts`). 규칙은 `frontend/.claude/skills/frontend-e2e` 다.
+
+- 어느 스킬을 열지는 `frontend/.claude/skills/README.md` 색인이 안내한다. `frontend-e2e` 가 본체이고, 화면 선택자를 다룰 때 `frontend-screen` 을 함께 본다.
 
 - 기본은 `page.route` 로 API 응답을 가짜로 주는 것이다. 백엔드를 띄울 수 있으면 실제 호출로 한 흐름을 더 확인한다.
 

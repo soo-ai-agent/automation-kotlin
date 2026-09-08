@@ -169,6 +169,12 @@ check_node_contracts() {
             continue
         fi
         grep -q '^allowed-tools:' "$f" || bad="$bad ${name}(allowed-tools없음)"
+        grep -q '^add-dir:' "$f" || bad="$bad ${name}(add-dir없음)"
+        # 코드를 커밋하는 역할은 영역 스킬 없이 돌면 안 된다 — 리뷰어는 그 스킬로 판정하는데
+        # 작성자는 그 스킬을 못 보는 상태가 된다. 실제로 그 상태였다.
+        if grep -q 'git commit' "$f" && [ -z "$(sed -n 's/^add-dir: *//p' "$f")" ]; then
+            bad="$bad ${name}(커밋하는데_영역스킬이_없음)"
+        fi
     done
 
     runner=".github/agent/run-claude.sh"
@@ -179,9 +185,12 @@ check_node_contracts() {
         || bad="$bad run-claude.sh(수습노드에_계약을_안읽음)"
     # 패턴이 -- 로 시작해 grep 이 옵션으로 먹는다 — 인자 끝 표시를 붙인다
     grep -qF -e '--allowedTools "$ALLOWED"' "$runner" || bad="$bad run-claude.sh(계약을_CLI에_안넘김)"
+    # 루트에서 열면 하위 폴더의 kotlin-*·frontend-* 가 세션 스킬 목록에 안 오른다.
+    # 실측: --add-dir 없이 0개, 붙이면 17개·8개 (bin/claude-skills.sh 에도 같은 기록이 있다).
+    grep -qF 'claude $ADD_DIRS -p' "$runner" || bad="$bad run-claude.sh(영역스킬을_안붙임)"
 
     if [ -z "$bad" ]; then
-        ok "노드마다 실행 계약이 있고 run-claude.sh 가 그것을 적용한다"
+        ok "노드마다 실행 계약(명령·영역 스킬)이 있고 run-claude.sh 가 그것을 적용한다"
     else
         ng "노드 실행 계약이 없거나 적용되지 않는다" "$bad"
     fi

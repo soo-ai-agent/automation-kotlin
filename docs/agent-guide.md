@@ -219,6 +219,21 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 | `CLAUDE_REVIEW_BAR` | — | 머지를 막는 기준 |
 | `CLAUDE_DIFF_LIMIT_BYTES` | `100000` | 리뷰가 한 번에 읽는 diff 상한 |
 
+### 고치기 전에 결과를 미리 본다
+
+그래프나 루프를 바꾸기 전에 아래를 돌리면 워크플로를 돌리지 않고 결과를 볼 수 있다. 모델도 GitHub 도 부르지 않는다.
+
+```bash
+bash common/harness-tests/plan.sh 'plan>api+web>e2e'   # 이 계획이 몇 바퀴에 걸쳐 어떻게 도나
+bash common/harness-tests/graph.sh 'api+web>e2e'       # 이 그래프가 어떤 단계로 펼쳐지나
+bash common/harness-tests/next-role.sh table           # 상황별로 어느 역할이 불리나
+bash common/harness-tests/loop.sh table                # 상황별 머지 결정
+```
+
+바꾼 뒤에는 하네스로 확인한다 — 검사 일곱과 돌리는 순서는 [local-claude.md](local-claude.md#하네스로-확인한다) 에 있다.
+
+### 노드 추가하기
+
 노드를 새로 만들려면 `.github/agent/nodes/<이름>.md` 를 추가하고 `CLAUDE_GRAPH` 에 이름을 잇는다.
 
 노드 파일은 앞머리에 그 역할의 **실행 계약**을 적는다. 지시문 아래에 무엇을 하라고 쓰는 것과 별개로, 실제로 무엇을 할 수 있는지가 여기서 정해진다.
@@ -226,11 +241,17 @@ api 노드는 시작 전에 전제(백엔드 뼈대)를 확인하고, 없으면 
 ```yaml
 ---
 # frontend/ 만 고치므로 백엔드 검증 명령을 갖지 않는다.
+add-dir: frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bash(npm:*)
 ---
 ```
 
-읽기 전용 git(`status`·`diff`·`log`)은 모든 노드가 기본으로 갖는다. 여기에 적는 것은 그 위에 더할 것뿐이다.
+`allowed-tools` 는 허용할 명령이다. 읽기 전용 git(`status`·`diff`·`log`)은 모든 노드가 기본으로 갖고, 여기에 적는 것은 그 위에 더할 것뿐이다.
+
+`add-dir` 은 그 노드가 볼 영역 스킬이다. 루트에서 claude 를 열면 스킬을 루트 `.claude/skills/` 에서만 찾는다.
+`backend/`·`frontend/` 를 여기 적어야 `kotlin-*`·`frontend-*` 가 세션 스킬 목록에 오른다.
+
+적지 않으면 그 노드는 영역 스킬을 하나도 못 보고 코드를 쓴다 — 리뷰어는 그 스킬로 판정하는데 작성자는 못 보는 상태가 된다.
 
 계약을 안 적으면 그 노드는 읽기 전용 git 만 받아 커밋도 검증도 못 한다. 하네스 형식 검사가 빠진 계약을 잡는다.
 

@@ -1,11 +1,17 @@
 ---
 # 백엔드 유닛 테스트가 본업이고, 프론트가 바뀌었으면 타입 검사까지 돌린다.
+# 백엔드 테스트가 본업이고 프론트 타입 검사까지 하므로 둘 다 붙인다.
+add-dir: backend frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
 ---
 
 너는 **검증 노드**다. 새 기능을 추가하지 않는다.
 
 - 직전 구현의 유닛 테스트를 보강하고 실행한다: `cd backend && ./gradlew ktlintCheck unitTest`
+
+- 어느 스킬을 열지는 `backend/.claude/skills/README.md` 색인이 안내한다. 프론트 테스트를 손대면 `frontend/.claude/skills/frontend-e2e` 를 본다.
+
+- 공통 스킬(`.claude/skills/`)은 항상 적용된다 — 특히 `algorithm-implementation` 이 "이해를 입출력 표로 고정하고 표를 테스트로 옮기는" 순서를 담고 있다.
 
 - 보강 기준은 kotlin-test 스킬이다. **테스트 메서드 하나가 기능 하나만** 검증하도록, 한 메서드에 여러 시나리오가 몰려 있으면 조건별로 쪼갠다.
 

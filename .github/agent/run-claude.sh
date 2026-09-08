@@ -41,9 +41,20 @@ strip_frontmatter() { # $1=역할 파일 → 지시문 본문만
 
 # 역할이 정한 명령을 기본 위에 얹는다. 계약이 없으면 읽기 전용 git 만 남는다 —
 # 모르는 역할에 권한을 주는 쪽이 아니라 막는 쪽으로 떨어져야 한다.
-apply_contract() { # $1=역할 파일 → ALLOWED 를 채운다
+#
+# 영역 스킬도 여기서 붙인다. 루트에서 열면 claude 는 스킬을 루트 .claude/skills/ 에서만
+# 찾고, 하위 폴더의 kotlin-*·frontend-* 는 --add-dir 로 그 폴더를 붙여야 세션 스킬 목록에
+# 오른다. 안 붙이면 이름조차 뜨지 않는다 (bin/claude-skills.sh 에 실측 기록이 있다).
+# 리뷰어와 하네스는 이미 붙이고 있었는데 노드만 빠져 있었다 — 리뷰어가 그 스킬로 판정하는데
+# 작성자는 그 스킬을 못 보는 상태였다.
+apply_contract() { # $1=역할 파일 → ALLOWED 와 ADD_DIRS 를 채운다
   extra=$(frontmatter "$1" | sed -n 's/^allowed-tools: *//p')
   ALLOWED="$BASE_TOOLS${extra:+,$extra}"
+
+  ADD_DIRS=""
+  for dir in $(frontmatter "$1" | sed -n 's/^add-dir: *//p'); do
+    ADD_DIRS="$ADD_DIRS --add-dir $dir"
+  done
 }
 
 build_prompt() { # $1=역할 파일, $2=출력 파일
@@ -80,7 +91,10 @@ build_prompt() { # $1=역할 파일, $2=출력 파일
 
 run_claude() { # $1=프롬프트 파일 → 종료코드를 STATUS 에
   STATUS=0
-  claude -p "$(cat "$1")" \
+  # --add-dir 은 폴더를 여럿 받는 옵션이라 바로 뒤에 플래그가 아닌 것이 오면 그것까지
+  # 폴더로 먹는다. 뒤에 -p 가 오도록 순서를 지킨다.
+  # shellcheck disable=SC2086
+  claude $ADD_DIRS -p "$(cat "$1")" \
     --permission-mode acceptEdits \
     --allowedTools "$ALLOWED" \
     --output-format stream-json --verbose \
@@ -93,6 +107,7 @@ apply_contract /tmp/role.md
 build_prompt /tmp/role.md /tmp/prompt.txt
 echo "노드: $NODE_NAME${RESCUE:+ (수습: $RESCUE)}"
 echo "허용 명령: $ALLOWED"
+echo "영역 스킬:${ADD_DIRS:- (없음)}"
 run_claude /tmp/prompt.txt
 
 # 수습 — 실패했고 수습 노드가 지정돼 있으면, 같은 브랜치를 이어받아 완수시킨다
@@ -109,6 +124,7 @@ if [ "$STATUS" != "0" ] && [ -n "$RESCUE" ]; then
       "$(tail -c 2000 /tmp/prev-out.txt)"
   } >> /tmp/rescue-prompt.txt
   echo "허용 명령: $ALLOWED"
+echo "영역 스킬:${ADD_DIRS:- (없음)}"
   run_claude /tmp/rescue-prompt.txt
   echo "NODE_LABEL=$NODE_NAME→$RESCUE" >> "$GITHUB_ENV"
 else

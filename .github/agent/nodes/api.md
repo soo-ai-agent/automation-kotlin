@@ -1,5 +1,7 @@
 ---
 # backend/ 만 고치므로 프론트 검증 명령을 갖지 않는다.
+# backend/ 만 고치므로 백엔드 스킬만 붙인다.
+add-dir: backend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(./gradlew:*)
 ---
 

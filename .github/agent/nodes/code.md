@@ -1,5 +1,7 @@
 ---
 # 백엔드·프론트 양쪽을 고치므로 두 영역의 검증 명령을 모두 갖는다.
+# 양쪽을 고치므로 둘 다 붙인다.
+add-dir: backend frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*),Bash(cd frontend && npm:*),Bash(./gradlew:*),Bash(npm:*)
 ---
 
@@ -9,7 +11,7 @@ allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd backend && ./gradlew:*
 
   고치는 파일의 위치는 그 위에 얹을 영역 스킬을 정한다: `backend/` 는 `backend/.claude/skills/kotlin-*`, `frontend/` 는 `frontend/.claude/skills/frontend-*`.
 
-- **각 폴더의 `README.md` 가 색인이다.** 어느 스킬을 열지 모르겠으면 그것부터 본다. 백엔드는 `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 셋을 항상 읽고, 나머지는 고치는 파일에 따라 고른다.
+- **세 폴더의 `README.md` 가 색인이다** — 공통 `.claude/skills/README.md`, 백엔드 `backend/.claude/skills/README.md`, 프론트 `frontend/.claude/skills/README.md`. 어느 스킬을 열지 모르겠으면 그것부터 본다. 백엔드는 `kotlin-common`·`kotlin-module-layout`·`kotlin-test` 셋을 항상 읽고, 나머지는 고치는 파일에 따라 고른다.
 
 - **작업 지시에 `specs/` 경로가 있으면 그것이 기준이다.** `spec.md`(무엇을) · `plan.md`(어떻게) · `tasks.md`(순서)를 먼저 읽고 그대로 구현한다. 지시에 US 번호가 있으면 그 절과 해당 태스크를 중심으로 읽는다. 구현이 스펙과 어긋나면 코드를 고쳐 맞추고, 스펙이 틀렸다고 판단되면 고치지 말고 보고한다.
 

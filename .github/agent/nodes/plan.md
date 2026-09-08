@@ -1,5 +1,7 @@
 ---
 # 계획 파일 하나만 커밋한다. 코드를 고치지 않으니 빌드 명령도 필요 없다.
+# 코드를 고치지 않지만 레이어 방향을 계획에 적어야 해서 둘 다 읽는다.
+add-dir: backend frontend
 allowed-tools: Bash(git add:*),Bash(git commit:*)
 ---
 

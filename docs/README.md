@@ -19,9 +19,9 @@
 | 7 | [external-apis.md](external-apis.md) | 외부 시스템이 막혔을 때 — 무엇을 쓰고 있고 막히면 무엇이 대신 나가는지 |
 | 8 | [upstream.md](upstream.md) | 빌려온 것의 원본과 라이선스 — ponytail · spec-kit |
 | 9 | [architecture.html](architecture.html) | 전체 구조를 한 장으로 보고 싶을 때 — 파이프라인·스킬 체계·문서 지도. GitHub 에서는 소스로 보이므로 내려받아 브라우저로 연다 |
-| 10 | [local-claude.md](local-claude.md) | 내 컴퓨터에서 Claude 를 열 때 — 같은 규칙으로 여는 launcher 깔기와 쓰는 법 |
+| 10 | [local-claude.md](local-claude.md) | 내 컴퓨터에서 Claude 를 열 때 — launcher 깔기, 그리고 **하네스로 확인하기** (그래프·루프를 고치기 전에 결과를 미리 보는 명령도 여기 있다) |
 
-1~3 만 읽어도 쓰는 데는 지장이 없다. 4 는 기본 동작을 바꾸고 싶어질 때, 10 은 터미널에서 직접 Claude 를 쓸 때 연다.
+1~3 만 읽어도 쓰는 데는 지장이 없다. 4 는 기본 동작을 바꾸고 싶어질 때, 10 은 터미널에서 직접 Claude 를 쓰거나 **바꾼 것을 하네스로 확인할 때** 연다.
 
 앱을 만드는 문서는 각 모듈에 있다 — [backend/README.md](../backend/README.md), [frontend/README.md](../frontend/README.md).
 
