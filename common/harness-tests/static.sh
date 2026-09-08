@@ -198,10 +198,15 @@ check_node_contracts() {
     # 실측: --add-dir 없이 0개, 붙이면 17개·8개 (bin/claude-skills.sh 에도 같은 기록이 있다).
     grep -qF 'claude --agent "$AGENT" $ADD_DIRS -p' "$runner" \
         || bad="$bad run-claude.sh(영역스킬을_안붙이거나_에이전트로_안부름)"
-    # 역할 파일은 기준 브랜치 것을 홈에 놓는다. 저장소 .claude/agents/ 에 두면
+    # 역할 파일은 기준 브랜치 것을 홈에 놓는다. 작업 트리의 .claude/agents/ 를 쓰면
     # 작업 브랜치가 자기 역할을 덮어써 권한을 넓힐 수 있다.
     grep -qF 'cp "$1" ~/.claude/agents/' "$runner" || bad="$bad run-claude.sh(역할을_에이전트_자리에_안놓음)"
-    [ -d .claude/agents ] && bad="$bad 저장소에_.claude/agents가_생김(작업_브랜치가_역할을_고칠_수_있다)"
+    # 로컬 세션은 launcher 가 .claude/agents/ 로 복사해 쓴다. 그건 사본이라 괜찮지만
+    # **커밋되면 안 된다** — 커밋되는 순간 작업 브랜치가 자기 역할을 고칠 수 있다.
+    git check-ignore -q .claude/agents 2>/dev/null \
+        || bad="$bad .claude/agents가_gitignore에_없음(커밋되면_역할을_고칠_수_있다)"
+    git ls-files --error-unmatch .claude/agents >/dev/null 2>&1 \
+        && bad="$bad .claude/agents가_커밋됨"
 
     if [ -z "$bad" ]; then
         ok "노드가 네이티브 에이전트 형식이고 run-claude.sh 가 --agent 로 부른다"
@@ -445,6 +450,29 @@ check_reviewer_readonly() {
     fi
 }
 
+# ── ⑯ 로컬 워크플로가 부르는 역할이 실재하는가 ────────────────────────
+# .claude/workflows/work.js 는 노드 역할을 agentType 으로 부른다. 계획 표현식에
+# 없는 역할을 적으면 그 단계가 통째로 죽는데, 워크플로는 모델을 부르는 물건이라
+# 돌려 보기 전에는 안 드러난다. 이름만이라도 여기서 맞춘다.
+check_workflow_roles() {
+    wf=".claude/workflows/work.js"
+    [ -f "$wf" ] || { ok "로컬 워크플로 없음 — 검사 건너뜀"; return; }
+    bad=""
+    node --check "$wf" 2>/dev/null || bad="$bad work.js(문법오류)"
+    # 스크립트가 역할 이름을 직접 적지 않고 계획 표현식에서 받으므로,
+    # 기본값으로 쓰는 것과 문서에 예로 든 것이 실재하는지만 본다.
+    for role in $(sed -n "s/.*args.plan) || '\([a-z>+]*\)'.*/\1/p" "$wf" | tr '>+' '  '); do
+        [ -f ".github/agent/nodes/$role.md" ] || bad="$bad work.js(없는_역할:$role)"
+    done
+    grep -qF 'agentType: role' "$wf" || bad="$bad work.js(역할을_agentType으로_안부름)"
+
+    if [ -z "$bad" ]; then
+        ok "로컬 워크플로가 실재하는 역할을 agentType 으로 부른다"
+    else
+        ng "로컬 워크플로가 어긋난다" "$bad"
+    fi
+}
+
 check_case_expectations
 check_pass_case_per_area
 check_skill_index_links
@@ -460,6 +488,7 @@ check_case_area_match
 check_syntax
 check_dispatch_rules_shared
 check_reviewer_readonly
+check_workflow_roles
 
 printf '\n%d PASS · %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

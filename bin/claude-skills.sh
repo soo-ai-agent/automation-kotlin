@@ -143,6 +143,12 @@ echo "  저장소: $REPO_ROOT"
 
 cd "$REPO_ROOT"
 
+# 노드 역할을 이 세션의 에이전트로 올린다. 원본은 .github/agent/nodes/ 이고 그쪽이 정본이다 —
+# 여기는 복사본이라 .gitignore 가 무시한다. 이렇게 해야 `claude --agent api` 로 부르거나
+# 워크플로가 agentType 으로 쓸 수 있다.
+mkdir -p .claude/agents
+cp .github/agent/nodes/*.md .claude/agents/ 2> /dev/null || true
+
 # 권한 확인 창을 띄우지 않는다 — 이 저장소 작업은 매번 승인을 누르는 값이 없다고 보고 끈 것이다.
 # 대신 세션이 하는 일을 사람이 보고 있어야 한다. 낯선 저장소나 남의 코드에는 이 launcher 를 쓰지 않는다.
 SKIP_PERMISSIONS="--dangerously-skip-permissions"
