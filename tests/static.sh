@@ -203,7 +203,11 @@ check_node_contracts() {
     grep -qF 'cp "$1" ~/.claude/agents/' "$runner" || bad="$bad run-claude.sh(역할을_에이전트_자리에_안놓음)"
     # 로컬 세션은 launcher 가 .claude/agents/ 로 복사해 쓴다. 그건 사본이라 괜찮지만
     # **커밋되면 안 된다** — 커밋되는 순간 작업 브랜치가 자기 역할을 고칠 수 있다.
-    git check-ignore -q .claude/agents 2>/dev/null \
+    #
+    # 폴더가 아니라 **안쪽 파일 경로**로 묻는다. .gitignore 의 `.claude/agents/` 처럼
+    # / 로 끝나는 패턴은 실재하는 디렉터리에만 매치돼서, launcher 를 안 돌린 트리
+    # (CI 의 갓 checkout 한 트리)에서는 폴더 경로로 물으면 무시 안 됨으로 나온다 — 실측했다.
+    git check-ignore -q .claude/agents/probe.md 2>/dev/null \
         || bad="$bad .claude/agents가_gitignore에_없음(커밋되면_역할을_고칠_수_있다)"
     git ls-files --error-unmatch .claude/agents >/dev/null 2>&1 \
         && bad="$bad .claude/agents가_커밋됨"
