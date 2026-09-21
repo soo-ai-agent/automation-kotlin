@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# 이 저장소의 규칙 스킬을 실은 Hermes 를 **지금 서 있는 디렉터리**에서 연다.
+#
+#   ccsk            공통 3종 + 백엔드·프론트 허브
+#   ccsk be         공통 3종 + 백엔드 허브 4종 (kotlin-*)
+#   ccsk fe         공통 3종 + 프론트 허브 (frontend-*)
+#   ccsk co         공통 3종만
+#
+# 뒤에 붙인 인자는 hermes 로 그대로 넘어간다 — `ccsk be -c` 는 이어서 대화하기다.
+#
+# **cd 하지 않는다.** 규칙은 이 저장소에서 가져오고, 작업 대상은 명령을 친 자리다.
+# 그래서 다른 프로젝트에 이 규칙을 그대로 들고 갈 수 있다.
+#
+# 저장소 루트에서 여는 launcher 는 따로 있다 — `claude-be`·`claude-fe`·`claude-all`
+# (bin/claude-skills.sh). 그쪽은 Claude Code 이고 이 저장소 자체를 고칠 때 쓴다.
+set -eu
+
+# ── 저장소 찾기 ──────────────────────────────────────────────
+# 심볼릭 링크로 걸어 두어도 원본 위치를 스스로 찾는다.
+# readlink -f 를 쓰지 않는다 — macOS(BSD) 에 그 옵션이 없다. 직접 따라간다.
+resolve_link() {
+    path="$1"
+    while [ -L "$path" ]; do
+        target="$(readlink "$path")"
+        case "$target" in
+            /*) path="$target" ;;
+            *) path="$(dirname "$path")/$target" ;;
+        esac
+    done
+    printf '%s/%s' "$(cd "$(dirname "$path")" && pwd)" "$(basename "$path")"
+}
+
+SELF="$(resolve_link "${BASH_SOURCE[0]}")"
+REPO="$(cd "$(dirname "$SELF")/.." && pwd)"
+
+# ── 스킬을 어디에 걸 것인가 ───────────────────────────────────
+# hermes 는 스킬을 **이름으로** 싣는다(-s). 경로는 받지 않으므로 사용자 스킬 자리에 링크를 걸어 둔다.
+#
+# 이름이 겹치면 한쪽이 통째로 안 보인다 — 같은 이름이 두 카테고리에 있으면 `-s` 가
+# "Unknown skill(s)" 로 실패한다(실측). 그래서 카테고리를 **매번 비우고 다시 건다.**
+#
+# 이 카테고리는 다른 저장소의 launcher(ccs)와 같은 자리를 쓴다. 마지막에 실행한 쪽이 이긴다 —
+# 아래 배너가 어느 저장소의 규칙이 실렸는지 늘 알려 준다.
+SKILLS_HOME="${HERMES_SKILLS_DIR:-$HOME/.hermes/skills}"
+CATEGORY="$SKILLS_HOME/gyurinet"
+
+# ── 영역 고르기 ──────────────────────────────────────────────
+# 허브만 미리 싣는다. 나머지 계층 스킬은 링크되어 있으니 세션에서 이름으로 부르면 된다.
+# 백엔드 허브 넷은 backend/.claude/skills/README.md 의 "항상" 목록 그대로다.
+case "${1-}" in
+    backend | be)
+        HUBS="core-principles ponytail object-design kotlin-common kotlin-abstraction kotlin-module-layout kotlin-test"
+        SCOPE="공통 3종 + 백엔드 허브 4종"
+        shift
+        ;;
+    frontend | fe)
+        HUBS="core-principles ponytail object-design frontend-common"
+        SCOPE="공통 3종 + 프론트엔드 허브"
+        shift
+        ;;
+    common | co)
+        HUBS="core-principles ponytail object-design"
+        SCOPE="공통 3종만"
+        shift
+        ;;
+    -h | --help | help)
+        sed -n '2,15p' "$SELF" | sed 's/^# \{0,1\}//'
+        exit 0
+        ;;
+    '' | -*)
+        HUBS="core-principles ponytail object-design kotlin-common frontend-common"
+        SCOPE="공통 3종 + 백엔드·프론트엔드 허브"
+        ;;
+    *)
+        echo "모르는 자리: $1" >&2
+        echo "사용법: ccsk [be|fe|co] [hermes 인자...]" >&2
+        exit 2
+        ;;
+esac
+
+command -v hermes > /dev/null || {
+    echo "hermes 가 없어요 — 설치하고 로그인한 뒤 다시 실행하세요." >&2
+    exit 1
+}
+
+# ── 링크 걸기 ────────────────────────────────────────────────
+link_skills() {
+    rm -rf "$CATEGORY"
+    mkdir -p "$CATEGORY"
+    for root in "$REPO/.claude/skills" "$REPO/backend/.claude/skills" "$REPO/frontend/.claude/skills"; do
+        [ -d "$root" ] || continue
+        for dir in "$root"/*/; do
+            [ -f "$dir/SKILL.md" ] || continue
+            name="$(basename "$dir")"
+            # speckit-* 는 spec-kit 설치물이라 우리 규칙이 아니다
+            case "$name" in speckit-*) continue ;; esac
+            ln -sfn "${dir%/}" "$CATEGORY/$name"
+        done
+    done
+}
+link_skills
+
+# 미리 싣기로 지정한 허브가 실제로 링크됐는지 본다 —
+# 없는 이름을 넘기면 hermes 가 통째로 실패한다. 통과와 미검사를 구분하려면 개수를 세어야 한다.
+MISSING=""
+for hub in $HUBS; do
+    [ -e "$CATEGORY/$hub" ] || MISSING="$MISSING $hub"
+done
+if [ -n "$MISSING" ]; then
+    echo "허브 스킬이 저장소에 없어요:$MISSING" >&2
+    echo "저장소: $REPO" >&2
+    exit 1
+fi
+
+# 헤드리스(-z) 출력과 섞이지 않게 stderr 로 알린다
+printf '\033[1;36m▶ Hermes · 스킬 %d개 링크 · 미리 싣기: %s · 규칙 %s · 작업 %s\033[0m\n' \
+    "$(ls "$CATEGORY" | wc -l | tr -d ' ')" "$SCOPE" "$REPO" "$PWD" >&2
+
+# ── 명령을 친 자리에서 열기 ──────────────────────────────────
+# 둘 다 필요하다. 하나만 걸면 반만 옮겨진다 (실측).
+#
+#   TERMINAL_CWD  셸 도구가 실제로 서는 자리. **이것이 없으면 홈에서 돈다** —
+#                 셸이 이미 그 자리에 있어도, --in 을 줘도 소용없다.
+#                 config 의 `terminal.cwd: .` 가 홈으로 풀려서, 명령을 친 자리의
+#                 파일을 상대 경로로 못 찾는다.
+#   --in          세션 조회의 기준 자리. -c·--resume 이 이 자리의 세션을 고르고,
+#                 직전 세션에 기록된 cwd 로 되돌아가지 않게 한다.
+#
+# --yolo — 승인 창 없이 연다. 세션이 하는 일을 사람이 보고 있어야 한다.
+# export 로 따로 쓴다. `TERMINAL_CWD=... exec hermes` 처럼 앞에 붙이면 전달되지 않는다 —
+# exec 는 특수 내장 명령이라 앞의 대입이 환경이 아니라 셸 변수로만 남는다 (실측: 엉뚱한 자리에서 열렸다).
+export TERMINAL_CWD="$PWD"
+
+exec hermes --in "$PWD" --yolo -s "$(echo "$HUBS" | tr ' ' ',')" "$@"

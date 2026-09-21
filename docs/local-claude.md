@@ -26,7 +26,9 @@ claude setup-token                          # 브라우저가 열리며 로그�
 ~/work/automation-kotlin/bin/claude-skills.sh install
 ```
 
-`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 과 짧은 이름 `ccsk` 네 개가 만들어진다.
+`~/.local/bin/` 에 `claude-be`·`claude-fe`·`claude-all` 과 `ccsk` 네 개가 만들어진다.
+
+앞의 셋은 **이 저장소를 고칠 때** 쓰는 Claude Code 이고, `ccsk` 는 **규칙만 들고 다른 프로젝트로 갈 때** 쓰는 Hermes 다.
 
 **3. PATH 에 그 폴더를 넣는다.** PATH 는 터미널이 명령어 파일을 찾아다니는 폴더 목록이다. 여기 없으면 이름만 쳐서는 실행되지 않는다.
 
@@ -40,15 +42,7 @@ claude-fe      # 프론트 작업으로 열기
 claude-all     # 저장소 전체
 ```
 
-더 짧게 치고 싶으면 `ccsk` 다 — 같은 것의 짧은 이름이고, 영역을 인자로 받는다.
-
-```bash
-ccsk be        # = claude-be
-ccsk fe        # = claude-fe
-ccsk           # = claude-all (영역을 안 주면 전체)
-```
-
-`ccsk -c` 처럼 `-` 로 시작하는 첫 인자는 영역이 아니라 claude 옵션으로 넘어간다 — 전체 자리에서 이어서 대화하기다.
+`-` 로 시작하는 첫 인자는 영역이 아니라 claude 옵션으로 넘어간다 — `claude-be -c` 는 백엔드 자리에서 이어서 대화하기다.
 
 어느 폴더에서 쳐도 된다. 셋 다 **저장소 루트에서** 열린다 — 루트 `CLAUDE.md` 와 거기 딸린 5대 원칙·리뷰 규칙(MUST)이
 통째로 읽히는 자리가 루트뿐이기 때문이다. 하위 폴더에서 열면 그 규칙들이 빠진 채로 열린다.
@@ -57,6 +51,34 @@ ccsk           # = claude-all (영역을 안 주면 전체)
 
 셋의 차이는 **작업 영역과 붙는 스킬**이다. `claude-be` 는 "backend/ 안에서만 고치고 kotlin-* 스킬을 따른다"를,
 `claude-fe` 는 그 반대를 세션 시작부터 지시해 둔다. 반대편은 계약 확인용으로 읽기만 한다.
+
+## 다른 프로젝트에 규칙을 들고 갈 때 — `ccsk`
+
+`ccsk` 는 앞의 셋과 **도구도 자리도 다르다.** 이 저장소의 규칙 스킬을 실은 **Hermes** 를,
+**명령을 친 그 디렉터리에서** 연다. 저장소 루트로 옮겨 가지 않는다.
+
+```bash
+cd ~/work/내-다른-프로젝트
+ccsk           # 공통 3종 + 백엔드·프론트 허브
+ccsk be        # 공통 3종 + 백엔드 허브 4종 (kotlin-common·abstraction·module-layout·test)
+ccsk fe        # 공통 3종 + 프론트 허브 (frontend-common)
+ccsk co        # 공통 3종만 (core-principles·ponytail·object-design)
+```
+
+미리 싣는 것은 허브뿐이다. 나머지 계층 스킬(`kotlin-entity`·`frontend-hooks` 등)은 전부 링크돼 있어
+세션에서 이름으로 부르면 읽힌다. 배너가 **몇 개를 링크했는지·어느 저장소의 규칙인지·어느 자리에서 여는지**를 매번 알려 준다.
+
+`--yolo` 로 연다 — 승인 창이 뜨지 않는다. 세션이 하는 일을 사람이 보고 있어야 한다.
+
+### 알아 둘 것 두 가지
+
+**스킬 이름은 전역이라 한 번에 한 저장소만 실린다.** hermes 는 스킬을 이름으로 싣는데,
+`core-principles` 같은 이름이 두 저장소에 다 있으면 한쪽이 통째로 안 보이고 `Unknown skill(s)` 로 실패한다.
+그래서 `ccsk` 는 실행할 때마다 스킬 카테고리를 **비우고 다시 건다.** 다른 저장소의 같은 launcher 와 자리를 공유하므로,
+**마지막에 실행한 쪽이 이긴다.** 배너의 `규칙 <경로>` 가 지금 무엇이 실렸는지 말해 준다.
+
+**이 저장소의 `CLAUDE.md` 는 따라가지 않는다.** 다른 프로젝트에서 열면 그 프로젝트의 규칙 문서가 읽히고,
+우리 규칙은 위 허브 스킬로만 들어간다. 저장소 전체 규칙이 통째로 필요하면 `claude-all` 로 저장소 루트에서 연다.
 
 | 명령 | 붙는 스킬 | 개수 |
 |---|---|---|
