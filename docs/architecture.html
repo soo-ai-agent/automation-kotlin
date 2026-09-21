@@ -395,7 +395,7 @@
 
     <figure>
       <div class="figbox">
-      <svg viewBox="0 0 760 236" role="img" aria-label="공통 스킬이 바닥에 항상 깔리고, backend 파일을 고치면 kotlin 스킬 17종이, frontend 파일을 고치면 frontend 스킬 8종이 그 위에 얹히는 구조">
+      <svg viewBox="0 0 760 236" role="img" aria-label="공통 스킬이 바닥에 항상 깔리고, backend 파일을 고치면 kotlin 스킬 18종이, frontend 파일을 고치면 frontend 스킬 8종이 그 위에 얹히는 구조">
         <g fill="none" stroke="currentColor" stroke-width="1.3">
           <rect x="40"  y="36" width="330" height="76" rx="8"/>
           <rect x="390" y="36" width="330" height="76" rx="8"/>
@@ -403,7 +403,7 @@
         <rect x="40" y="150" width="680" height="60" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
         <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="currentColor" text-anchor="middle">
           <text x="205" y="66" font-weight="600">backend/ 를 고치면</text>
-          <text x="205" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5">kotlin-* · 17종</text>
+          <text x="205" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5">kotlin-* · 18종</text>
           <text x="555" y="66" font-weight="600">frontend/ 를 고치면</text>
           <text x="555" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5">frontend-* · 8종</text>
         </g>
@@ -427,12 +427,12 @@
     <div class="tablewrap"><table>
       <tr><th>스킬</th><th>무엇을 강제하나</th></tr>
       <tr><td class="k"><code>ponytail</code> <span class="mono">(+review·audit·debt)</span></td><td>실제로 동작하는 가장 게으른 해법 — YAGNI, 표준 라이브러리 우선, 가장 짧은 diff. 리뷰·감사·부채 장부 변형 3종 동반</td></tr>
-      <tr><td class="k"><code>oop-responsibility-design</code></td><td>책임주도 설계 — 책임 배치, 캡슐화 경계, 다형성, GRASP. "이 로직을 어느 클래스에 두나"의 판정 기준</td></tr>
+      <tr><td class="k"><code>object-design</code></td><td>책임주도 설계 — 책임 배치, 캡슐화 경계, 다형성, GRASP. "이 로직을 어느 클래스에 두나"의 판정 기준</td></tr>
       <tr><td class="k"><code>md-doc</code></td><td>기술 문서 작성 — 쉬운 한국어, 비유 금지, 코드 인용, 결론 우선</td></tr>
       <tr><td class="k"><code>api-contract</code></td><td>서버-클라이언트 계약 — <code>CONTRACT.md</code>+백엔드 DTO 를 프론트가 그대로 미러링(개명 금지), nullable 대칭, 미지의 enum 은 경계 한 곳에서 <code>UNKNOWN</code> 정규화, 시각·금액 와이어 단위, 필드 하나 추가는 표준 경로의 자리마다 한 곳씩만. 세 스킬(kotlin-style·frontend-style)이 공유하는 목표(유지보수성·정합성·가독성)의 원문이 여기 있다</td></tr>
     </table></div>
 
-    <h3>백엔드 스킬 17종 <span class="mono" style="color:var(--muted)">backend/.claude/skills/</span></h3>
+    <h3>백엔드 스킬 18종 <span class="mono" style="color:var(--muted)">backend/.claude/skills/</span></h3>
     <p>모두 같은 구조다: 규칙 → <b>적발 신호</b>(<span class="pill crit">Critical</span> 머지 차단 · <span class="pill warn">Important</span> 참고 코멘트) → 체크리스트.
     16종을 다 읽지 않는다 — "항상" 셋 + 고치는 파일에 맞는 것만.</p>
 

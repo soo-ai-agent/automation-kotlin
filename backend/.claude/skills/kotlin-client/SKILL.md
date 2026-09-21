@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/clients/**"
 name: kotlin-client
 description: 외부 시스템 연동 규칙. 처음 붙이는 API 를 실응답부터 확인하는 절차(필드명·타입·페이징·빈 결과·좌표계, 규격 위반 대응), 쿼터·갱신 주기에 맞춘 호출 설계, 0건·실패가 기존 데이터를 지우지 않게 하기, 조용한 폴백 금지, clients/client-* 모듈의 구조와 internal 캡슐화, 타임아웃, 외부 실패를 ApiException 하위 예외로 번역하기, 트랜잭션 안에서 호출 금지, 카탈로그(docs/external-apis.md) 기록을 다룬다. 외부 API·결제·알림 연동을 붙일 때 사용한다. "외부 API 연동", "RestClient", "결제 붙이기", "이 데이터 어디서 오나" 요청에도 사용할 것.
 ---

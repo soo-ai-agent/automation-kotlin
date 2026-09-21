@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/**"
 name: kotlin-common
 description: Kotlin + Spring Boot 백엔드 전 레이어 공통 규칙. 자료형 선언, 불변성(세터 금지), 조건문·반복문 풀어쓰기(람다·함수형 체이닝 자제), 이름 규약, 예외, 주석 최소화, 검증 기준을 담는다. 이 프로젝트에서 Kotlin 코드를 작성하거나 리뷰할 때 레이어 스킬(module-layout, controller, dto, domain-service, implement, entity, repository)과 항상 함께 사용한다.
 ---
@@ -18,12 +20,16 @@ description: Kotlin + Spring Boot 백엔드 전 레이어 공통 규칙. 자료�
 
 다섯째(적게 쓰기)를 극단까지 미는 스킬이 `ponytail` 인데, **리뷰 규칙의 MUST(`rules/code-review.md`)는 ponytail 로도 무를 수 없다** — 새 동작의 테스트 동반이 대표다.
 
-## 최상위 원칙 — 3대 원칙이 정본이다
+## 최상위 원칙 — 5대 원칙이 정본이다
 
-저장소 전체의 최상위 원칙은 공통 스킬 [core-principles](../../../../.claude/skills/core-principles/SKILL.md)(3대 원칙)가 정본으로 갖는다
-— 단순함 최우선, 최소 수정·무파괴, 데이터의 흐름과 통제.
+저장소 전체의 최상위 원칙은 공통 스킬 [core-principles](../../../../.claude/skills/core-principles/SKILL.md)(5대 원칙)가 정본으로 갖는다
+— 단순함 최우선, 최소 수정·무파괴, 변경 지점 통제, 데이터 흐름, 데이터 통제.
 
 이 문서의 모든 규칙은 그 원칙에 종속된다. 여기에는 요약을 두지 않는다 — 두 곳에 적히면 한쪽만 고쳐진다.
+
+설계 판단(이 로직을 누구에게 맡길 것인가)은 [object-design](../../../../.claude/skills/object-design/SKILL.md) 이, 과설계 방지는 [ponytail](../../../../.claude/skills/ponytail/SKILL.md) 이 담당한다 — 둘 다 백엔드 작업에서 항상 함께 적용된다.
+
+이름 짓기와 추상화 레벨(함수를 어떻게 쪼개고 무엇이라 부를 것인가)은 **kotlin-abstraction** 이 정한다 — 이 문서의 「이름」·「주석」과 짝을 이룬다.
 
 ## 자료형
 

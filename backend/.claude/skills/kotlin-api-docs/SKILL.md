@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/core/**/src/docs/**"
 name: kotlin-api-docs
 description: Spring REST Docs 로 API 문서를 만드는 규칙. restdocs 태그 테스트의 자리와 형태, RestDocsTest 상속, 스니펫 이름 규약, index.adoc 에 include 추가, CONTRACT.md 와의 관계를 다룬다. 엔드포인트를 추가·변경할 때 kotlin-controller 와 함께 사용한다. "API 문서", "RestDocs", "문서 테스트" 요청에도 사용할 것.
 ---

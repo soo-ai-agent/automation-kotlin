@@ -1,9 +1,16 @@
 ---
+paths:
+  - "backend/**/src/test/**"
 name: kotlin-test
 description: 유닛 테스트 작성과 리뷰 규칙. 테스트 메서드 하나가 기능 하나만 검증하도록 쪼개는 법, MockK 스텁 범위, 레이어별 테스트 대상, unitTest 태스크를 다룰 때 사용한다. 요구사항을 구현할 때는 항상 함께 사용해 테스트를 같이 작성한다. "테스트 추가", "테스트 짜줘", "커버리지" 요청에도 사용할 것.
 ---
 
 # 유닛 테스트
+
+> 테스트를 **언제 쓰고 무엇을 검증하나**는 공통 스킬 [minimal-tests](../../../../.claude/skills/minimal-tests/SKILL.md) 가,
+> **함수 하나의 범위**는 [core-principles](../../../../.claude/skills/core-principles/SKILL.md) 「테스트 함수의 범위」가 정본으로 갖는다.
+>
+> 이 문서는 그것을 **코틀린으로 어떻게 쓰나**(JUnit5·MockK·Gradle 태스크)만 다룬다.
 
 **자리:** 대상과 같은 패키지의 `src/test/kotlin/...`, 파일명은 `<대상>Test.kt` **실행:** `./gradlew unitTest` — 태그가 없는 테스트만 돈다. DB·스프링 컨텍스트가 필요 없어야 한다.
 

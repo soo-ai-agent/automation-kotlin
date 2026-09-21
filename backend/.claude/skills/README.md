@@ -4,13 +4,14 @@
 
 Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한 공통 규칙은 [`.claude/skills/`](../../../.claude/skills/) 에 있고, 백엔드 작업에도 항상 함께 적용된다.
 
-**17종을 다 읽지 않는다.** 아래 "항상" 셋을 읽고, 나머지는 지금 고치는 파일이 무엇인지에 따라 골라 읽는다.
+**18종을 다 읽지 않는다.** 아래 "항상" 넷을 읽고, 나머지는 지금 고치는 파일이 무엇인지에 따라 골라 읽는다.
 
 ## 항상
 
 | 스킬 | 다루는 것 |
 |---|---|
 | [kotlin-common](kotlin-common/SKILL.md) | 자료형, 불변성, 조건문 풀어쓰기, 이름, 예외, 주석, 검증 (최상위 원칙은 공통 `core-principles`) |
+| [kotlin-abstraction](kotlin-abstraction/SKILL.md) | 이름 짓기와 추상화 레벨 — 함수를 어떻게 쪼개고 무엇이라 부를지, 어느 층에 둘지 |
 | [kotlin-module-layout](kotlin-module-layout/SKILL.md) | 새 파일을 어느 모듈·패키지에 둘지, 의존 방향, 도메인 경계 |
 | [kotlin-test](kotlin-test/SKILL.md) | 한 메서드 = 한 기능, MockK 범위, 계층별 테스트 대상 |
 
@@ -42,7 +43,7 @@ Kotlin + Spring Boot 멀티모듈 백엔드의 규칙이다. 스택과 무관한
 
 ## 문서 구조
 
-스킬 17종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
+스킬 18종 모두 같은 모양이다. 마지막 두 절만 봐도 리뷰는 된다.
 
 - **규칙** — 지켜야 할 것
 

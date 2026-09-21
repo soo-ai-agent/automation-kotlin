@@ -163,7 +163,7 @@ main 에 머지되면 GHCR 이미지 배포까지 이어진다 ([docs/deploy.md]
 **코딩 규칙이 세 곳으로 나뉜 데는 이유가 있다.** 고치는 파일의 위치가 어느 규칙을 붙일지 고른다.
 
     .claude/skills/           공통 8종 — 위치와 무관하게 항상 적용
-    backend/.claude/skills/   kotlin-* 17종 — backend/ 를 고칠 때만
+    backend/.claude/skills/   kotlin-* 18종 — backend/ 를 고칠 때만
     frontend/.claude/skills/  frontend-* 8종 — frontend/ 를 고칠 때만
 
 **사람이 고치는 설정** — 동작을 바꾸고 싶을 때 열 곳 셋(`settings.env`·노드 지시문·`rules/`)은 [.github/README.md](.github/README.md) 가 안내한다.

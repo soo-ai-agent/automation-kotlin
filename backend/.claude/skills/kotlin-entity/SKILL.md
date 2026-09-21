@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/storage/**"
 name: kotlin-entity
 description: JPA 엔티티 작성과 리뷰 규칙. storage db-core 의 @Entity 클래스, BaseEntity 상속, protected set 과 행위 메서드, 애그리게이트 경계, 연관관계 페치 전략을 다룰 때 사용한다. "테이블 추가", "엔티티 상태 변경", "컬럼 추가" 요청에도 사용할 것.
 ---

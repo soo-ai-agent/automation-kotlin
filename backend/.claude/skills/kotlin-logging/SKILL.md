@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/support/logging/**"
 name: kotlin-logging
 description: 로그와 모니터링 규칙. 로거 선언, 레벨 고르는 기준, 파라미터 치환({})으로 남기기, traceId 로 요청 하나를 잇는 법, 로그에 넣으면 안 되는 것, 어디서 남기고 어디서 남기지 않는지를 다룬다. 실패 처리나 외부 연동을 만들 때 kotlin-error 와 함께 사용한다. "로그 추가", "무슨 일이 있었는지 남기기" 요청에도 사용할 것.
 ---

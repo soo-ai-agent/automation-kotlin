@@ -298,7 +298,7 @@
 
 ### 요구사항
 
-- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·oop-responsibility-design·md-doc·api-contract), 백엔드 `backend/.claude/skills/`(kotlin-* 17종), 프론트 `frontend/.claude/skills/`(frontend-* 8종).
+- 코딩 규칙 스킬은 3모듈: 공통 `.claude/skills/`(ponytail 계열·object-design·md-doc·api-contract), 백엔드 `backend/.claude/skills/`(kotlin-* 18종), 프론트 `frontend/.claude/skills/`(frontend-* 8종).
 
   공통 스킬은 고치는 파일의 위치와 무관하게 항상 적용되고, 영역 스킬은 위치가 정한다 (디렉터리 스코프 스킬).
 
@@ -310,7 +310,7 @@
 
 ### 수정 시 불변 조건
 
-- 리뷰어 프롬프트(`claude-review.yml`)와 `settings.env` 의 `CLAUDE_REVIEW_BAR` 에 있는 스킬 경로는 **문자열 하드코딩**이다 — 스킬을 옮기면 두 곳을 같이 고칠 것 (`.claude/skills/oop-responsibility-design`, `backend/.claude/skills/kotlin-*`, `frontend/.claude/skills/frontend-*`).
+- 리뷰어 프롬프트(`claude-review.yml`)와 `settings.env` 의 `CLAUDE_REVIEW_BAR` 에 있는 스킬 경로는 **문자열 하드코딩**이다 — 스킬을 옮기면 두 곳을 같이 고칠 것 (`.claude/skills/object-design`, `backend/.claude/skills/kotlin-*`, `frontend/.claude/skills/frontend-*`).
 
 - `CLAUDE.md`·`AGENTS.md` 는 루트에서 옮길 수 없다 (Claude Code·Codex 가 루트에서 읽는다).
 

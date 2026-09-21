@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/storage/db-core/src/main/resources/db/migration/**"
 name: kotlin-migration
 description: DB 스키마 변경 규칙. Flyway 마이그레이션 파일의 자리와 이름, 프로파일별 동작, 이미 적용된 파일을 고치지 않는 규칙, 무중단 배포를 위한 컬럼 추가·삭제 순서를 다룬다. 엔티티에 필드나 테이블을 추가·변경·삭제할 때 kotlin-entity 와 항상 함께 사용한다. "테이블 추가", "컬럼 추가", "스키마 변경", "마이그레이션" 요청에도 사용할 것.
 ---

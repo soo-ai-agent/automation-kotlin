@@ -34,7 +34,7 @@ allowed-tools: Bash(git add:*),Bash(git commit:*),Bash(cd frontend && npm:*),Bas
 
   `src/user/` 아래 파일들이 그대로 따라 쓸 본보기다. 도메인이 최상위 폴더이고 그 아래가 계층이다 — 새 도메인은 `src/<도메인>/{types,api,services,hooks,components,screens}` 로 만들고, 스타일은 `이름.styles.ts` 로 나란히 둔다.
 
-- 공통 스킬(`.claude/skills/`)도 파일 위치와 무관하게 항상 함께 적용된다 — 모든 코딩에 `ponytail`, 설계 판단에 `oop-responsibility-design`. 색인은 `.claude/skills/README.md` 다.
+- 공통 스킬(`.claude/skills/`)도 파일 위치와 무관하게 항상 함께 적용된다 — 모든 코딩에 `ponytail`, 설계 판단에 `object-design`. 색인은 `.claude/skills/README.md` 다.
 
 - `cd frontend && npm ci && npm run build` 가 통과해야 끝난 것이다.
 

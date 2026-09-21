@@ -1,0 +1,1 @@
+../skills/core-principles/SKILL.md

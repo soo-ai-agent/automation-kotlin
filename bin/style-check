@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""저장한 코드를 프로젝트의 검사 도구에 걸어 본다 — 훅(저장 시)과 사람이 같은 스크립트를 쓴다.
+
+도구를 새로 만들지 않는다. 이 저장소가 이미 쓰는 것을 부를 뿐이다:
+백엔드는 `./gradlew ktlintCheck`, 프론트는 `tsc --noEmit`.
+
+도구가 없으면 통과가 아니라 "검사 안 됨"으로 알린다 — 통과와 미검사는 겉보기가 같다.
+그래서 결과에 항상 **그 영역이 몇 개 파일을 갖고 있는지**를 함께 적는다. 0개면 초록불이 아무것도 뜻하지 않는다.
+
+사용법: style-check <파일…>
+       style-check --hook      (훅용 — stdin 의 훅 JSON 을 읽는다)
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+TIMEOUT_SECONDS = 600   # Gradle 은 첫 실행에서 의존성을 받는다
+
+
+@dataclass(frozen=True)
+class Outcome:
+    """검사 결과. `ran` 이 거짓이면 통과가 아니라 검사하지 못한 것이다."""
+    ran: bool
+    passed: bool
+    detail: str
+    file_count: int
+
+
+def tracked_count(*patterns: str) -> int:
+    """git 이 추적하는 파일 수. 대상이 비어 있는데 초록불이 뜨는 것을 막는다."""
+    listed = subprocess.run(
+        ["git", "ls-files", "--", *patterns],
+        cwd=REPO, capture_output=True, text=True, check=False,
+    )
+    return len([line for line in listed.stdout.splitlines() if line])
+
+
+def run(command: list[str], workdir: Path) -> tuple[int, str]:
+    result: subprocess.CompletedProcess[str] = subprocess.run(
+        command, cwd=workdir, capture_output=True, text=True, timeout=TIMEOUT_SECONDS
+    )
+    return result.returncode, (result.stdout + result.stderr).strip()
+
+
+def check_backend() -> Outcome:
+    count: int = tracked_count("backend/*.kt", "backend/**/*.kt")
+    gradlew: Path = REPO / "backend/gradlew"
+    if not gradlew.exists():
+        return Outcome(False, False, "backend/gradlew 가 없다 — backend/README.md 의 뼈대를 올린 뒤 다시 검사해라", count)
+
+    code, output = run([str(gradlew), "ktlintCheck"], REPO / "backend")
+    return Outcome(True, code == 0, output, count)
+
+
+def check_frontend() -> Outcome:
+    count: int = tracked_count("frontend/src/**/*.ts", "frontend/src/**/*.tsx")
+    tsc: Path = REPO / "frontend/node_modules/.bin/tsc"
+    if not tsc.exists():
+        return Outcome(False, False, "frontend/node_modules 가 없다 — `npm ci` 뒤에 다시 검사해라", count)
+
+    code, output = run([str(tsc), "--noEmit"], REPO / "frontend")
+    return Outcome(True, code == 0, output, count)
+
+
+def checker_for(path: Path) -> tuple[str, str] | None:
+    """이 파일을 볼 검사 이름과 영역. 대상이 아니면 None."""
+    try:
+        relative: str = str(path.resolve().relative_to(REPO))
+    except ValueError:
+        return None   # 저장소 밖 파일은 검사 대상이 아니다
+
+    if relative.startswith("backend/") and path.suffix == ".kt":
+        return ("./gradlew ktlintCheck", "backend")
+    if relative.startswith("frontend/src/") and path.suffix in {".ts", ".tsx"}:
+        return ("tsc --noEmit", "frontend")
+    return None
+
+
+def check_area(area: str) -> Outcome:
+    return check_backend() if area == "backend" else check_frontend()
+
+
+def run_hook() -> int:
+    """PostToolUse 훅 — 방금 저장한 코드가 속한 영역을 검사해 결과를 모델에게 돌려준다."""
+    try:
+        event: dict[str, object] = json.loads(sys.stdin.read() or "{}")
+    except json.JSONDecodeError:
+        return 0
+
+    tool_input: object = event.get("tool_input") or {}
+    file_path: str = str(tool_input.get("file_path", "")) if isinstance(tool_input, dict) else ""
+    if not file_path:
+        return 0
+
+    path: Path = Path(file_path)
+    target: tuple[str, str] | None = checker_for(path)
+    if target is None or not path.exists():
+        return 0
+
+    name, area = target
+    outcome: Outcome = check_area(area)
+    if outcome.ran and outcome.passed:
+        return 0
+
+    if outcome.ran:
+        lines: list[str] = [
+            f"방금 저장한 {file_path} — `{name}` 이 실패했다. 고치고 진행해라.",
+            outcome.detail,
+        ]
+        summary: str = f"{name} 실패"
+    else:
+        lines = [
+            f"방금 저장한 {file_path} 는 `{name}` 으로 검사하지 못했다 — 통과가 아니라 미검사다.",
+            outcome.detail,
+        ]
+        summary = f"{name} 미검사"
+
+    print(json.dumps({
+        "systemMessage": f"style-check: {file_path} — {summary}",
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "additionalContext": "\n".join(lines),
+        },
+    }, ensure_ascii=False))
+    return 0
+
+
+def main() -> int:
+    if sys.argv[1:2] == ["--hook"]:
+        return run_hook()
+
+    areas: list[str] = []
+    for arg in sys.argv[1:]:
+        target: tuple[str, str] | None = checker_for(Path(arg))
+        if target is not None and target[1] not in areas:
+            areas.append(target[1])
+
+    if not areas:
+        print("검사할 대상이 없다 — backend 의 .kt, frontend/src 의 .ts·.tsx 가 대상이다")
+        return 0
+
+    failed: bool = False
+    for area in areas:
+        outcome: Outcome = check_area(area)
+        state: str = "통과" if outcome.ran and outcome.passed else ("실패" if outcome.ran else "미검사")
+        print(f"■ {area} — {state} (추적 중인 대상 파일 {outcome.file_count}개)")
+        if outcome.detail:
+            print(f"  {outcome.detail}")
+        failed |= outcome.ran and not outcome.passed
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

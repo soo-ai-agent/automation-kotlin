@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/core/**/api/controller/**"
 name: kotlin-controller
 description: 컨트롤러 작성과 리뷰 규칙. core-<도메인> 의 controller 패키지, @RestController, 요청/응답 변환, 인증 정보 추출, 응답 DTO 래핑, HTTP 동사와 상태코드를 다룰 때 사용한다. "엔드포인트 추가", "API 만들어줘" 요청에도 사용할 것.
 ---

@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""계층 규칙 중 기계로 잴 수 있는 것을 검사한다 — 훅(저장 시)과 CI(PR)가 같은 스크립트를 쓴다.
+
+지금 재는 것은 둘이다.
+
+1. 백엔드 Kotlin — 파일 하나에 최상위 선언 하나이고, 파일 이름이 그 선언 이름과 같다.
+   중첩 타입과 sealed 하위 타입은 세지 않는다. `Dtos.kt`·`Models.kt` 류 모음 파일이 이 검사에 걸린다.
+
+2. 프론트 — 한 파일에 주역(컴포넌트·훅) 하나. `types/`·`enums/`·`lib/`·`utils/`·`*.styles.ts` 는 대상이 아니다.
+
+사람이 읽고 지키는 규칙은 바쁠 때 빠지므로, 기계가 셀 수 있는 것은 기계가 센다.
+
+사용법: layer-check <파일…>     (인자 없으면 대상 경로 전체)
+       layer-check --hook      (훅용 — stdin 의 훅 JSON 을 읽는다)
+"""
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+
+BACKEND_ROOT = "backend/"
+FRONTEND_ROOT = "frontend/src/"
+
+# 이 폴더의 파일은 관심사 단위로 묶는 것이 규칙이라 주역 세기 대상이 아니다.
+FRONTEND_EXEMPT_DIRS = ("types/", "enums/", "lib/", "utils/", "constants/")
+
+# 최상위(들여쓰기 0) 선언만 본다. `private`·`internal`·`sealed`·`data` 같은 수식어를 건너뛰고 이름을 집는다.
+KOTLIN_DECLARATION = re.compile(
+    r"^(?P<modifiers>(?:public |internal |private |protected |abstract |open |sealed |data |value |annotation |enum |inner |companion )*)"
+    r"(?P<kind>class|interface|object)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
+)
+
+# 프론트의 '주역' — 대문자로 시작하면 컴포넌트, use 로 시작하면 훅이다.
+TS_EXPORTED_FUNCTION = re.compile(
+    r"^export\s+(?:default\s+)?(?:async\s+)?function\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
+)
+TS_EXPORTED_ARROW = re.compile(
+    r"^export\s+const\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*(?::[^=]+)?=\s*(?:async\s*)?\([^)]*\)\s*(?::[^=]+)?=>"
+)
+
+
+@dataclass(frozen=True)
+class Declaration:
+    name: str
+    is_sealed: bool
+    supertype: str
+
+
+def relative_of(path: Path) -> str | None:
+    try:
+        return str(path.resolve().relative_to(REPO))
+    except ValueError:
+        return None   # 저장소 밖 파일은 검사 대상이 아니다
+
+
+def is_backend_target(path: Path) -> bool:
+    relative: str | None = relative_of(path)
+    return relative is not None and relative.startswith(BACKEND_ROOT) and path.suffix == ".kt"
+
+
+def is_frontend_target(path: Path) -> bool:
+    relative: str | None = relative_of(path)
+    if relative is None or not relative.startswith(FRONTEND_ROOT) or path.suffix not in {".ts", ".tsx"}:
+        return False
+    if path.name.endswith(".styles.ts") or path.name.endswith(".test.ts") or path.name.endswith(".test.tsx"):
+        return False
+    return not any(f"/{exempt}" in f"/{relative}" for exempt in FRONTEND_EXEMPT_DIRS)
+
+
+def strip_block_comments(source: str) -> str:
+    """주석 안의 `class Foo` 를 선언으로 세지 않기 위해 블록 주석을 지운다."""
+    return re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+
+
+def kotlin_declarations(source: str) -> list[Declaration]:
+    declarations: list[Declaration] = []
+    for line in strip_block_comments(source).splitlines():
+        if line.startswith((" ", "\t")):
+            continue   # 들여쓰인 것은 중첩 타입이다 — 세지 않는다
+        match = KOTLIN_DECLARATION.match(line)
+        if match is None:
+            continue
+        modifiers: str = match.group("modifiers")
+        if "companion " in modifiers or "inner " in modifiers:
+            continue
+        supertype_match = re.search(r":\s*([A-Za-z_][A-Za-z0-9_]*)", line[match.end():])
+        declarations.append(Declaration(
+            name=match.group("name"),
+            is_sealed="sealed " in modifiers,
+            supertype=supertype_match.group(1) if supertype_match else "",
+        ))
+    return declarations
+
+
+def check_backend(path: Path) -> list[str]:
+    declarations: list[Declaration] = kotlin_declarations(path.read_text(encoding="utf-8"))
+    if not declarations:
+        return []   # 최상위 함수·상수만 있는 파일은 이 규칙의 대상이 아니다
+
+    sealed_names: set[str] = {one.name for one in declarations if one.is_sealed}
+    roots: list[Declaration] = [one for one in declarations if one.supertype not in sealed_names]
+
+    findings: list[str] = []
+    if len(roots) > 1:
+        names: str = ", ".join(one.name for one in roots)
+        findings.append(
+            f"최상위 선언이 {len(roots)}개다 ({names}) — 파일 하나에 최상위 선언 하나. 파일을 나눈다"
+        )
+
+    expected: str = path.stem
+    if len(roots) == 1 and roots[0].name != expected:
+        findings.append(
+            f"파일 이름과 선언 이름이 다르다 ({expected}.kt ↔ {roots[0].name}) — 파일 이름을 선언 이름과 맞춘다"
+        )
+    return findings
+
+
+def check_frontend(path: Path) -> list[str]:
+    leads: list[str] = []
+    for line in strip_block_comments(path.read_text(encoding="utf-8")).splitlines():
+        match = TS_EXPORTED_FUNCTION.match(line) or TS_EXPORTED_ARROW.match(line)
+        if match is None:
+            continue
+        name: str = match.group("name")
+        if name[0].isupper() or name.startswith("use"):
+            leads.append(name)
+
+    if len(leads) <= 1:
+        return []
+    return [
+        f"한 파일에 주역이 {len(leads)}개다 ({', '.join(leads)}) — "
+        f"컴포넌트·훅은 파일 하나에 하나. 파일을 나눈다"
+    ]
+
+
+def check_file(path: Path) -> list[str]:
+    if is_backend_target(path):
+        return check_backend(path)
+    if is_frontend_target(path):
+        return check_frontend(path)
+    return []
+
+
+def target_files() -> list[Path]:
+    """git 이 추적하는 대상 파일 전부."""
+    listed = subprocess.run(
+        ["git", "ls-files", "--", BACKEND_ROOT, FRONTEND_ROOT],
+        cwd=REPO, capture_output=True, text=True, check=True,
+    )
+    paths: list[Path] = [REPO / name for name in listed.stdout.splitlines()]
+    return [path for path in paths if is_backend_target(path) or is_frontend_target(path)]
+
+
+def run_hook() -> int:
+    """PostToolUse 훅 — 방금 저장한 파일만 검사해 그 결과를 모델에게 돌려준다."""
+    try:
+        event: dict[str, object] = json.loads(sys.stdin.read() or "{}")
+    except json.JSONDecodeError:
+        return 0
+
+    tool_input: object = event.get("tool_input") or {}
+    file_path: str = str(tool_input.get("file_path", "")) if isinstance(tool_input, dict) else ""
+    if not file_path:
+        return 0
+
+    path: Path = Path(file_path)
+    findings: list[str] = check_file(path) if path.exists() else []
+    if not findings:
+        return 0
+
+    lines: list[str] = [f"방금 저장한 {file_path} 에 대한 layer-check 결과다.", "고치고 진행해라."]
+    lines.extend(f"- {finding}" for finding in findings)
+
+    print(json.dumps({
+        "systemMessage": f"layer-check: {file_path} — 지적 {len(findings)}건",
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "additionalContext": "\n".join(lines),
+        },
+    }, ensure_ascii=False))
+    return 0
+
+
+def main() -> int:
+    if sys.argv[1:2] == ["--hook"]:
+        return run_hook()
+
+    paths: list[Path] = [Path(arg) for arg in sys.argv[1:]] or target_files()
+    backend_checked: int = 0
+    frontend_checked: int = 0
+    failed: bool = False
+
+    for path in paths:
+        if is_backend_target(path):
+            backend_checked += 1
+        elif is_frontend_target(path):
+            frontend_checked += 1
+        else:
+            continue
+
+        findings: list[str] = check_file(path)
+        if not findings:
+            continue
+        failed = True
+        print(f"■ {path.relative_to(REPO) if path.is_relative_to(REPO) else path}")
+        for finding in findings:
+            print(f"  - {finding}")
+
+    # 통과와 미검사는 겉보기가 같다 — 몇 개를 봤는지 항상 남긴다
+    print(f"검사한 파일 백엔드 {backend_checked}개 · 프론트 {frontend_checked}개 · 규칙 3개")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

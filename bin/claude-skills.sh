@@ -54,7 +54,7 @@ usage() {
   $(basename "$SCRIPT_PATH") install     위 명령어들을 $BIN_DIR 에 깐다 (한 번만)
   $(basename "$SCRIPT_PATH") [backend|frontend|all] [claude 옵션...]
 
-전부 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(3대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
+전부 저장소 루트에서 열린다 — 루트 CLAUDE.md 와 그 import(5대 원칙·리뷰 규칙)가 통째로 읽히는 자리다.
 전부 권한 확인 창 없이 연다(--dangerously-skip-permissions) — 세션이 하는 일을 사람이 보고 있어야 한다.
 뒤에 붙인 인자는 claude 로 그대로 넘어간다 (예: claude-be -c 는 이어서 대화).
 저장소: $REPO_ROOT
@@ -96,7 +96,7 @@ if [ -z "$AREA" ]; then
 fi
 
 # 어느 자리를 고르든 claude 는 저장소 루트에서 연다.
-# 하위 폴더에서 열면 루트 CLAUDE.md 의 @import(3대 원칙·리뷰 규칙 MUST)가 펼쳐지지 않아
+# 하위 폴더에서 열면 루트 CLAUDE.md 의 @import(5대 원칙·리뷰 규칙 MUST)가 펼쳐지지 않아
 # 최상위 규칙이 통째로 빠진다 — 실측으로 확인했다. 영역은 cwd 가 아니라 아래 FOCUS 로 좁힌다.
 #
 # 다만 루트에서 열면 claude 가 스킬을 루트 .claude/skills/ 에서만 찾는다.

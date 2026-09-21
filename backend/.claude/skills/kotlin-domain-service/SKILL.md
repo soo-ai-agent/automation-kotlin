@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/core/**/domain/service/**"
 name: kotlin-domain-service
 description: 도메인 서비스 작성과 리뷰 규칙. core/domain 의 Service 클래스, 유스케이스 오케스트레이션, @Transactional 트랜잭션 경계, 구현 레이어 조합을 다룰 때 사용한다. "비즈니스 로직", "서비스 추가", "트랜잭션 경계" 요청에도 사용할 것.
 ---

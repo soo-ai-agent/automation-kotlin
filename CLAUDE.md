@@ -6,11 +6,44 @@
 
 공통 스킬은 고치는 파일의 위치와 무관하게 **항상 함께 적용된다.** 위치는 그 위에 얹는 영역 스킬을 고른다 — `backend/` 는 `kotlin-*`, `frontend/` 는 `frontend-*`.
 
-최상위 원칙은 공통 스킬 `core-principles`(3대 원칙)다 — 단순함 최우선, 최소 수정·무파괴, 데이터의 흐름과 통제. 다른 모든 규칙 문서는 이 원칙에 종속되고, 충돌하면 그 문서가 앞선다.
+최상위 원칙은 공통 스킬 `core-principles`(5대 원칙)다 — 단순함 최우선, 최소 수정·무파괴, 변경 지점 통제, 데이터 흐름, 데이터 통제. 다른 모든 규칙 문서는 이 원칙에 종속되고, 충돌하면 그 문서가 앞선다.
 
 원칙 전문은 아래 import 로 모든 에이전트에게 자동으로 읽힌다.
 
 리뷰 규칙은 아래 import 로 함께 읽힌다. 작성 기준과 리뷰 기준은 같은 문서에서 관리한다.
+
+## 작업 전에 읽을 것
+
+코드나 규칙 문서를 쓰거나 고치기 전에 **공통 3종(core-principles·ponytail·object-design)을 먼저 읽고**, 고치는 파일 위치에 해당하는 영역 스킬을 함께 읽는다.
+
+| 고치는 곳 | 함께 읽을 영역 스킬 |
+|---|---|
+| 백엔드 코드 (`backend/`) | `kotlin-common` + `kotlin-abstraction` + `kotlin-module-layout` + `kotlin-test` + 해당 계층 |
+| 프론트 코드 (`frontend/src/`) | `frontend-common` + 해당 레이어(`frontend-screen`·`hooks`·`service`·`api`·`lib`·`style`) |
+| 규칙 문서 자체 (`**/.claude/skills/`, `rules/`, `CLAUDE.md`) | 수정 대상 스킬과 직접 관련된 참조. 공통 원칙의 적용 범위를 따른다 |
+| 테스트 코드 (`**/src/test/`·`**/e2e/`·`*Test.kt`·`*.spec.ts`) | `minimal-tests` + `kotlin-test` 또는 `frontend-e2e` |
+| 브랜치를 만들거나 정리할 때 | `branch-flow` |
+| 여러 에이전트로 나눠 돌릴 때 | `harness-split` → `harness-graph` → `harness-loop` |
+| 그 외 | 없음 — 공통 3종만 |
+
+어느 스킬을 열지 모르겠으면 세 폴더의 `README.md` 색인부터 본다.
+
+**규칙 본문은 `.claude/rules/` 가 싣는다** — 공통 원칙은 세션 시작 시, 계층 규칙은 `paths` 글롭에 걸리는 파일을 읽을 때. 무엇이 실렸는지는 `/context` 로 본다.
+
+## 기계가 세는 것은 기계가 센다
+
+규칙을 반복해서 어긴다면 그건 강조가 모자란 것이 아니라 **강제 장치가 없다는 뜻이다**(core-principles 제 3원칙).
+
+| 장치 | 무엇을 보나 | 언제 도나 |
+|---|---|---|
+| `bin/layer-check` | 파일 하나에 최상위 선언 하나, 파일 이름 = 선언 이름, 프론트 주역 하나 | 저장 시 훅 + PR CI |
+| `bin/style-check` | 백엔드 `./gradlew ktlintCheck`, 프론트 `tsc --noEmit` | 저장 시 훅 |
+
+**초록불이 아니라 "검사한 파일 수"를 근거로 삼는다.** 두 스크립트 모두 마지막 줄에 개수를 찍는다 —
+대상이 비어 있어도 종료 코드는 0이라, 통과와 미검사는 겉보기가 같기 때문이다.
+
+검사기를 고쳤으면 `python3 -B -m unittest tests/test_layer_check.py tests/test_style_check.py` 가 함께 통과해야 한다.
+`-B` 는 바이트코드 캐시를 끈다 — 같은 초 안에 스크립트를 고쳐 다시 돌리면 옛 바이트코드가 실행된다.
 
 ## 스펙이 기준이다
 

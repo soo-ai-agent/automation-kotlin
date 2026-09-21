@@ -8,7 +8,7 @@
 
 | 파일·폴더 | 출처 | 커밋되나 |
 |---|---|---|
-| `skills/core-principles`·`api-contract`·`md-doc`·`oop-responsibility-design` | 이 저장소 자체 작성 | 예 |
+| `skills/core-principles`·`api-contract`·`md-doc`·`object-design` | 이 저장소 자체 작성 | 예 |
 | `skills/ponytail`·`ponytail-review` | DietrichGebert, MIT — <https://github.com/DietrichGebert/ponytail> | 예 (원본 그대로) |
 | `skills/LICENSE` | 위 두 스킬의 MIT 라이선스 전문 | 예 |
 | `skills/speckit-*` | GitHub, Inc., MIT — <https://github.com/github/spec-kit> | 아니오 — 설치물이라 `.gitignore` 가 거른다 |

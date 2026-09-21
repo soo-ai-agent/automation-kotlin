@@ -8,7 +8,7 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/warn-bulk-api-calls.sh\"",
             "timeout": 10,
-            "statusMessage": "\uc678\ubd80 API \ub300\ub7c9 \ud638\ucd9c \ud655\uc778"
+            "statusMessage": "외부 API 대량 호출 확인"
           }
         ]
       }
@@ -21,7 +21,19 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/warn-speckit-preset-stale.sh\"",
             "timeout": 10,
-            "statusMessage": "\ud55c\uad6d\uc5b4 \ud504\ub9ac\uc14b \ub3d9\uae30\ud654 \ud655\uc778"
+            "statusMessage": "한국어 프리셋 동기화 확인"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/bin/layer-check\" --hook",
+            "timeout": 15,
+            "statusMessage": "계층 규칙 검사"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/bin/style-check\" --hook",
+            "timeout": 600,
+            "statusMessage": "스타일·타입 검사"
           }
         ]
       }

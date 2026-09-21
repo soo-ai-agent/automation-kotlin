@@ -1,0 +1,42 @@
+# 🔒 기능 본체 — 여기에 사용자 설정은 없어요. 검사 규칙은 bin/layer-check 에 있어요.
+#
+# 계층 규칙 기계 검사 — 사람이 읽고 지키는 규칙은 바쁠 때 빠지므로, 셀 수 있는 것은 기계가 세요.
+#
+# 같은 스크립트를 훅(.claude/settings.json 의 PostToolUse)도 쓴다. 한 도구에만 묶인 장치는
+# 그 도구를 쓰지 않는 작업에서 조용히 죽으므로, 훅과 CI 두 경로를 모두 둔다.
+#
+# **초록불이 아니라 "검사한 파일 수"를 근거로 삼는다.** 대상이 0개여도 종료 코드는 0이라서
+# 스크립트가 마지막 줄에 항상 개수를 찍는다. 잡 로그에서 그 줄을 보면 무엇을 봤는지 알 수 있다.
+name: layer-check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "backend/**"
+      - "frontend/src/**"
+      - "bin/layer-check"
+      - "bin/style-check"
+      - "tests/test_layer_check.py"
+      - "tests/test_style_check.py"
+
+permissions:
+  contents: read
+
+jobs:
+  layer-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 검사기가 맞는지 먼저 본다 — 검사기가 틀리면 그 아래 초록불은 아무 뜻이 없다
+      - name: 검사기 자체 테스트
+        run: python3 -B -m unittest tests/test_layer_check.py tests/test_style_check.py -v
+
+      - name: 계층 규칙 검사
+        run: python3 bin/layer-check

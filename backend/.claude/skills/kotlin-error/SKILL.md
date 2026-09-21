@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/core/**/error/**"
 name: kotlin-error
 description: 실패를 표현하는 규칙. 예외가 자기 응답(status·code·title·detail)을 갖는 ApiException 베이스, 예외를 던지는 도메인이 소유하는 규칙, 새 실패 유형을 추가하는 순서, HTTP 상태코드와 로그 레벨 고르는 기준, ApiControllerAdvice 핸들러, 응답 메시지에 담아도 되는 것을 다룬다. 기능에 실패 분기를 만들 때 kotlin-domain-service 와 함께 사용한다. "예외 처리", "에러 응답", "404 를 주고 싶다" 요청에도 사용할 것.
 ---

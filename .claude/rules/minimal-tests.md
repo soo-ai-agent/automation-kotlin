@@ -1,0 +1,1 @@
+../skills/minimal-tests/SKILL.md

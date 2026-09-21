@@ -1,4 +1,6 @@
 ---
+paths:
+  - "backend/storage/**"
 name: kotlin-repository
 description: 리포지토리 작성과 리뷰 규칙. storage db-core 의 JpaRepository 인터페이스, 쿼리 메서드 이름, 페이징, fetch join 과 N+1, Specification 분리를 다룰 때 사용한다. "조회 쿼리 추가", "쿼리가 느리다", "N+1" 요청에도 사용할 것.
 ---

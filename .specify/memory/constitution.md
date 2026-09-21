@@ -18,7 +18,7 @@ Sync Impact Report
 이 문서에 규칙을 복사해 적지 않는다. 규칙 본문은 아래가 갖는다.
 
 - 공통 코딩 규칙 — `.claude/skills/`
-- 백엔드 규칙 — `backend/.claude/skills/` (`kotlin-*` 17종)
+- 백엔드 규칙 — `backend/.claude/skills/` (`kotlin-*` 18종)
 - 프론트엔드 규칙 — `frontend/.claude/skills/`
 - 머지를 막는 기준 — `rules/code-review.md`
 - 작업 규칙 진입점 — `CLAUDE.md`(Claude), `AGENTS.md`(Codex)

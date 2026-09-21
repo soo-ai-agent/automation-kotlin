@@ -54,7 +54,7 @@ flowchart TD
 
 일꾼과 리뷰어가 자동으로 읽는다. 공통 스킬은 어디를 고치든 항상 적용되고, 고치는 파일의 위치가 그 위에 얹는 영역 스킬을 정한다.
 
-    어디를 고치든                        → 공통 규칙 (.claude/skills/ — ponytail·oop-responsibility-design 등)
+    어디를 고치든                        → 공통 규칙 (.claude/skills/ — ponytail·object-design 등)
     backend/api/... 또는 backend/core/core-<도메인>/... 를 고치면  → 위에 더해 백엔드 계층 규칙 (kotlin-*)
     frontend/src/... 를 고치면           → 위에 더해 프론트엔드 규칙 (frontend-*)
 

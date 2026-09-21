@@ -17,7 +17,9 @@ license: MIT
 
 `node_modules`, `.git`, 빌드 산출물을 제외하고 주석 마커를 grep 한다:
 
-`grep -rnE '(#|//) ?ponytail:' .`  (스택이 다른 주석 접두어를 쓰면 추가)
+`rg -n --hidden -g "!.git/**" -g "!**/node_modules/**" -g "!**/build/**" -g "!**/.gradle/**" '(#|//) ?ponytail:'`
+
+스택에 맞는 주석 접두어와 추가 산출물 제외 경로를 적용한다.
 
 히트 하나가 장부 한 행이다. 주석 접두어 조건 덕에 관례를 언급만 한 산문은 장부에서 걸러진다.
 

@@ -1,4 +1,7 @@
 ---
+paths:
+  - "backend/core/**/api/request/**"
+  - "backend/core/**/api/response/**"
 name: kotlin-dto
 description: 요청·응답 DTO 작성과 리뷰 규칙. api/request 와 api/response 패키지의 data class, Request·Response 이름 규약, 검증 애너테이션, 도메인 모델과의 변환 메서드를 다룰 때 사용한다. "요청 DTO 추가", "응답 형태 변경" 요청에도 사용할 것.
 ---
