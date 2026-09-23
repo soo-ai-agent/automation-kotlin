@@ -94,6 +94,47 @@ for (member in members) {
 val firstActive: Member? = members.firstOrNull { it.isActive }
 ```
 
+## 겹친 계산은 이름 있는 중간 변수로 나눈다
+
+한 문장에 계산·생성·호출이 겹치면 읽는 사람이 안쪽부터 거꾸로 풀어야 한다. **한 줄에 한 가지 일** — 중간 결과마다 이름을 주고, 마지막 줄은 그 이름들로 짧아진다.
+
+```kotlin
+// ❌ 세 겹 — 평균 계산, 덩어리 생성, 목록 추가가 한 문장에
+clusters.add(SafetySpotCluster(GeoPoint(sumLat / spots.size, sumLng / spots.size), weight = spots.size))
+
+// ✅ 한 줄에 하나 — 이름이 뜻을 말한다
+val center = GeoPoint(sumLat / spots.size, sumLng / spots.size)
+val cluster = SafetySpotCluster(center, weight = spots.size)
+clusters.add(cluster)
+```
+
+`maxOf(abs(b.lat - a.lat), abs(b.lng - a.lng))` 처럼 연산이 겹친 식도 같다 — `latSpanDeg`·`lngSpanDeg` 로 나눈 뒤 `maxOf` 한다. 이름을 붙일 수 없을 만큼 사소한 겹침(인자 하나의 `toString()` 등)은 그대로 둔다.
+
+## 함수 안에 클래스를 선언하지 않는다
+
+함수 본문 안의 `data class` 는 처음 읽는 사람이 "이게 왜 여기 있지"부터 묻게 만들고, 대개 `var` 누적 그릇이나 임시 묶음이라 다른 규칙도 함께 어긴다.
+
+- 임시 묶음이 필요하면 **클래스 멤버의 `private data class`** 로 올리고 한 줄 설명을 단다.
+
+- `var` 누적 그릇이라면 선언을 올리기 전에 구조를 본다 — 목록으로 모은 뒤 계산하면 그릇 자체가 사라지는 경우가 많다(`groupBy` 꼴의 수집 후 집계).
+
+```kotlin
+// ❌ 함수 안 선언 + var 누적
+fun findClusters(...): List<Cluster> {
+    data class Acc(var sumLat: Double = 0.0, var count: Int = 0)
+    ...
+}
+
+// ✅ 모아 두고 나중에 계산 — 그릇이 필요 없다
+val spotsByCell: LinkedHashMap<Long, ArrayList<Spot>> = LinkedHashMap()
+for (spot in spots) {
+    spotsByCell.getOrPut(cellKey(spot)) { ArrayList() }.add(spot)
+}
+for (cellSpots in spotsByCell.values) {
+    // 여기서 합·평균을 계산한다
+}
+```
+
 ## 파일 하나에 최상위 선언 하나
 
 최상위 `class`·`interface`·`object`·`enum class`·`data class`·`annotation class` 는 **각자 자기 파일**에 둔다. 파일 이름은 그 선언 이름과 **정확히 같다** — `TodoFinder.kt` 안에는 `TodoFinder` 하나뿐이다.
@@ -174,7 +215,9 @@ val todo: Todo = finder.getById(id)
 
 - 테스트 메서드 하나는 기능 하나만 검증한다. 상세 규칙은 `kotlin-test` 스킬을 따른다.
 
-- 커밋 전 `./gradlew ktlintCheck unitTest` 가 통과해야 한다.
+- 커밋 전 그 저장소의 검증 명령이 통과해야 한다. 태스크 이름은 저장소마다 다르니 `./gradlew tasks` 로 확인한다 — `ktlintCheck`·`unitTest` 가 있으면 그것, 없으면 `test`.
+
+  **없는 태스크를 적어 두면 검사가 도는 대신 `Task not found` 가 나고, 그걸 몇 번 보면 검증 절 전체를 건너뛰게 된다.**
 
 - 테스트를 지우거나 단언을 약화해 통과시키지 않는다.
 
@@ -290,6 +333,8 @@ class LocationView private constructor(…) {
 | 습관적 nullable(`?`) | 없음 처리 책임 전가 | Important |
 | `MutableList` 노출 | 외부에서 내부 상태 변형 | Important |
 | 판단·누적이 든 람다 체이닝 (`firstOrNull { }`·`fold` 등) | 흐름이 람다 안에 숨음 | Important |
+| 계산·생성·호출이 겹친 한 문장 (중간 이름 없음) | 안쪽부터 거꾸로 읽어야 함 | Important |
+| 함수 본문 안의 클래스 선언 | 자리 밖 선언, 대개 `var` 그릇 동반 | Important |
 | 코드를 그대로 옮긴 주석 | 소음 | Important |
 | 새 동작에 유닛 테스트 없음 | 미검증 동작 유입 | Critical |
 | 구현이 하나뿐인데 신설한 인터페이스·추상 클래스·설정 옵션 (확장 지점 미리 두기) | 요청받지 않은 추상화 — 제1원칙(core-principles) 위반 | Critical |
@@ -310,4 +355,4 @@ class LocationView private constructor(…) {
 
 - [ ] 새 동작마다 유닛 테스트가 있고, 한 메서드가 한 기능만 검증하는가
 
-- [ ] `./gradlew ktlintCheck unitTest` 가 통과하는가
+- [ ] 그 저장소의 검증 명령(`./gradlew tasks` 로 확인)이 통과하는가
