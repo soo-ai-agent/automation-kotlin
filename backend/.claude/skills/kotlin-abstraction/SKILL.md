@@ -123,6 +123,25 @@ val savings: AllSavings = allSavingsCache.get(requestId)
 **외부에서 들어온 낱말은 경계에서 우리 낱말로 바꾼다.** 외부 API 가 `SavingProduct` 라 부르더라도
 안쪽은 `Product` 하나로 간다 — 바꾸는 자리는 `clients/client-*` 한 곳이다(제 4원칙 · 데이터 흐름).
 
+**단 경계 안쪽(`clients/client-*`)에서는 외부가 쓰는 낱말을 그대로 이어 쓴다.** 그 모듈의 일이
+외부 규격을 다루는 것이라, 우리 말로 바꾸면 요청·응답을 조립하는 줄과 변수 이름이 어긋난다.
+
+```kotlin
+// O — Tmap 이 passList 라 부르니 이 모듈 안에서도 passList 다
+body["passList"] = passList.joinToString("_") { "${it.lng},${it.lat}" }
+```
+
+```kotlin
+// X — 이름만 우리 말로 바꿔 놓아 둘을 대조할 수 없게 된다
+body["passList"] = waypoints.joinToString("_") { "${it.lng},${it.lat}" }
+```
+
+우리 낱말로 바뀌는 자리는 클라이언트의 공개 시그니처다 — 바깥은 `waypoints` 로 부르고,
+모듈 안은 `passList` 로 받는다. 외부 문서를 펴 놓고 코드를 읽을 수 있어야 한다.
+
+**줄임말은 이 예외에 들지 않는다.** 외부가 정한 이름이 아니라 우리가 줄인 것이면 편다
+(`destName` → `destinationName`). 판정은 하나 — **외부 문서에 그 낱말이 그대로 적혀 있는가.**
+
 낱말이 세 개를 넘으면 머리로 기억하지 말고 **저장소에 어휘 사전을 둔다.**
 새 이름을 짓기 전에 사전을 보고, 사전에 없는 낱말이 필요하면 사전에 먼저 적는다.
 규칙 문서가 쓰는 낱말은 `.claude/skills/core-principles/references/glossary.md` 가 고정한다.
@@ -389,6 +408,7 @@ Kotlin 은 `?.let {}.map {}.filter {}` 로 여러 층을 한 줄에 눌러 담�
 | 클래스 이름이 말하는 층과 다른 층의 메서드가 섞여 있다 | 파일 레벨 불일치 | Important |
 | 함수·클래스에 "무엇을 하는지" KDoc 이 붙어 있다 | 이름이 제 일을 못 한다 | Important |
 | 같은 개념을 두 낱말로 부른다 (`member`/`user`) | 어휘가 고정되지 않았다 | Important |
+| `clients/client-*` 안에서 외부 파라미터 이름을 우리 말로 바꿨다 | 외부 문서와 대조가 끊긴다 | Important |
 | `checkXxx(): Boolean` | 이름이 반환값을 말하지 않는다 | Important |
 | `findXxx` 가 예외를 던지거나 `getXxx` 가 `null` 을 낸다 | 규약을 어겨 호출부가 이름을 못 믿는다 | Important |
 | `cnt`·`res`·`msg` 를 새로 만든다 | 줄임말 | Code Smell |
@@ -415,6 +435,7 @@ Kotlin 은 `?.let {}.map {}.filter {}` 로 여러 층을 한 줄에 눌러 담�
 - [ ] 낮은 층 타입(엔티티·외부 응답)이 위 계층 시그니처에 나타나지 않는가
 - [ ] 설명을 붙이고 싶어진 이름이 없는가 (있다면 이름을 고쳤는가)
 - [ ] 같은 개념에 낱말 하나만 쓰고 있는가
+- [ ] 외부가 정한 이름을 `clients/client-*` 안에서 그대로 이어 쓰고 있는가
 - [ ] Boolean 을 돌려주는 함수가 `is`·`has`·`can` 으로 시작하는가
 - [ ] `get`/`find` 규약을 지켰는가
 - [ ] 단수·복수가 실제 개수와 맞는가
