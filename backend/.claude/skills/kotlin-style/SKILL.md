@@ -1,6 +1,6 @@
 ---
 name: kotlin-style
-description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상태 표현, else 없는 when, null 좁히기, 람다 분기(?.let·takeIf) 금지, 화살표(->) 최소화, forEach 와 for 의 구분, 빈 컬렉션 접근, 컬렉션 조인, 코루틴 취소 예외를 다룬다. when 분기·sealed·null 처리·코루틴 예외를 작성하거나 리뷰할 때 kotlin-common 과 항상 함께 사용한다. "코틀린 스타일", "when 분기", "sealed", "null 처리" 요청에도 사용할 것.
+description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상태 표현, else 없는 when, null 좁히기, `?.` 사슬 풀어쓰기, 변수 선언에 조건문 금지, 람다 분기(?.let·takeIf) 금지, 화살표(->) 최소화, forEach 와 for 의 구분, 빈 컬렉션 접근, 컬렉션 조인, 코루틴 취소 예외를 다룬다. when 분기·sealed·null 처리·코루틴 예외를 작성하거나 리뷰할 때 kotlin-common 과 항상 함께 사용한다. "코틀린 스타일", "when 분기", "sealed", "null 처리" 요청에도 사용할 것.
 ---
 
 # Kotlin 문법: 조건·분기·반복
@@ -31,6 +31,7 @@ description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상�
 | 실패 표현 | `kotlin-error` 를 따른다 — 도메인 실패를 `Result`·`runCatching` 으로 바꾸지 않는다 |
 | 코루틴에서 예외 잡기 | `CancellationException` 은 반드시 다시 던지기 |
 | 컬렉션 접근 | `first()` 대신 `firstOrNull()` |
+| 함수 본문 | 블록 본문(`{ return … }`) — 식 본문(`fun x() = …`)을 쓰지 않는다 |
 
 ## 1. 상태를 먼저 올바르게 표현한다
 
@@ -41,12 +42,20 @@ description: Kotlin 의 조건·분기·반복 문법 규칙. sealed 타입 상�
 
 ```kotlin
 // ❌ "PAID 인데 paidAt == null" 이 표현 가능 → 쓰는 곳마다 null 확인
-data class OrderResult(val status: OrderStatus, val paidAt: Instant?)
+data class OrderResult(
+    val status: OrderStatus,
+    val paidAt: Instant?,
+)
 
 // ✅ 불가능한 상태가 타입에서 사라짐
 sealed interface OrderResult {
-    data class Pending(val id: Long) : OrderResult
-    data class Paid(val id: Long, val paidAt: Instant) : OrderResult
+    data class Pending(
+        val id: Long,
+    ) : OrderResult
+    data class Paid(
+        val id: Long,
+        val paidAt: Instant,
+    ) : OrderResult
 }
 ```
 
@@ -85,6 +94,57 @@ val user = userFinder.findById(id) ?: return null
 require(user.isActive) { "inactive user: $id" }
 // 여기부터는 정상 흐름
 ```
+
+**`?.` 를 두 번 이상 잇지 않는다 — 단계마다 `if` 로 푼다.** 끝에 `.orEmpty()`·`?: 기본값`이 붙어 있어도 같다.
+한 줄로 보이지만 그 안에 null 검사가 단계 수만큼 숨어 있고, 어느 단계에서 비었는지 읽는 사람이 알 수 없다.
+
+```kotlin
+// ❌ 네 단계의 null 검사가 한 줄에 눌려 있다
+val pois = response?.searchPoiInfo?.pois?.poi.orEmpty()
+
+// ✅ 단계마다 이름과 타입이 남고, 비는 자리가 보인다
+if (response == null) {
+    return emptyList()
+}
+val searchPoiInfo: TmapPoiList? = response.searchPoiInfo
+if (searchPoiInfo == null) {
+    return emptyList()
+}
+val pois: TmapPois? = searchPoiInfo.pois
+if (pois == null) {
+    return emptyList()
+}
+val poiList: List<TmapPoi> = pois.poi
+```
+
+`?.` 한 번과 그 자리의 기본값(`name?.trim().orEmpty()`, `x ?: default`)은 그대로 쓴다 — 단계가 하나라 숨는 것이 없다.
+
+**변수 선언에 조건문을 넣지 않는다.** `val x = if (…) { … } else { … }` 처럼 선언 오른쪽에 분기 블록을 두면,
+변수 하나를 읽으려고 블록 전체를 따라가야 하고 선언 줄이 길어진다.
+
+**기본값으로 선언하고, 조건에 따른 변화는 그 아래 `if` 문으로 쓴다.**
+
+```kotlin
+// ❌ 선언 안에 분기 — 값이 무엇인지 블록을 다 읽어야 안다
+val routes: List<TmapRoute> =
+    if (query.reroute) {
+        baseRoutes
+    } else {
+        baseRoutes + planSaferRoutes(query, baseRoutes, firstRoutePath)
+    }
+
+// ✅ 기본값으로 선언하고, 조건은 아래에서 더한다
+val routes: ArrayList<TmapRoute> = ArrayList(baseRoutes)
+if (!query.reroute) {
+    routes.addAll(routeFinder.findSaferRoutes(query, baseRoutes, waypointPlans))
+}
+```
+
+선언이 평범한 값 하나로 끝나고, 분기가 자라도 선언 줄은 그대로다. 같은 분기가 여러 곳에서 반복될 때만 함수로 내린다 —
+한 번 쓰이는 분기를 이 규칙 때문에 함수로 빼지는 않는다(kotlin-common 「지나가기만 하는 함수는 호출부로 합친다」).
+
+예외는 enum·sealed 의 소진 검사뿐이다 — `val label: String = when (type) { … }` 는 컴파일러에게 누락을 잡히려고 쓰는 관용구다(위 1·2절).
+`x ?: default` 같은 값 선택 한 줄은 분기문이 아니므로 그대로 쓴다.
 
 **분기에 람다를 쓰지 않는다 — `if () {}` 로 쓴다.** `?.let { }`, `takeIf { }`, `?.let { } ?: run { }` 은 `if` 를 람다로 흉내 낸 것이다.
 조건이 어디 있는지 숨기고, 동작마저 다르다.
@@ -156,7 +216,27 @@ for (order in orders) {
 }
 ```
 
-## 4. 예외 — 잡는 쪽 규칙
+## 4. 함수 본문 — 식 본문 대신 블록 본문
+
+**함수 본문은 블록(`{ return … }`)으로 쓴다. 식 본문(`fun x() = …`)은 쓰지 않는다.**
+
+한 줄짜리 위임이라도 같다. 식 본문은 로직이 자라는 순간 `=` 뒤에 체인이 붙기 시작하고,
+블록으로 되돌리는 diff 가 로직 변경과 섞인다. 처음부터 블록이면 줄 추가가 곧 diff 전부다.
+
+```kotlin
+// ❌ 식 본문 — 자라면 = 뒤에 체인이 붙는다
+fun routeStats(): RouteStatsResponse = routeStatsService.summarize()
+
+// ✅ 블록 본문 — 반환 타입·return 이 명시되고, 다음 줄을 붙일 자리가 이미 있다
+fun routeStats(): RouteStatsResponse {
+    return routeStatsService.summarize()
+}
+```
+
+예외 둘 — `when` 식의 소진 검사를 쓰는 함수(`fun label(): String = when (this) { … }`)와
+상수 반환 프로퍼티(`val size: Int get() = items.size`)는 식 본문이 관용구다.
+
+## 5. 예외 — 잡는 쪽 규칙
 
 **실패 표현은 `kotlin-error` 가 기준이다.** 도메인 실패는 status·code 를 스스로 가진 `ApiException` 하위 예외로 던진다.
 예상 가능한 실패를 `Result`·`runCatching` 반환으로 바꾸지 않는다 — 실패 표현이 두 갈래가 되어 호출부마다 다루는 법이 달라진다.
@@ -188,17 +268,24 @@ try {
 | 코루틴에서 `CancellationException` 을 삼키는 포괄 catch·`runCatching` | 취소 불능 | Critical |
 | `Pair`·`Triple` 이 함수 경계를 넘음 | raw tuple 금지(rules.md MUST) 위반 | Critical |
 | enum + nullable 조합으로 불가능한 상태가 표현 가능 | 쓰는 곳마다 방어 분기 | Important |
+| 변수 선언 오른쪽의 `if`·`when` 블록 (소진 검사 제외) | 선언 한 줄을 읽으려고 블록을 따라가야 함 | Important |
+| `?.` 를 두 번 이상 이은 사슬 (`a?.b?.c.orEmpty()`) | null 검사 단계가 한 줄에 숨음 | Important |
 | `?.let { } ?: run { }` 등 람다로 만든 제어 흐름 | 조건 은폐 + let 이 null 반환 시 run 도 실행 | Important |
 | 도메인 실패를 `Result`·`runCatching` 으로 반환 | `kotlin-error` 의 예외 규칙과 이원화 | Important |
 | 빈 컬렉션에 `first()`·인덱스 접근 | 런타임 예외 | Important |
 | 콜백 파라미터로 제어 흐름 전달 | 흐름이 람다 안에 숨음 | Important |
 | 문(statement)으로 쓴 `when` + 빠진 가지 | 누락이 컴파일러에 안 잡힘 | Important |
+| 식 본문 함수 (`fun x() = …`, when 소진 검사·단순 getter 제외) | 로직이 자라면 체인화, 블록 전환 diff 가 로직과 섞임 | Code Smell |
 
 ## 체크리스트
 
 - [ ] sealed 분기에 `else` 가 없는가
 
 - [ ] 불가능한 상태가 타입으로 막혀 있는가 (enum + nullable 조합이 없는가)
+
+- [ ] 변수 선언 오른쪽에 `if`·`when` 블록이 없는가 (분기를 함수로 내렸는가)
+
+- [ ] `?.` 사슬이 두 단계 이상 이어진 곳이 없는가 (단계마다 `if` 로 풀렸는가)
 
 - [ ] 제어 흐름이 람다(`?.let`·`takeIf`·콜백) 없이 `if`/`when` 으로 보이는가
 

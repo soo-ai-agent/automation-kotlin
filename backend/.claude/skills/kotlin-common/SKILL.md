@@ -67,7 +67,9 @@ fun findActive(memberId: Long) = repository.findById(memberId).get()!!
 val updated: TodoResult = result.copy(done = true)
 
 // ❌ 밖에서 아무 때나 바꿀 수 있는 상태
-data class TodoResult(var done: Boolean)
+data class TodoResult(
+    var done: Boolean,
+)
 ```
 
 ## 조건문·반복문 — 길어도 풀어서 쓴다
@@ -121,7 +123,10 @@ clusters.add(cluster)
 ```kotlin
 // ❌ 함수 안 선언 + var 누적
 fun findClusters(...): List<Cluster> {
-    data class Acc(var sumLat: Double = 0.0, var count: Int = 0)
+    data class Acc(
+        var sumLat: Double = 0.0,
+        var count: Int = 0,
+    )
     ...
 }
 
@@ -134,6 +139,22 @@ for (cellSpots in spotsByCell.values) {
     // 여기서 합·평균을 계산한다
 }
 ```
+
+## 클래스 선언 — 생성자 파라미터는 줄마다 하나
+
+생성자 파라미터가 있는 클래스 선언은 **파라미터가 하나여도** 여러 줄로 편다. 여는 괄호 뒤에서 줄을 바꾸고, 한 줄에 파라미터 하나, 닫는 괄호는 자기 줄에 둔다. ktlint 의 trailing-comma 규칙에 따라 마지막 파라미터 뒤에도 쉼표를 둔다.
+
+```kotlin
+// ✅ 하나여도 펴서 쓴다
+class PlaceController(
+    private val placeSearchService: PlaceSearchService,
+) {
+
+// ❌ 한 줄에 접음 — 파라미터가 늘 때 diff 가 선언 줄 전체를 다시 쓴다
+class PlaceController(private val placeSearchService: PlaceSearchService) {
+```
+
+파라미터가 늘어도 기존 줄이 안 바뀌고(diff 한 줄), 모든 클래스 선언이 같은 모양이 된다.
 
 ## 파일 하나에 최상위 선언 하나
 
@@ -159,8 +180,13 @@ for (cellSpots in spotsByCell.values) {
 ```kotlin
 // X — 한 파일에 셋. 어느 것을 고쳐도 같은 파일이 바뀐다
 // TodoDtos.kt
-data class TodoCreateRequest(val title: String)
-data class TodoResponse(val id: Long, val title: String)
+data class TodoCreateRequest(
+    val title: String,
+)
+data class TodoResponse(
+    val id: Long,
+    val title: String,
+)
 enum class TodoStatus { TODO, DONE }
 ```
 
@@ -258,7 +284,10 @@ val todo: Todo = finder.getById(id)
 
 ```kotlin
 // X — 좌표는 데이터, 계산은 남의 것
-data class GeoPoint(val lat: Double, val lng: Double)
+data class GeoPoint(
+    val lat: Double,
+    val lng: Double,
+)
 
 object SpatialMath {
     fun distanceMeters(a: GeoPoint, b: GeoPoint): Double = …
@@ -268,7 +297,10 @@ val d = SpatialMath.distanceMeters(from, to)
 
 ```kotlin
 // O — 자기 값으로 하는 계산은 자기가 안다
-data class GeoPoint(val lat: Double, val lng: Double) {
+data class GeoPoint(
+    val lat: Double,
+    val lng: Double,
+) {
     fun distanceMetersTo(other: GeoPoint): Double = …
 }
 val d = from.distanceMetersTo(to)

@@ -150,8 +150,12 @@ fun fetchRoute(origin: Coord, destination: Coord, searchOption: String): Route?
 
 ```kotlin
 // ❌ 밖에서 보이면 안 되는 것들
-internal data class ExampleRequest(val parameter: String)
-internal data class ExampleResponse(val exampleResponseValue: String) {
+internal data class ExampleRequest(
+    val parameter: String,
+)
+internal data class ExampleResponse(
+    val exampleResponseValue: String,
+) {
     fun toResult(): ExampleClientResult = ExampleClientResult(exampleResponseValue)
 }
 

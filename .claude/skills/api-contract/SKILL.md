@@ -74,7 +74,10 @@ snake_case 응답이 필요해지는 순간이 오면 그 변환은 직렬화 �
 
 ```kotlin
 // 서버 — name 은 항상 있다고 보장
-data class UserResponse(val id: Long, val name: String)
+data class UserResponse(
+    val id: Long,
+    val name: String,
+)
 ```
 
 ```ts

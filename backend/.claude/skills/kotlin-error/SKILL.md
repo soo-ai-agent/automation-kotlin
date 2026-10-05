@@ -64,12 +64,14 @@ fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Any>> = … 
 
 ```kotlin
 // core/core-<도메인>/.../<도메인>/domain/error/TodoNotFoundException.kt
-class TodoNotFoundException(todoId: Long) : ApiException(
-    status = HttpStatus.NOT_FOUND,
-    code = "TODO_NOT_FOUND",
-    detail = "할 일을 찾을 수 없습니다.",      // 사용자에게 보이는 문구
-    message = "할 일이 없다: id=$todoId",      // 로그용. 내부 값을 담아도 된다
-)
+class TodoNotFoundException(
+    todoId: Long,
+) : ApiException(
+        status = HttpStatus.NOT_FOUND,
+        code = "TODO_NOT_FOUND",
+        detail = "할 일을 찾을 수 없습니다.",      // 사용자에게 보이는 문구
+        message = "할 일이 없다: id=$todoId",      // 로그용. 내부 값을 담아도 된다
+    )
 ```
 
 `code` 는 클라이언트가 분기에 쓰는 문자열이다. `E404` 같은 상태코드 재탕이 아니라
@@ -122,8 +124,9 @@ fun getById(id: Long): TodoResult {
 
 ```kotlin
 // 공용 모듈 — 프레임워크 검증 실패를 우리 예외로 옮긴다
-class RequestValidationException(fieldErrors: List<ApiFieldError>) :
-    ApiException(
+class RequestValidationException(
+    fieldErrors: List<ApiFieldError>,
+) : ApiException(
         status = HttpStatus.BAD_REQUEST,
         code = "INVALID_REQUEST",
         detail = "요청 값을 확인해 주세요.",

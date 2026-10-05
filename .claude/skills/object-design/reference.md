@@ -448,7 +448,9 @@ val hansan = Movie(
 예시에 계속 나온 `Money` 는 금액을 나타내는 작은 불변 클래스다. `Long` 같은 원시 타입 대신 "금액"이라는 업무 개념을 타입으로 드러내고, 값을 바꿀 때마다 새 객체를 만든다.
 
 ```kotlin
-data class Money(private val amount: BigDecimal) {
+data class Money(
+    private val amount: BigDecimal,
+) {
     operator fun plus(other: Money): Money = Money(amount + other.amount)
     operator fun minus(other: Money): Money = Money(amount - other.amount)
     fun times(multiplier: Double): Money = Money(amount * BigDecimal.valueOf(multiplier))
